@@ -78,7 +78,7 @@ class Index extends Controller
         $this->vars['objectPath'] = Request::input('path');
 
         if ($type == 'page')
-            $this->vars['pageUrl'] = $object->getViewBag()->property('url');
+            $this->vars['pageUrl'] = URL::to($object->getViewBag()->property('url'));
 
         return [
             'tabTitle' => $this->getTabTitle($type, $object),
@@ -129,7 +129,7 @@ class Index extends Controller
         ];
 
         if ($type == 'page') {
-            $result['pageUrl'] = $object->getViewBag()->property('url');
+            $result['pageUrl'] = URL::to($object->getViewBag()->property('url'));
             $router = new Router($this->theme);
             $router->clearCache();
         }
