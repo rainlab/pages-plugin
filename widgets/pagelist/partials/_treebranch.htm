@@ -25,7 +25,7 @@
                     id="<?= $cbId ?>" 
                     type="checkbox"
                     name="object[<?= e($fileName) ?>]" 
-                    <?= $this->isPageSelected($pageObj->page) ? 'checked' : null ?> 
+                    <?= $this->isItemSelected($fileName) ? 'checked' : null ?> 
                     data-request="<?= $this->getEventHandler('onSelect') ?>"
                     value="1">
                 <label for="<?= $cbId ?>">Select</label>

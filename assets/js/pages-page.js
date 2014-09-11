@@ -19,6 +19,8 @@
         // Item is clicked in the sidebar
         $(document).on('open.oc.treeview', 'form.layout[data-content-id=pages]', $.proxy(this.onSidebarItemClick, this))
 
+        $(document).on('open.oc.list', this.$sidePanel, $.proxy(this.onSidebarItemClick, this))
+
         // A master tab is shown / switched
         this.$masterTabs.on('shown.bs.tab', $.proxy(this.onTabShown, this))
 
@@ -372,9 +374,20 @@
             return
 
             var $collapseIcon = $('<a href="javascript:;" class="tab-collapse-icon tabless"><i class="icon-chevron-up"></i></a>'),
-                $panel = $('.form-tabless-fields', data.pane)
+                $panel = $('.form-tabless-fields', data.pane),
+                $secondaryPanel = $('.control-tabs.secondary', data.pane),
+                $primaryPanel = $('.control-tabs.primary', data.pane),
+                hasSecondaryTabs = $secondaryPanel.length > 0
 
             $panel.append($collapseIcon);
+
+            if (!hasSecondaryTabs) {
+                $primaryPanel.parent().removeClass('min-size')
+                $primaryPanel.removeClass('layout-row min-size').addClass('layout')
+                $('> div:first-child', $primaryPanel).addClass('layout-row min-size')
+                $('.tab-content', $primaryPanel).addClass('layout-row')
+                $('.tab-pane', $primaryPanel).addClass('layout-cell full-size')
+            }
 
             $collapseIcon.click(function(){
                 $panel.toggleClass('collapsed')
@@ -390,8 +403,6 @@
             })
 
             var $primaryCollapseIcon = $('<a href="javascript:;" class="tab-collapse-icon primary"><i class="icon-chevron-down"></i></a>'),
-                $primaryPanel = $('.control-tabs.primary', data.pane),
-                $secondaryPanel = $('.control-tabs.secondary', data.pane),
                 $primaryTabContainer = $('.nav-tabs', $primaryPanel)
 
             $primaryTabContainer.addClass('master-area')
@@ -413,7 +424,7 @@
                 if (!$('a', data.tab).hasClass('new-template') && localStorage.ocPagesTablessCollapsed == 1)
                     $panel.addClass('collapsed')
 
-                if (localStorage.ocPagesPrimaryCollapsed == 1) {
+                if (localStorage.ocPagesPrimaryCollapsed == 1 && hasSecondaryTabs) {
                     $primaryPanel.addClass('collapsed')
                     $secondaryPanel.addClass('primary-collapsed')
                 }

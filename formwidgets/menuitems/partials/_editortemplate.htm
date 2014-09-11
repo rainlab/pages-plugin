@@ -1,0 +1,25 @@
+<div class="popover-head">
+    <h3><?= e(trans('rainlab.pages::lang.menuitem.editor_title')) ?></h3>
+    <button type="button" class="close"
+        data-dismiss="popover"
+        aria-hidden="true">&times;</button>
+</div>
+<div class="popover-body form-container">
+    <form>
+        <?= $itemFormWidget->render() ?>
+    <form>
+</div>
+<div class="modal-footer">
+    <button
+        type="button"
+        class="btn btn-primary"
+        data-dismiss="popover">
+        <?= e(trans('backend::lang.form.apply')) ?>
+    </button>
+    <button
+        type="button"
+        class="btn btn-default"
+        data-dismiss="popover">
+        <?= e(trans('backend::lang.form.cancel')) ?>
+    </button>
+</div>

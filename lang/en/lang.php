@@ -15,10 +15,30 @@ return [
         'layouts_not_found' => 'Layouts not found',
         'saved' => 'The page has been successfully saved.'
     ],
-    'menus' => [
-        'menu_label' => 'Menus'
+    'menu' => [
+        'menu_label' => 'Menus',
+        'delete_confirmation' => 'Do you really want to delete selected menus?',
+        'no_records' => 'No menus found',
+        'new_name' => 'New menu',
+        'new_code' => 'new-menu',
+        'delete_confirm_single' => 'Do you really want delete this menu?',
+        'saved' => 'The menu has been successfully saved.',
+        'name' => 'Name',
+        'code' => 'Code',
+        'items' => 'Menu items',
+        'add_subitem' => 'Add subitem',
+        'no_records' => 'No items found',
     ],
-    'textblocks' => [
+    'menuitem' => [
+        'title' => 'Title',
+        'editor_title' => 'Edit Menu Item',
+        'type' => 'Type',
+        'allow_nested_items' => 'Allow nested items',
+        'allow_nested_items_comment' => 'Nested items could be generated dynamically by static page and some other item types',
+        'url' => 'URL',
+        'reference' => 'Static page'
+    ],
+    'textblock' => [
         'menu_label' => 'Text blocks'
     ],
     'sidebar' => [

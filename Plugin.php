@@ -44,13 +44,14 @@ class Plugin extends PluginBase
                         'permissions' => ['rainlab.pages.manage_pages'],
                     ],
                     'menus' => [
-                        'label'       => 'rainlab.pages::lang.menus.menu_label',
+                        'label'       => 'rainlab.pages::lang.menu.menu_label',
                         'icon'        => 'icon-sitemap',
                         'url'         => 'javascript:;',
+                        'attributes'  => ['data-menu-item'=>'menus'],
                         'permissions' => ['rainlab.pages.manage_menus'],
                     ],
                     'textblocks' => [
-                        'label'       => 'rainlab.pages::lang.textblocks.menu_label',
+                        'label'       => 'rainlab.pages::lang.textblock.menu_label',
                         'icon'        => 'icon-file-text-o',
                         'url'         => 'javascript:;',
                         'permissions' => ['rainlab.pages.manage_textblocks'],
@@ -67,6 +68,13 @@ class Plugin extends PluginBase
             $controller = new Controller();
 
             return $controller->initCmsPage($url);
+        });
+
+        Event::listen('pages.menuitem.listTypes', function() {
+            return [
+                'static-page'=>'Static page',
+                'cms-page'=>'CMS Page'
+            ];
         });
     }
 }

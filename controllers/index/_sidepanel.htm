@@ -4,6 +4,10 @@
             <form class="layout" data-content-id="pages" data-object-type="page" data-type-icon="oc-icon-files-o" onsubmit="return false">
                 <?= $this->widget->pageList->render() ?>
             </form>
+
+            <form class="layout hide" data-content-id="menus" data-object-type="menu" data-type-icon="oc-icon-sitemap" onsubmit="return false">
+                <?= $this->widget->menuList->render() ?>
+            </form>
         </div>
     </div>
 </div>

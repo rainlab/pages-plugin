@@ -17,13 +17,11 @@ use Lang;
  */
 class PageList extends WidgetBase
 {
-    protected $searchTerm = false;
+    use \Backend\Traits\SearchableWidget;
+    use \Backend\Traits\CollapsableWidget;
+    use \Backend\Traits\SelectableWidget;
 
     protected $theme;
-
-    protected $groupStatusCache = false;
-
-    protected $selectedPagesCache = false;
 
     protected $dataIdPrefix;
 
@@ -67,11 +65,6 @@ class PageList extends WidgetBase
      * Event handlers
      */
 
-    public function onGroupStatusUpdate()
-    {
-        $this->setGroupStatus(Input::get('group'), Input::get('status'));
-    }
-
     public function onReorder()
     {
         $structure = json_decode(Input::get('structure'), true);
@@ -89,16 +82,10 @@ class PageList extends WidgetBase
         return $this->updateList();
     }
 
-    public function onSelect()
-    {
-        $this->extendSelection();
-    }
-
     public function onSearch()
     {
         $this->setSearchTerm(Input::get('search'));
         $this->extendSelection();
-
         return $this->updateList();
     }
 
@@ -137,46 +124,6 @@ class PageList extends WidgetBase
         return $pages;
     }
 
-    protected function getSearchTerm()
-    {
-        return $this->searchTerm !== false ? $this->searchTerm : $this->getSession('search');
-    }
-
-    protected function setSearchTerm($term)
-    {
-        $this->searchTerm = trim($term);
-        $this->putSession('search', $this->searchTerm);
-    }
-
-    protected function getGroupStatuses()
-    {
-        if ($this->groupStatusCache !== false)
-            return $this->groupStatusCache;
-
-        $groups = $this->getSession($this->getThemeSessionKey('groups'), []);
-        if (!is_array($groups))
-            return $this->groupStatusCache = [];
-
-        return $this->groupStatusCache = $groups;
-    }
-
-    protected function setGroupStatus($group, $status)
-    {
-        $statuses = $this->getGroupStatuses();
-        $statuses[$group] = $status;
-        $this->groupStatusCache = $statuses;
-        $this->putSession($this->getThemeSessionKey('groups'), $statuses);
-    }
-
-    protected function getGroupStatus($group)
-    {
-        $statuses = $this->getGroupStatuses();
-        if (array_key_exists($group, $statuses))
-            return $statuses[$group];
-
-        return true;
-    }
-
     protected function getThemeSessionKey($prefix)
     {
         return $prefix.$this->theme->getDirName();
@@ -185,40 +132,6 @@ class PageList extends WidgetBase
     protected function updateList()
     {
         return ['#'.$this->getId('page-list') => $this->makePartial('items', ['items'=>$this->getData()])];
-    }
-
-    protected function getSelectedPages()
-    {
-        if ($this->selectedPagesCache !== false)
-            return $this->selectedPagesCache;
-
-        $pages = $this->getSession($this->getThemeSessionKey('selected'), []);
-        if (!is_array($pages))
-            return $this->selectedPagesCache = [];
-
-        return $this->selectedPagesCache = $pages;
-    }
-
-    protected function extendSelection()
-    {
-        $items =Input::get('object', []);
-        $currentSelection = $this->getSelectedPages();
-
-        $this->putSession($this->getThemeSessionKey('selected'), array_merge($currentSelection, $items));
-    }
-
-    protected function resetSelection()
-    {
-        $this->putSession($this->getThemeSessionKey('selected'), []);
-    }
-
-    protected function isPageSelected($page)
-    {
-        $selectedPages = $this->getSelectedPages();
-        if (!is_array($selectedPages) || !isset($selectedPages[$page->getBaseFileName()]))
-            return false;
-
-        return $selectedPages[$page->getBaseFileName()];
     }
 
     protected function subtreeToText($page)
@@ -244,17 +157,15 @@ class PageList extends WidgetBase
         return $page->getViewBag()->property('title').' '.$page->getViewBag()->property('url');
     }
 
-    protected function textMatchesSearch(&$words, $text)
+    protected function getSession($key = null, $default = null)
     {
-        foreach ($words as $word) {
-            $word = trim($word);
-            if (!strlen($word))
-                continue;
+        $key = strlen($key) ? $this->getThemeSessionKey($key) : $key;
 
-            if (Str::contains(Str::lower($text), $word))
-                return true;
-        }
+        return parent::getSession($key, $default);
+    }
 
-        return false;
+    protected function putSession($key, $value) 
+    {
+        return parent::putSession($this->getThemeSessionKey($key), $value);
     }
 }

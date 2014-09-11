@@ -1,0 +1,20 @@
+fields:
+  title:
+    span: left
+    label: rainlab.pages::lang.menuitem.title
+  type:
+    span: right
+    label: rainlab.pages::lang.menuitem.type
+    type: dropdown
+  allowNested:
+    label: rainlab.pages::lang.menuitem.allow_nested_items
+    comment: rainlab.pages::lang.menuitem.allow_nested_items_comment
+    type: checkbox
+    default: true
+  url:
+    label: rainlab.pages::lang.menuitem.url
+  reference:
+    label: rainlab.pages::lang.menuitem.reference
+    type: dropdown
+    options: 
+        first: First

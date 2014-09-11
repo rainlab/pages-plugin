@@ -1,0 +1,47 @@
+.control-filelist.menu-list {
+    li {
+        a {
+            position: relative;
+
+            &:before {
+                position: absolute;
+                width: 18px;
+                height: 18px;
+                left: 17px;
+                top: 23px;
+
+                content: ' ';
+
+                background-image: url(../images/menu-icons.png);
+                background-position: 0 0;
+                background-repeat: no-repeat;
+                background-size: 36px auto;
+            }
+
+            &:hover {
+                &:before {
+                    background-position: 0 -60px;
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-devicepixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx) {
+    .control-filelist.menu-list {
+        li {
+            a {
+                &:before {
+                    background-position: 0px -11px;
+                    background-size: 18px auto;
+                }
+
+                &:hover {
+                    &:before {
+                        background-position: 0px -40px;
+                    }
+                }
+            }
+        }
+    }
+}

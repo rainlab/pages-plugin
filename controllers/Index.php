@@ -15,6 +15,7 @@ use Backend\Classes\WidgetManager;
 use System\Classes\ApplicationException;
 use Backend\Traits\InspectableContainer;
 use RainLab\Pages\Widgets\PageList;
+use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 
@@ -46,6 +47,7 @@ class Index extends Controller
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
 
             new PageList($this, 'pageList');
+            new MenuList($this, 'menuList');
         }
         catch (Exception $ex) {
             $this->handleError($ex);
@@ -53,6 +55,7 @@ class Index extends Controller
 
         $this->addJs('/modules/backend/assets/js/october.treeview.js', 'core');
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js');
+        $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
 
         $this->bodyClass = 'compact-container side-panel-not-fixed';
         $this->pageTitle = Lang::get('rainlab.pages::lang.plugin_name');
@@ -256,7 +259,8 @@ class Index extends Controller
     protected function resolveTypeClassName($type)
     {
         $types = [
-            'page'    => 'RainLab\Pages\Classes\Page'
+            'page' => 'RainLab\Pages\Classes\Page',
+            'menu' => 'RainLab\Pages\Classes\Menu'
         ];
 
         if (!array_key_exists($type, $types))
@@ -268,7 +272,8 @@ class Index extends Controller
     protected function makeObjectFormWidget($type, $object)
     {
         $formConfigs = [
-            'page'    => '@/plugins/rainlab/pages/classes/page/fields.yaml'
+            'page' => '@/plugins/rainlab/pages/classes/page/fields.yaml',
+            'menu' => '@/plugins/rainlab/pages/classes/menu/fields.yaml',
         ];
 
         if (!array_key_exists($type, $formConfigs))
@@ -292,9 +297,15 @@ class Index extends Controller
                 $result = trans('rainlab.pages::lang.page.new');
 
             return $result;
+        } elseif ($type == 'menu') {
+            $result = $object->name;
+            if (!strlen($result))
+                $result = trans('rainlab.pages::lang.menu.new');
+
+            return $result;
         }
 
-        return $template->getFileName();
+        return $object->getFileName();
     }
 
     protected function formatSettings()
