@@ -47,6 +47,12 @@
 
         // A new tab is added to the editor
         this.$masterTabs.on('initTab.oc.tab', $.proxy(this.onInitTab, this))
+
+        // Handle the menu saving
+        var self = this
+        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=menu]', function(e, data) {
+            return self.onSaveMenu(this, e, data)
+        })
     }
 
     /*
@@ -140,6 +146,7 @@
             this.setPageTitle(title)
 
         this.$pageTree.treeView('markActive', dataId)
+        $('[data-control=filelist]', this.$sidePanel).fileList('markActive', dataId)
     }
 
     /*
@@ -147,6 +154,7 @@
      */
     PagesPage.prototype.onAllTabsClosed = function() {
         this.$pageTree.treeView('markActive', null)
+        $('[data-control=filelist]', this.$sidePanel).fileList('markActive', null)
         this.setPageTitle('')
     }
 
@@ -198,6 +206,7 @@
 
         this.$masterTabs.ocTab('updateIdentifier', $tabPane, tabId)
         this.$pageTree.treeView('markActive', tabId)
+        $('[data-control=filelist]', this.$sidePanel).fileList('markActive', tabId)
 
         var objectType = $('input[name=objectType]', $form).val()
         if (objectType.length > 0)
@@ -235,11 +244,11 @@
     /*
      * Closes deleted page tabs in the editor area.
      */
-    PagesPage.prototype.closePages = function(data) {
+    PagesPage.prototype.closeTabs = function(data, type) {
         var self = this
 
         $.each(data.deletedObjects, function(){
-            var tabId = 'page-' + data.theme + '-' + this,
+            var tabId = type + '-' + data.theme + '-' + this,
                 tab = self.masterTabsObj.findByIdentifier(tabId)
 
             $(tab).trigger('close.oc.tab', [{force: true}])
@@ -443,6 +452,29 @@
             $panel.trigger('unmodified.oc.tab')
             self.updateModifiedCounter()
         })
+    }
+
+    PagesPage.prototype.onSaveMenu = function(form, e, data) {
+        var items = [],
+            $items = $('div[data-control=treeview] > ol > li', form)
+
+        var iterator = function(items) {
+            var result = []
+
+            $.each(items, function() {
+                var item = $(this).data('menu-item')
+
+                var $subitems = $('> ol >li', this)
+                if ($subitems.length)
+                    item['items'] = iterator($subitems)
+
+                result.push(item)
+            })
+
+            return result
+        }
+
+        data.options.data['itemData'] = iterator($items)
     }
 
     $(document).ready(function(){

@@ -2,12 +2,17 @@
 
 use Cms\Classes\Content;
 use RainLab\Pages\Classes\PageList;
+use RainLab\Pages\Classes\Router;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use ApplicationException;
+use October\Rain\Router\Helper as RouterHelper;
+use October\Rain\Support\Str;
+use Cache;
 use Validator;
 use File;
 use Lang;
+use Config;
 
 /**
  * Represents a static page.
@@ -41,6 +46,8 @@ class Page extends Content
      * This property is used by the page editor internally.
      */
     public $parent;
+
+    protected static $menuTreeCache = null;
 
     /**
      * Creates an instance of the object and associates it with a CMS theme.
@@ -182,10 +189,7 @@ class Page extends Content
 
         $layouts = Layout::listInTheme($theme, true);
         foreach ($layouts as $layout) {
-            if (!isset($layout->settings['components']))
-                continue;
-
-            if (!array_key_exists('staticPage', $layout->settings['components']))
+            if (!$layout->hasComponent('staticPage'))
                 continue;
 
             $baseName = $layout->getBaseFileName();
@@ -221,5 +225,198 @@ class Page extends Content
         });
 
         parent::validate();
+    }
+
+    /**
+     * Returns a list of options for the Reference drop-down menu in the
+     * menu item configuration form, when the Static Page item type is selected.
+     * @return array Returns an array
+     */
+    protected static function listStaticPageMenuOptions()
+    {
+        $theme = Theme::getEditTheme();
+
+        $pageList = new PageList($theme);
+        $pageTree = $pageList->getPageTree(true);
+
+        $iterator = function($pages) use (&$iterator) {
+            $result = [];
+
+            foreach ($pages as $pageInfo) {
+                $pageName = $pageInfo->page->getViewBag()->property('title');
+                $fileName = $pageInfo->page->getBaseFileName();
+
+                if (!$pageInfo->subpages)
+                    $result[$fileName] = $pageName;
+                else
+                    $result[$fileName] = [
+                        'title' => $pageName,
+                        'items' => $iterator($pageInfo->subpages)
+                    ];
+            }
+
+            return $result;
+        };
+
+        return $iterator($pageTree);
+    }
+
+    /**
+     * Handler for the pages.menuitem.getTypeInfo event.
+     * Returns a menu item type information. The type information is returned as array
+     * with the following elements:
+     * - references - a list of the item type reference options. The options are returned in the
+     *   ["key"] => "title" format for options that don't have sub-options, and in the format
+     *   ["key"] => ["title"=>"Option title", "items"=>[...]] for options that have sub-options. Optional,
+     *   required only if the menu item type requires references.
+     * - nesting - Boolean value indicating whether the item type supports nested items. Optional,
+     *   false if omitted.
+     * - dynamicItems - Boolean value indicating whether the item type could generate new menu items.
+     *   Optional, false if omitted.
+     * - cmsPages - a list of CMS pages, if the item type requires a CMS page reference in order to resolve
+     *   item URLs. Should return an array in the following format:
+     *   ["page-path"] => "Page title"
+     *   This element is not only if the item type requires a CMS page reference.
+     * @param string $type Specifies the menu item type
+     * @return array Returns an array
+     */
+    public static function getMenuTypeInfo($type)
+    {
+        if ($type == 'all-static-pages')
+            return [
+                'dynamicItems' => true
+            ];
+
+        if ($type == 'static-page')
+            return [
+                'references' => self::listStaticPageMenuOptions(),
+                'nesting' => true,
+                'dynamicItems' => true
+            ];
+    }
+
+    /**
+     * Handler for the pages.menuitem.resolveItem event.
+     * Returns information about a menu item. The result is an array
+     * with the following keys:
+     * - url - the menu item URL. Not required for menu item types that return all available records.
+     * - isActive - determines whether the menu item is active. Not required for menu item types that 
+     *   return all available records.
+     * - items - an array of arrays with the same keys (url, isActive, items) + the title key. 
+     *   The items array should be added only if the $item's $nesting property value is TRUE.
+     * @param \RainLab\Pages\Classes\MenuItem $item Specifies the menu item.
+     * @param \Cms\Classes\Theme $theme Specifies the current theme.
+     * @param string $url Specifies the current page URL, normalized, in lower case
+     * @return mixed Returns an array. Returns null if the item cannot be resolved.
+     */
+    public static function resolveMenuItem($item, $url, $theme)
+    {
+        $tree = self::buildMenuTree($theme);
+
+        if ($item->type == 'static-page' && !isset($tree[$item->reference]))
+            return;
+
+        $result = [];
+
+        if ($item->type == 'static-page') {
+            $pageInfo = $tree[$item->reference];
+            $result['url'] = $pageInfo['url'];
+            $result['isActive'] = $result['url'] == $url;
+        }
+
+        if ($item->nesting || $item->type == 'all-static-pages') {
+            $iterator = function($items) use (&$iterator, &$tree, $url) {
+                $branch = [];
+
+                foreach ($items as $itemName) {
+                    if (!isset($tree[$itemName]))
+                        continue;
+
+                    $itemInfo = $tree[$itemName];
+
+                    $branchItem = [];
+                    $branchItem['url'] = $itemInfo['url'];
+                    $branchItem['isActive'] = $branchItem['url'] == $url;
+                    $branchItem['title'] = $itemInfo['title'];
+
+                    if ($itemInfo['items'])
+                        $branchItem['items'] = $iterator($itemInfo['items']);
+
+                    $branch[] = $branchItem;
+                }
+
+                return $branch;
+            };
+
+            $result['items'] = $iterator($item->type == 'static-page' ? $pageInfo['items'] : $tree['--root-pages--']);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Builds and caches a menu item tree.
+     * This method is used internally.
+     * @param \Cms\Classes\Theme $theme Specifies the current theme.
+     * @return array Returns an array containing the page information
+     */
+    public static function buildMenuTree($theme)
+    {
+        if (self::$menuTreeCache !== null)
+            return self::$menuTreeCache;
+
+        $key = crc32($theme->getPath()).'static-page-menu-tree';
+
+        $cached = Cache::get($key, false);
+        $unserialized = $cached ? @unserialize($cached) : false;
+
+        if ($unserialized !== false)
+            return self::$menuTreeCache = $unserialized;
+
+        $menuTree = [
+            '--root-pages--' => []
+        ];
+
+        $iterator = function($items, $parent, $level) use (&$menuTree, &$iterator) {
+            $result = [];
+
+            foreach ($items as $item) {
+                $viewBag = $item->page->getViewBag();
+                $pageCode = $item->page->getBaseFileName();
+
+                $itemData = [
+                    'url' => Str::lower(RouterHelper::normalizeUrl($viewBag->property('url'))),
+                    'title' => $viewBag->property('title'),
+                    'items' => $iterator($item->subpages, $pageCode, $level+1),
+                    'parent' => $parent
+                ];
+
+                if ($level == 0)
+                    $menuTree['--root-pages--'][] = $pageCode;
+
+                $result[] = $pageCode;
+                $menuTree[$pageCode] = $itemData;
+            }
+
+            return $result;
+        };
+
+        $pageList = new PageList($theme);
+        $iterator($pageList->getPageTree(), null, 0);
+
+        self::$menuTreeCache = $menuTree;
+        Cache::put($key, serialize($menuTree), Config::get('cms.parsedPageCacheTTL', 10));
+
+        return self::$menuTreeCache;
+    }
+
+    /**
+     * Clears the menu item cache
+     * @param \Cms\Classes\Theme $theme Specifies the current theme.
+     */
+    public static function clearMenuCache($theme)
+    {
+        $key = crc32($theme->getPath()).'static-page-menu-tree';
+        Cache::forget($key);
     }
 }

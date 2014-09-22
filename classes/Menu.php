@@ -5,6 +5,8 @@ use October\Rain\Support\Yaml;
 use System\Classes\SystemException;
 use Cms\Classes\CmsObject;
 use RainLab\Pages\Classes\MenuItem;
+use RainLab\Pages\Classes\MenuItemReference;
+use October\Rain\Support\ValidationException;
 use ApplicationException;
 use DirectoryIterator;
 use Validator;
@@ -12,7 +14,11 @@ use Exception;
 use File;
 use Lang;
 use Config;
-use Cache;
+use Request;
+use Event;
+use Symfony\Component\Yaml\Dumper as YamlDumper;
+use October\Rain\Support\Str;
+use October\Rain\Router\Helper as RouterHelper;
 
 /**
  * Represents a front-end menu.
@@ -33,7 +39,21 @@ class Menu extends CmsObject
      */
     protected $items;
 
+    /**
+     * @var array Raw item data.
+     * This property is used by the menu editor.
+     */
+    protected $itemData = false;
+
     protected static $allowedExtensions = ['yaml'];
+
+    protected static $defaultExtension = 'yaml';
+
+    protected static $fillable = [
+        'code',
+        'name',
+        'itemData'
+    ];
 
     /**
      * Returns the directory name corresponding to the object type.
@@ -59,12 +79,158 @@ class Menu extends CmsObject
     }
 
     /**
-     * Returns the menu items
-     * @return array Returns an array of the MenuItem objects.
+     * Sets the menu code.
+     * @param string $code Specifies the file code.
+     * @return \Cms\Classes\CmsObject Returns the object instance.
+     */
+    public function setCode($code)
+    {
+        $code = trim($code);
+
+        if (!strlen($code)) {
+            throw new ValidationException(['code' =>
+                Lang::get('rainlab.pages::lang.menu.code_required')
+            ]);
+        }
+
+        if (!preg_match('/^[0-9a-z\-\_]+$/i', $code)) {
+            throw new ValidationException(['code' =>
+                Lang::get('rainlab.pages::lang.menu.invalid_code')
+            ]);
+        }
+
+        $this->code = $code;
+        $this->fileName = $code.'.yaml';
+
+        return $this;
+    }
+
+    /**
+     * Returns the menu items.
+     * This function is used in the back-end.
+     * @return array Returns an array of the \RainLab\Pages\Classes\MenuItem objects.
      */
     public function getItems()
     {
         return $this->items;
+    }
+
+    /**
+     * Returns the menu item references.
+     * This function is used on the front-end.
+     * @return array Returns an array of the \RainLab\Pages\Classes\MenuItemReference objects.
+     */
+    public function generateReferences()
+    {
+        $currentUrl = Request::path();
+
+        if (!strlen($currentUrl))
+            $currentUrl = '/';
+
+        $currentUrl = Str::lower(RouterHelper::normalizeUrl($currentUrl));
+
+        $iterator = function($items) use ($currentUrl, &$iterator) {
+            $result = [];
+
+            foreach ($items as $item) {
+                $parentReference = new MenuItemReference();
+                $parentReference->title = $item->title;
+
+                /*
+                 * If the item type is URL, assign the reference the item's URL and compare the current URL with the item URL
+                 * to determine whether the item is active.
+                 */
+                if ($item->type == 'url') {
+                    $parentReference->url = $item->url;
+                    $parentReference->isActive = $currentUrl == Str::lower(RouterHelper::normalizeUrl($item->url));
+                } else {
+                    /*
+                     * If the item type is not URL, use the API to request the item type's provider to
+                     * return the item URL, subitems and determine whether the item is active.
+                     */
+
+                    $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
+                    if (is_array($apiResult)) {
+                        foreach ($apiResult as $itemInfo) {
+                            if (!is_array($itemInfo))
+                                continue;
+
+                            if (!$item->replace && isset($itemInfo['url'])) {
+                                $parentReference->url = $itemInfo['url'];
+                                $parentReference->isActive = $itemInfo['isActive'];
+                            }
+
+                            if (isset($itemInfo['items'])) {
+                                $itemIterator = function($items) use (&$itemIterator, $parentReference) {
+                                    $result = [];
+
+                                    foreach ($items as $item) {
+                                        $reference = new MenuItemReference();
+                                        $reference->title = isset($item['title']) ? $item['title'] : '--no title--';
+                                        $reference->url = isset($item['url']) ? $item['url'] : '#';
+                                        $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;
+
+                                        if (!strlen($parentReference->url)) {
+                                            $parentReference->url = $reference->url;
+                                            $parentReference->isActive = $reference->isActive;
+                                        }
+
+                                        if (isset($item['items']))
+                                            $reference->items = $itemIterator($item['items']);
+
+                                        $result[] = $reference;
+                                    }
+
+                                    return $result;
+                                };
+
+                                $parentReference->items = $itemIterator($itemInfo['items']);
+                            }
+                        }
+                    }
+                }
+
+                if ($item->items)
+                    $parentReference->items = $iterator($item->items);
+
+                if (!$item->replace)
+                    $result[] = $parentReference;
+                else {
+                    foreach ($parentReference->items as $subItem)
+                        $result[] = $subItem;
+                }
+            }
+
+            return $result;
+        };
+
+        $items = $iterator($this->items);
+
+        /*
+         * Populate the isChildActive property
+         */
+        $hasActiveChild = function($items) use (&$hasActiveChild) {
+            foreach ($items as $item) {
+                if ($item->isActive)
+                    return true;
+
+                $result = $hasActiveChild($item->items);
+                if ($result)
+                    return $result;
+            }
+        };
+
+        $iterator = function($items) use (&$iterator, &$hasActiveChild) {
+            foreach ($items as $item) {
+                $item->isChildActive = $hasActiveChild($item->items);
+
+                $iterator($item->items);
+            }
+        };
+
+        $iterator($items);
+
+        return $items;
     }
 
     /**
@@ -77,6 +243,9 @@ class Menu extends CmsObject
      */
     public static function load($theme, $fileName)
     {
+        if (!strlen(File::extension($fileName)))
+            $fileName .= '.yaml';
+
         if (($obj = parent::load($theme, $fileName)) === null)
             return null;
 
@@ -90,5 +259,44 @@ class Menu extends CmsObject
             $obj->items = MenuItem::initFromArray($parsedData['items']);
 
         return $obj;
+    }
+
+    /**
+     * Saves the object to the disk.
+     */
+    public function save()
+    {
+        if ($this->itemData !== false)
+            $this->items = MenuItem::initFromArray($this->itemData);
+
+        $contentData = [
+            'name' => $this->name,
+            'items' => $this->itemData ? $this->itemData : []
+        ];
+
+        $dumper = new YamlDumper();
+        $this->content = $dumper->dump($contentData, 20, 0, false, true);
+
+        return parent::save();
+   }
+
+    /**
+     * Initializes a cache item.
+     * @param array &$item The cached item array.
+     */
+    protected function initCacheItem(&$item)
+    {
+        $item['name'] = $this->name;
+        $item['items'] = serialize($this->items);
+    }
+
+    /**
+     * Initializes the object properties from the cached data.
+     * @param array $cached The cached data array.
+     */
+    protected function initFromCache($cached)
+    {
+        $this->items = unserialize($cached['items']);
+        $this->name = $cached['name'];
     }
 }

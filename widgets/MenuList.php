@@ -58,7 +58,25 @@ class MenuList extends WidgetBase
     public function widgetDetails() {}
 
     /*
-     * Methods for th internal use
+     * Event handlers
+     */
+
+    public function onUpdate()
+    {
+        $this->extendSelection();
+
+        return $this->updateList();
+    }
+
+    public function onSearch()
+    {
+        $this->setSearchTerm(Input::get('search'));
+        $this->extendSelection();
+        return $this->updateList();
+    }
+
+    /*
+     * Methods for the internal use
      */
 
     protected function getData()

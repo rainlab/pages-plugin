@@ -1,0 +1,9 @@
+{% for item in items %}
+    <li class="{{ item.isActive ? 'active' : '' }} {{ item.isChildActive ? 'child-active' : '' }}">
+        <a href="{{ item.url }}">{{ item.title }}</a>
+
+        {% if item.items %}
+            <ul>{% partial __SELF__ ~ "::items" items=item.items %}</ul>
+        {% endif %}
+    </li>
+{% endfor %}

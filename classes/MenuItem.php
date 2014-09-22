@@ -6,7 +6,10 @@ use Lang;
 use Event;
 
 /**
- * Represents a front-end menu item.
+ * Represents a menu item.
+ * This class is used in the back-end for managing the menu items.
+ * On the front-end items are represented with the
+ * \RainLab\Pages\Classes\MenuItemReference objects.
  *
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges
@@ -19,7 +22,7 @@ class MenuItem
     public $title;
 
     /**
-     * @var array Specifies the menu subitems
+     * @var array Specifies the item subitems
      */
     public $items = [];
 
@@ -32,7 +35,7 @@ class MenuItem
     /**
      * @var boolean Determines whether the auto-generated menu items could have subitems.
      */
-    public $allowNested;
+    public $nesting;
 
     /**
      * @var string Specifies the menu item type - URL, static page, etc.
@@ -51,16 +54,28 @@ class MenuItem
     public $reference;
 
     /**
+     * @var boolean Indicates that generated items should replace this item.
+     */
+    public $replace;
+
+    /**
+     * @var string Specifies the CMS page path to resolve dynamic menu items to.
+     */
+    public $cmsPage;
+
+    /**
      * @var boolean Used by the system internally.
      */
     public $exists = false;
 
-    protected $fillable = [
+    public $fillable = [
         'title', 
-        'allowNested', 
+        'nesting', 
         'type', 
         'url', 
-        'reference'
+        'reference',
+        'cmsPage',
+        'replace'
     ];
 
     /**
@@ -90,16 +105,6 @@ class MenuItem
     }
 
     /**
-     * Returns the item reference description.
-     * This method is used by the back-end UI.
-     * @return string 
-     */
-    public function getReferenceDescription()
-    {
-        return 'Static page';
-    }
-
-    /**
      * Returns a list of registered menu item types
      * @return array Returns an array of registered item types
      */
@@ -110,8 +115,38 @@ class MenuItem
         $apiResult = Event::fire('pages.menuitem.listTypes');
         if (is_array($apiResult)) {
             foreach ($apiResult as $typeList) {
+                if (!is_array($typeList))
+                    continue;
+
                 foreach ($typeList as $typeCode=>$typeName)
                     $result[$typeCode] = $typeName;
+            }
+        }
+
+        return $result;
+    }
+
+    public function getCmsPageOptions($keyValue = null)
+    {
+        return []; // CMS Pages are loaded client-side
+    }
+
+    public function getReferenceOptions($keyValue = null)
+    {
+        return []; // References are loaded client-side
+    }
+
+    public static function getTypeInfo($type)
+    {
+        $result = [];
+        $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
+        if (is_array($apiResult)) {
+            foreach ($apiResult as $optionList) {
+                if (!is_array($optionList))
+                    continue;
+
+                foreach ($optionList as $code=>$name)
+                    $result[$code] = $name;
             }
         }
 

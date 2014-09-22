@@ -35,12 +35,13 @@ class Controller
     public function initCmsPage($url)
     {
         $router = new Router($this->theme);
+
         $page = $router->findByUrl($url);
         if (!$page)
             return null;
 
         $viewBag = $page->getViewBag();
-        
+
         $cmsPage = new Page($this->theme);
         $cmsPage->settings['url'] = $url;
         $cmsPage->settings['components'] = [];

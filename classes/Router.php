@@ -5,6 +5,7 @@ use Cms\Classes\Theme;
 use October\Rain\Router\Helper as RouterHelper;
 use Cache;
 use Config;
+use October\Rain\Support\Str;
 
 /**
  * A router for static pages.
@@ -45,13 +46,14 @@ class Router
      */
     public function findByUrl($url)
     {
-        $url = strtolower(RouterHelper::normalizeUrl($url));
+        $url = Str::lower(RouterHelper::normalizeUrl($url));
 
         if (array_key_exists($url, self::$cache))
             return self::$cache[$url];
 
         $urlMap = $this->getUrlMap();
 
+        $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
         if (!array_key_exists($url, $urlMap))
             return null;
 
@@ -90,7 +92,7 @@ class Router
      */
     protected function loadUrlMap()
     {
-        $key = $this->getCacheKey('page-url-map');
+        $key = $this->getCacheKey('static-page-url-map');
 
         $cacheable = Config::get('cms.enableRoutesCache');
         $cached = $cacheable ? Cache::get($key, false) : false;
@@ -102,14 +104,22 @@ class Router
             $pageList = new PageList($this->theme);
 
             $pages = $pageList->listPages();
-            $map = [];
+            $map = [
+                'urls' => [],
+                'files' => [],
+                'titles' => []
+            ];
             foreach ($pages as $page) {
                 $url = $page->getViewBag()->property('url');
                 if (!$url)
                     continue;
 
-                $url = strtolower(RouterHelper::normalizeUrl($url));
-                $map[$url] = $page->getFileName();
+                $url = Str::lower(RouterHelper::normalizeUrl($url));
+                $file = $page->getBaseFileName();
+
+                $map['urls'][$url] = $file;
+                $map['files'][$file] = $url;
+                $map['titles'][$file] = $page->getViewBag()->property('title');
             }
 
             self::$urlMap = $map;
@@ -138,6 +148,6 @@ class Router
      */
     public function clearCache()
     {
-        Cache::forget($this->getCacheKey('page-url-map'));
+        Cache::forget($this->getCacheKey('static-page-url-map'));
     }
 }

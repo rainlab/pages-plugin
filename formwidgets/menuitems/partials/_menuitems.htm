@@ -1,8 +1,12 @@
-<div class="layout-absolute" data-control="menu-item-editor">
+<div 
+    class="layout-absolute"
+    data-control="menu-item-editor"
+    data-alias="<?= $this->alias ?>"
+    data-item-properties="<?= e($itemProperties) ?>"
+>
     <div class="control-scrollbar" data-control="scrollbar">
         <div class="control-treeview light" 
             data-control="treeview" 
-            data-group-status-handler="<?= $this->getEventHandler('onGroupStatusUpdate') ?>" 
             id="<?= $this->getId('item-list') ?>"
         >
             <?= $this->makePartial('items', ['items'=>$items]) ?>
@@ -11,5 +15,10 @@
 
     <script type="text/template" data-editor-template>
         <?= $this->makePartial('editortemplate') ?>
+    </script>
+
+
+    <script type="text/template" data-item-template>
+        <?= $this->makePartial('item', ['item'=>$emptyItem]) ?>
     </script>
 </div>

@@ -18,6 +18,8 @@ use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\MenuItem;
+use RainLab\Pages\Plugin as PagesPlugin;
 
 /**
  * Pages and Menus index
@@ -108,7 +110,11 @@ class Index extends Controller
         if ($settings)
             $objectData['settings'] = $settings;
 
-        $fields = ['markup', 'code', 'fileName', 'content', 'parent'];
+        $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
+
+        if ($type != 'menu')
+            $fields[] = 'parent';
+
         foreach ($fields as $field) {
             if (array_key_exists($field, $_POST))
                 $objectData[$field] = Request::input($field);
@@ -133,11 +139,20 @@ class Index extends Controller
 
         if ($type == 'page') {
             $result['pageUrl'] = URL::to($object->getViewBag()->property('url'));
-            $router = new Router($this->theme);
-            $router->clearCache();
+
+            PagesPlugin::clearCache();
         }
 
-        Flash::success(Lang::get('rainlab.pages::lang.page.saved'));
+        $successMessages = [
+            'page' => 'rainlab.pages::lang.page.saved',
+            'menu' => 'rainlab.pages::lang.menu.saved'
+        ];
+
+        $successMessage = isset($successMessages[$type]) ?
+            $successMessages[$type] :
+            $successMessages['page'];
+
+        Flash::success(Lang::get($successMessage));
 
         return $result;
     }
@@ -201,8 +216,13 @@ class Index extends Controller
             foreach ($objects as $path=>$selected) {
                 if ($selected) {
                     $object = $this->loadObject($type, $path, true);
-                    if ($object)
-                        $deleted = array_merge($deleted, $object->delete());
+                    if ($object) {
+                        $deletedObjects = $object->delete();
+                        if (is_array($deletedObjects))
+                            $deleted = array_merge($deleted, $deletedObjects);
+                        else
+                            $deleted[] = $path;
+                    }
                 }
             }
         }
@@ -222,6 +242,15 @@ class Index extends Controller
         return $this->makePartial('concurrency_resolve_form');
     }
 
+    public function onGetMenuItemTypeInfo()
+    {
+        $type = Request::input('type');
+
+        return [
+            'menuItemTypeInfo' => MenuItem::getTypeInfo(Request::input('type'))
+        ];
+    }
+
     //
     // Methods for the internal use
     //
@@ -235,7 +264,6 @@ class Index extends Controller
     protected function loadObject($type, $path, $ignoreNotFound = false)
     {
         $class = $this->resolveTypeClassName($type);
-
         if (!($object = call_user_func(array($class, 'load'), $this->theme, $path))) {
             if (!$ignoreNotFound)
                 throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));

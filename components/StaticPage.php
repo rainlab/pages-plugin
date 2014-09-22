@@ -6,7 +6,7 @@ use Cms\Classes\Theme;
 use Request;
 
 /**
- * The A static page component.
+ * The static page component.
  *
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges

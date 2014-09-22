@@ -18,6 +18,8 @@ class PageList
 {
     protected $theme;
 
+    protected static $configCache = false;
+
     /**
      * Creates the page list object.
      * @param \Cms\Classes\Theme $theme Specifies a parent theme.
@@ -151,6 +153,7 @@ class PageList
     public function updateStructure($structure)
     {
         $originalData = $this->getPagesConfig();
+
         $originalData['static-pages'] = $structure;
 
         $dumper = new YamlDumper();
@@ -260,16 +263,19 @@ class PageList
      */
     protected function getPagesConfig()
     {
+        if (self::$configCache !== false)
+            return self::$configCache;
+
         $filePath = $this->getConfigFilePath();
 
         if (!file_exists($filePath))
-            return ['static-pages'=>[]];
+            return self::$configCache = ['static-pages'=>[]];
 
         $config = Yaml::parse(File::get($filePath));
         if (!array_key_exists('static-pages', $config))
             throw new SystemException('The content of the theme meta/static-pages.yaml file is invalid: the "static-pages" root element is not found.');
 
-        return $config;
+        return self::$configCache = $config;
     }
 
     /**

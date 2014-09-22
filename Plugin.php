@@ -4,6 +4,9 @@ use Backend;
 use Event;
 use System\Classes\PluginBase;
 use RainLab\Pages\Classes\Controller;
+use RainLab\Pages\Classes\Page as StaticPage;
+use RainLab\Pages\Classes\Router;
+use Cms\Classes\Theme;
 
 class Plugin extends PluginBase
 {
@@ -11,7 +14,7 @@ class Plugin extends PluginBase
     public function pluginDetails()
     {
         return [
-            'name'        => 'Pages',
+            'name'        => 'Static Pages',
             'description' => 'Pages & menus features.',
             'author'      => 'Alexey Bobkov, Samuel Georges',
             'icon'        => 'icon-files-o'
@@ -21,7 +24,9 @@ class Plugin extends PluginBase
     public function registerComponents()
     {
         return [
-            '\RainLab\Pages\Components\StaticPage' => 'staticPage'
+            '\RainLab\Pages\Components\StaticPage' => 'staticPage',
+            '\RainLab\Pages\Components\StaticMenu' => 'staticMenu',
+            '\RainLab\Pages\Components\StaticBreadcrumbs' => 'staticBreadcrumbs'
         ];
     }
 
@@ -55,7 +60,7 @@ class Plugin extends PluginBase
                         'icon'        => 'icon-file-text-o',
                         'url'         => 'javascript:;',
                         'permissions' => ['rainlab.pages.manage_textblocks'],
-                    ],
+                    ]
                 ]
 
             ]
@@ -73,8 +78,31 @@ class Plugin extends PluginBase
         Event::listen('pages.menuitem.listTypes', function() {
             return [
                 'static-page'=>'Static page',
-                'cms-page'=>'CMS Page'
+                'all-static-pages'=>'All static pages'
             ];
         });
+
+        Event::listen('pages.menuitem.getTypeInfo', function($type) {
+            if ($type == 'url')
+                return [];
+
+            if ($type == 'static-page'|| $type == 'all-static-pages')
+                return StaticPage::getMenuTypeInfo($type);
+        });
+
+        Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
+            if ($type == 'static-page' || $type == 'all-static-pages')
+                return StaticPage::resolveMenuItem($item, $url, $theme);
+        });
+    }
+
+    public static function clearCache()
+    {
+        $activeTheme = Theme::getActiveTheme();
+
+        $router = new Router($activeTheme);
+        $router->clearCache();
+
+        StaticPage::clearMenuCache($activeTheme);
     }
 }
