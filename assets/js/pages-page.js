@@ -147,6 +147,7 @@
 
         this.$pageTree.treeView('markActive', dataId)
         $('[data-control=filelist]', this.$sidePanel).fileList('markActive', dataId)
+        $(window).trigger('resize')
     }
 
     /*

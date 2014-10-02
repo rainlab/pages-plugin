@@ -16,9 +16,11 @@ use Lang;
 use Config;
 use Request;
 use Event;
+use URL;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
+use Cms\Classes\Controller as CmsController;
 
 /**
  * Represents a front-end menu.
@@ -118,18 +120,20 @@ class Menu extends CmsObject
     /**
      * Returns the menu item references.
      * This function is used on the front-end.
+     * @param Cms\Classes\Page $page The current page object.
      * @return array Returns an array of the \RainLab\Pages\Classes\MenuItemReference objects.
      */
-    public function generateReferences()
+    public function generateReferences($page)
     {
         $currentUrl = Request::path();
 
         if (!strlen($currentUrl))
             $currentUrl = '/';
 
-        $currentUrl = Str::lower(RouterHelper::normalizeUrl($currentUrl));
+        $currentUrl = Str::lower(URL::to($currentUrl));
 
-        $iterator = function($items) use ($currentUrl, &$iterator) {
+        $activeMenuItem = $page->activeMenuItem ?: false;
+        $iterator = function($items) use ($currentUrl, &$iterator, $activeMenuItem) {
             $result = [];
 
             foreach ($items as $item) {
@@ -142,7 +146,7 @@ class Menu extends CmsObject
                  */
                 if ($item->type == 'url') {
                     $parentReference->url = $item->url;
-                    $parentReference->isActive = $currentUrl == Str::lower(RouterHelper::normalizeUrl($item->url));
+                    $parentReference->isActive = $currentUrl == Str::lower($item->url) || $activeMenuItem === $item->code;
                 } else {
                     /*
                      * If the item type is not URL, use the API to request the item type's provider to
@@ -157,7 +161,7 @@ class Menu extends CmsObject
 
                             if (!$item->replace && isset($itemInfo['url'])) {
                                 $parentReference->url = $itemInfo['url'];
-                                $parentReference->isActive = $itemInfo['isActive'];
+                                $parentReference->isActive = $itemInfo['isActive'] || $activeMenuItem === $item->code;
                             }
 
                             if (isset($itemInfo['items'])) {

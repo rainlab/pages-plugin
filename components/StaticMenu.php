@@ -61,6 +61,6 @@ class StaticMenu extends ComponentBase
         $menu = PagesMenu::loadCached($theme, $this->property('code'));
 
         if ($menu)
-            $this->menuItems = $this->page['menuItems'] = $menu->generateReferences();
+            $this->menuItems = $this->page['menuItems'] = $menu->generateReferences($this->page);
     }
 }

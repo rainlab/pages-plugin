@@ -6,6 +6,7 @@ use RainLab\Pages\Classes\MenuItemReference;
 use RainLab\Pages\Classes\Page as StaticPageClass;
 use Cms\Classes\Theme;
 use Request;
+use URL;
 
 /**
  * The static breadcrumbs component.
@@ -52,7 +53,7 @@ class StaticBreadcrumbs extends ComponentBase
                 $pageInfo = $tree[$code];
                 $reference = new MenuItemReference();
                 $reference->title = $pageInfo['title'];
-                $reference->url = $pageInfo['url'];
+                $reference->url = URL::to($pageInfo['url']);
                 $reference->isActive = $code == $startCode;
 
                 $breadcrumbs[] = $reference;

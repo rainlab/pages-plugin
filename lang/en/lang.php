@@ -48,10 +48,12 @@ return [
         'replace' => 'Replace this item with its generated children',
         'replace_comment' => 'Use this checkbox to push generated menu items to the same level with this item. This item itself will be hidden.',
         'cms_page' => 'CMS Page',
-        'cms_page_comment' => 'Select a CMS page to use for displaying a content the menu item refers to.',
-        'reference_required' => 'The menu item reference is required',
+        'cms_page_comment' => 'Select a page to open when the menu item is clicked.',
+        'reference_required' => 'The menu item reference is required.',
         'url_required' => 'The URL is required',
-        'cms_page_required' => 'Please select a CMS page'
+        'cms_page_required' => 'Please select a CMS page',
+        'code' => 'Code',
+        'code_comment' => 'Enter the menu item code if you want to access it with the API.'
     ],
     'textblock' => [
         'menu_label' => 'Text blocks'

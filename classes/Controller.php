@@ -43,6 +43,7 @@ class Controller
         $viewBag = $page->getViewBag();
 
         $cmsPage = new Page($this->theme);
+        $cmsPage->title = $viewBag->property('title');
         $cmsPage->settings['url'] = $url;
         $cmsPage->settings['components'] = [];
         $cmsPage->settings['hidden'] = $viewBag->property('hidden');

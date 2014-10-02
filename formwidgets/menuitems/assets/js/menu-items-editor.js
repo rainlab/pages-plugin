@@ -271,7 +271,8 @@
             propertyNames = this.$el.data('item-properties'),
             basicProperties = {
                 'title': 1,
-                'type': 1
+                'type': 1,
+                'code': 1
             },
             typeInfoPropertyMap = {
                 reference: 'references',

@@ -13,6 +13,7 @@ use Validator;
 use File;
 use Lang;
 use Config;
+use URL;
 
 /**
  * Represents a static page.
@@ -90,6 +91,9 @@ class Page extends Content
             $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
             if (strlen($fileName) > 200)
                 $fileName = substr($fileName, 0, 200);
+
+            if (!strlen($fileName))
+                $fileName = 'index';
 
             $curName = $fileName.'.htm';
             $counter = 2;
@@ -273,10 +277,8 @@ class Page extends Content
      *   false if omitted.
      * - dynamicItems - Boolean value indicating whether the item type could generate new menu items.
      *   Optional, false if omitted.
-     * - cmsPages - a list of CMS pages, if the item type requires a CMS page reference in order to resolve
-     *   item URLs. Should return an array in the following format:
-     *   ["page-path"] => "Page title"
-     *   This element is not only if the item type requires a CMS page reference.
+     * - cmsPages - a list of CMS pages (objects of the Cms\Classes\Page class), if the item type requires a CMS page reference to 
+     *   resolve the item URL.
      * @param string $type Specifies the menu item type
      * @return array Returns an array
      */
@@ -300,6 +302,8 @@ class Page extends Content
      * Returns information about a menu item. The result is an array
      * with the following keys:
      * - url - the menu item URL. Not required for menu item types that return all available records.
+     *   The URL should be returned relative to the website root and include the subdirectory, if any.
+     *   Use the URL::to() helper to generate the URLs.
      * - isActive - determines whether the menu item is active. Not required for menu item types that 
      *   return all available records.
      * - items - an array of arrays with the same keys (url, isActive, items) + the title key. 
@@ -307,6 +311,7 @@ class Page extends Content
      * @param \RainLab\Pages\Classes\MenuItem $item Specifies the menu item.
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
      * @param string $url Specifies the current page URL, normalized, in lower case
+     * The URL is specified relative to the website root, it includes the subdirectory name, if any.
      * @return mixed Returns an array. Returns null if the item cannot be resolved.
      */
     public static function resolveMenuItem($item, $url, $theme)
@@ -320,7 +325,7 @@ class Page extends Content
 
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
-            $result['url'] = $pageInfo['url'];
+            $result['url'] = URL::to($pageInfo['url']);
             $result['isActive'] = $result['url'] == $url;
         }
 
@@ -334,8 +339,11 @@ class Page extends Content
 
                     $itemInfo = $tree[$itemName];
 
+                    if ($itemInfo['navigation_hidden'])
+                        continue;
+
                     $branchItem = [];
-                    $branchItem['url'] = $itemInfo['url'];
+                    $branchItem['url'] = URL::to($itemInfo['url']);
                     $branchItem['isActive'] = $branchItem['url'] == $url;
                     $branchItem['title'] = $itemInfo['title'];
 
@@ -388,7 +396,8 @@ class Page extends Content
                     'url' => Str::lower(RouterHelper::normalizeUrl($viewBag->property('url'))),
                     'title' => $viewBag->property('title'),
                     'items' => $iterator($item->subpages, $pageCode, $level+1),
-                    'parent' => $parent
+                    'parent' => $parent,
+                    'navigation_hidden' => $viewBag->property('navigation_hidden')
                 ];
 
                 if ($level == 0)
