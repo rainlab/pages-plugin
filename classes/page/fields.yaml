@@ -43,6 +43,16 @@ tabs:
       type: checkbox
       comment: rainlab.pages::lang.editor.navigation_hidden_comment
 
+    viewBag[meta_title]:
+      tab: rainlab.pages::lang.editor.metas
+      label: rainlab.pages::lang.editor.meta_title
+
+    viewBag[meta_description]:
+      tab: rainlab.pages::lang.editor.metas
+      type: textarea
+      size: small
+      label: rainlab.pages::lang.editor.meta_description
+
 secondaryTabs:
   stretch: true
   fields:

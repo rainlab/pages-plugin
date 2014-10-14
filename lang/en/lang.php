@@ -81,5 +81,8 @@ return [
         'hidden_comment' => 'Hidden pages are accessible only by logged-in back-end users.',
         'navigation_hidden' => 'Hide in navigation',
         'navigation_hidden_comment' => 'Check this box to hide this page from automatically generated menus and breadcrumbs.',
+        'metas' => 'Metas',
+        'meta_title' => 'Meta title',
+        'meta_description' => 'Meta description',
     ],
 ];

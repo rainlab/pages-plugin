@@ -19,10 +19,15 @@ class StaticPage extends ComponentBase
     public $page;
 
     /**
-     * @var string The static page title
+     * @var string The static page meta title
      */
     public $title;
 
+    /**
+     * @var string The static page meta description
+     */
+    public $description;
+    
     /**
      * @var string The static page content
      */
@@ -47,7 +52,14 @@ class StaticPage extends ComponentBase
         $this->page = $this->page['page'] = $router->findByUrl($url);
 
         if ($this->page) {
-            $this->title = $this->page['title'] = $this->page->getViewBag()->property('title');
+            if ($this->page->getViewBag()->property('meta_title') == '')
+            {
+                $title = $this->page->getViewBag()->property('title');
+            } else {
+                $title = $this->page->getViewBag()->property('meta_title');
+            }
+            $this->title = $this->page['title'] = $title;
+            $this->description = $this->page['description'] = $this->page->getViewBag()->property('meta_description');
             $this->content = $this->page['content'] = $this->page->markup;
         }
     }
