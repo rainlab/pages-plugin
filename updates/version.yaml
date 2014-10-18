@@ -1,3 +1,4 @@
 1.0.1: Implemented the static pages management and the Static Page component.
 1.0.2: Fixed the page preview URL.
 1.0.3: Implemented menus.
+1.0.4: Implemented the content block management and placeholder support.
