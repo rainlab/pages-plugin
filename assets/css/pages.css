@@ -1,7 +1,7 @@
-.control-filelist.menu-list li a {
+.control-filelist.menu-list li > a {
   position: relative;
 }
-.control-filelist.menu-list li a:before {
+.control-filelist.menu-list li > a:before {
   position: absolute;
   width: 18px;
   height: 18px;
@@ -13,15 +13,49 @@
   background-repeat: no-repeat;
   background-size: 36px auto;
 }
-.control-filelist.menu-list li a:hover:before {
+.control-filelist.menu-list li > a:hover:before {
   background-position: 0 -60px;
 }
+.control-filelist.content li > a {
+  position: relative;
+}
+.control-filelist.content li > a:before {
+  position: absolute;
+  width: 18px;
+  height: 22px;
+  left: 18px;
+  top: 15px;
+  content: ' ';
+  background-image: url(../images/content-icons.png);
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: 34px auto;
+}
+.control-filelist.content li > a:hover:before {
+  background-position: 0 -27px;
+}
+.control-filelist.content li.group ul li > a:before {
+  left: 34px;
+}
 @media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-devicepixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx) {
-  .control-filelist.menu-list li a:before {
+  .control-filelist.menu-list li > a:before {
     background-position: 0px -11px;
     background-size: 18px auto;
   }
-  .control-filelist.menu-list li a:hover:before {
+  .control-filelist.menu-list li > a:hover:before {
     background-position: 0px -40px;
   }
+  .control-filelist.content li a:before {
+    background-position: 0px -27px;
+    background-size: 17px auto;
+  }
+  .control-filelist.content li a:hover:before {
+    background-position: 0px -52px;
+  }
+}
+.fancy-layout .pagesTextEditor {
+  border-left: 1px solid #e0e0e0 !important;
+}
+.fancy-layout .pagesTextEditor .ace_scroller {
+  padding: 20px;
 }

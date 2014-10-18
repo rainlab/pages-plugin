@@ -19,6 +19,8 @@ use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItem;
+use Cms\Classes\Content;
+use Cms\Widgets\TemplateList;
 use RainLab\Pages\Plugin as PagesPlugin;
 
 /**
@@ -50,6 +52,11 @@ class Index extends Controller
 
             new PageList($this, 'pageList');
             new MenuList($this, 'menuList');
+
+            $theme = $this->theme;
+            new TemplateList($this, 'contentList', function() use ($theme) {
+                return Content::listInTheme($theme, true);
+            });
         }
         catch (Exception $ex) {
             $this->handleError($ex);
@@ -70,6 +77,13 @@ class Index extends Controller
 
     public function index()
     {
+        // Preload Ace editor modes explicitly, because they could be changed dynamically
+        // depending on a content block type
+        $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/ace.js', 'core');
+
+        $aceModes = ['markdown', 'plain_text', 'html', 'less', 'css', 'scss', 'sass', 'javascript'];
+        foreach ($aceModes as $mode)
+            $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/mode-'.$mode.'.js', 'core');
     }
 
     public function index_onOpen()
@@ -78,22 +92,8 @@ class Index extends Controller
 
         $type = Request::input('type');
         $object = $this->loadObject($type, Request::input('path'));
-        $widget = $this->makeObjectFormWidget($type, $object);
 
-        $this->vars['objectPath'] = Request::input('path');
-
-        if ($type == 'page')
-            $this->vars['pageUrl'] = URL::to($object->getViewBag()->property('url'));
-
-        return [
-            'tabTitle' => $this->getTabTitle($type, $object),
-            'tab' => $this->makePartial('form_page', [
-                'form'          => $widget,
-                'objectType'  => $type,
-                'objectTheme' => $this->theme->getDirName(),
-                'objectMtime' => $object->mtime
-            ])
-        ];
+        return $this->pushObjectForm($type, $object);
     }
 
     public function onSave()
@@ -101,40 +101,14 @@ class Index extends Controller
         $this->validateRequestTheme();
         $type = Request::input('objectType');
 
-        $objectPath = trim(Request::input('objectPath'));
-        $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
+        $object = $this->fillObjectFromPost($type);
 
-        $settings = $this->formatSettings($this->formatSettings());
-
-        $objectData = [];
-        if ($settings)
-            $objectData['settings'] = $settings;
-
-        $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
-
-        if ($type != 'menu')
-            $fields[] = 'parent';
-
-        foreach ($fields as $field) {
-            if (array_key_exists($field, $_POST))
-                $objectData[$field] = Request::input($field);
-        }
-
-        if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true)
-            $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
-
-        if (!Request::input('objectForceSave') && $object->mtime) {
-            if (Request::input('objectMtime') != $object->mtime)
-                throw new ApplicationException('mtime-mismatch');
-        }
-
-        $object->fill($objectData);
         $object->save();
 
         $result = [
-            'objectPath' => $object->getBaseFileName(),
+            'objectPath'  => $type != 'content' ? $object->getBaseFileName() : $object->fileName,
             'objectMtime' => $object->mtime,
-            'tabTitle'        => $this->getTabTitle($type, $object)
+            'tabTitle'    => $this->getTabTitle($type, $object)
         ];
 
         if ($type == 'page') {
@@ -209,6 +183,9 @@ class Index extends Controller
 
         $type = Request::input('type');
         $objects = Request::input('object');
+        if (!$objects)
+            $objects = Request::input('template');
+
         $error = null;
         $deleted = [];
 
@@ -251,6 +228,16 @@ class Index extends Controller
         ];
     }
 
+    public function onUpdatePageLayout()
+    {
+        $this->validateRequestTheme();
+        $type = Request::input('objectType');
+
+        $object = $this->fillObjectFromPost($type);
+
+        return $this->pushObjectForm($type, $object);
+    }
+
     //
     // Methods for the internal use
     //
@@ -271,6 +258,14 @@ class Index extends Controller
             return null;
         }
 
+        if ($type == 'content') {
+            $fileName = $object->getFileName();
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+            if ($extension == 'htm')
+                $object->markup_html = $object->markup;
+        }
+
         return $object;
     }
 
@@ -288,7 +283,8 @@ class Index extends Controller
     {
         $types = [
             'page' => 'RainLab\Pages\Classes\Page',
-            'menu' => 'RainLab\Pages\Classes\Menu'
+            'menu' => 'RainLab\Pages\Classes\Menu',
+            'content' => 'Cms\Classes\Content'
         ];
 
         if (!array_key_exists($type, $types))
@@ -302,6 +298,7 @@ class Index extends Controller
         $formConfigs = [
             'page' => '@/plugins/rainlab/pages/classes/page/fields.yaml',
             'menu' => '@/plugins/rainlab/pages/classes/menu/fields.yaml',
+            'content' => '@/plugins/rainlab/pages/classes/content/fields.yaml'
         ];
 
         if (!array_key_exists($type, $formConfigs))
@@ -313,7 +310,46 @@ class Index extends Controller
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
 
+        if ($type == 'page')
+            $widget->bindEvent('form.extendFieldsBefore', function() use ($widget, $object) {
+                $this->addPagePlaceholders($widget, $object);
+            });
+
         return $widget;
+    }
+
+    protected function addPagePlaceholders($formWidget, $page)
+    {
+        $placeholders = $page->listLayoutPlaceholders();
+
+        foreach ($placeholders as $placeholderCode=>$info) {
+            $placeholderTitle = $info['title'];
+            $fieldConfig = [
+                'tab' => $placeholderTitle,
+                'stretch' => '1',
+                'size' => 'huge'
+            ];
+
+            if ($info['type'] != 'text')
+                $fieldConfig['type'] = 'richeditor';
+            else {
+                $fieldConfig['type'] = 'codeeditor';
+                $fieldConfig['language'] = 'text';
+                $fieldConfig['theme'] = 'chrome';
+                $fieldConfig['showGutter'] = false;
+                $fieldConfig['highlightActiveLine'] = false;
+                $fieldConfig['cssClass'] = 'pagesTextEditor';
+                $fieldConfig['showInvisibles'] = false;
+                $fieldConfig['fontSize'] = 13;
+                $fieldConfig['wordWrap'] = '80';
+            }
+
+            $formWidget->config->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
+        }
+
+        $placeholderValues = $page->getPlaceholderValues();
+        foreach ($placeholderValues as $name=>$value)
+            $page->placeholders->add($name, $value);
     }
 
     protected function getTabTitle($type, $object)
@@ -331,6 +367,12 @@ class Index extends Controller
                 $result = trans('rainlab.pages::lang.menu.new');
 
             return $result;
+        } elseif ($type == 'content') {
+            $result = in_array($type, ['asset', 'content']) ? $object->getFileName() : $object->getBaseFileName();
+            if (!$result)
+                $result = trans('cms::lang.'.$type.'.new');
+
+            return $result;
         }
 
         return $object->getFileName();
@@ -346,5 +388,100 @@ class Index extends Controller
         $settings['viewBag'] = $_POST['viewBag'];
 
         return $settings;
+    }
+
+    protected function setPlaceholders($page)
+    {
+        $data = post();
+        if (!array_key_exists('placeholders', $data))
+            return null;
+
+        $placeholderData = $data['placeholders'];
+        $placeholders = $page->listLayoutPlaceholders();
+
+        $result = null;
+        foreach ($placeholders as $placeholderCode=>$info) {
+            if (!array_key_exists($placeholderCode, $placeholderData))
+                continue;
+
+            $placeholderValue = trim($placeholderData[$placeholderCode]);
+
+            if (strlen($placeholderValue)) {
+                $putCode = "{% put $placeholderCode %}".PHP_EOL;
+                $putCode .= $placeholderValue.PHP_EOL;
+                $putCode .= "{% endput %}".PHP_EOL.PHP_EOL;
+
+                $result .= $putCode;
+            }
+        }
+
+        return trim($result);
+    }
+
+    protected function fillObjectFromPost($type)
+    {
+        $objectPath = trim(Request::input('objectPath'));
+        $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
+
+        $settings = $this->formatSettings($this->formatSettings());
+
+        $objectData = [];
+        if ($settings)
+            $objectData['settings'] = $settings;
+
+        $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
+
+        if ($type != 'menu' && $type != 'content')
+            $fields[] = 'parent';
+
+        foreach ($fields as $field) {
+            if (array_key_exists($field, $_POST))
+                $objectData[$field] = Request::input($field);
+        }
+
+        if ($type == 'page') {
+            $objectData['code'] = $this->setPlaceholders($object);
+
+            if (!empty($objectData['code']) && Config::get('cms.convertLineEndings', false) === true)
+                $objectData['code'] = $this->convertLineEndings($objectData['code']);
+        }
+
+        if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true)
+            $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
+
+        if (!Request::input('objectForceSave') && $object->mtime) {
+            if (Request::input('objectMtime') != $object->mtime)
+                throw new ApplicationException('mtime-mismatch');
+        }
+
+        if ($type == 'content') {
+            $fileName = $objectData['fileName'];
+
+            if (dirname($fileName) == 'static-pages')
+                throw new ApplicationException(trans('rainlab.pages::lang.content.cant_save_to_dir'));
+        }
+
+        $object->fill($objectData);
+        return $object;
+    }
+
+    protected function pushObjectForm($type, $object)
+    {
+        $widget = $this->makeObjectFormWidget($type, $object);
+
+        $this->vars['objectPath'] = Request::input('path');
+
+        if ($type == 'page')
+            $this->vars['pageUrl'] = URL::to($object->getViewBag()->property('url'));
+
+        return [
+            'tabTitle' => $this->getTabTitle($type, $object),
+            'tab' => $this->makePartial('form_page', [
+                'form'          => $widget,
+                'objectType'  => $type,
+                'objectTheme' => $this->theme->getDirName(),
+                'objectMtime' => $object->mtime
+            ])
+        ];
     }
 }

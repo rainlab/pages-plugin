@@ -55,11 +55,12 @@ class Plugin extends PluginBase
                         'attributes'  => ['data-menu-item'=>'menus'],
                         'permissions' => ['rainlab.pages.manage_menus'],
                     ],
-                    'textblocks' => [
-                        'label'       => 'rainlab.pages::lang.textblock.menu_label',
+                    'content' => [
+                        'label'       => 'rainlab.pages::lang.content.menu_label',
                         'icon'        => 'icon-file-text-o',
                         'url'         => 'javascript:;',
-                        'permissions' => ['rainlab.pages.manage_textblocks'],
+                        'attributes'  => ['data-menu-item'=>'content'],
+                        'permissions' => ['rainlab.pages.manage_content'],
                     ]
                 ]
 
@@ -69,10 +70,16 @@ class Plugin extends PluginBase
 
     public function boot()
     {
-        Event::listen('cms.router.beforeRoute', function($url){
-            $controller = new Controller();
+        Event::listen('cms.router.beforeRoute', function($url) {
+            return Controller::instance()->initCmsPage($url);
+        });
 
-            return $controller->initCmsPage($url);
+        Event::listen('cms.page.beforeTwigRender', function($page, $loader, $twig) {
+            return Controller::instance()->injectPageTwig($page, $loader, $twig);
+        });
+
+        Event::listen('cms.page.getRenderedContents', function($page) {
+            return Controller::instance()->getPageContents($page);
         });
 
         Event::listen('pages.menuitem.listTypes', function() {

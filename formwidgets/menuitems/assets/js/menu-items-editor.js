@@ -141,7 +141,7 @@
         var self = this
 
         $.each(properties, function(property) {
-            var $input = $('[name="'+property+'"]', $popupContainer)
+            var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
 
             if ($input.prop('type') !== 'checkbox' ) {
                 $input.val(this)
@@ -284,9 +284,9 @@
 
         $.each(propertyNames, function() {
             var propertyName = this,
-                $input = $('[name="'+propertyName+'"]', self.$popupContainer)
+                $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
-            if ($input.prop('type') !== 'checkbox' ) {
+            if ($input.prop('type') !== 'checkbox') {
                 data[propertyName] = $.trim($input.val())
 
                 if (propertyName == 'type')
@@ -312,8 +312,9 @@
                         return false
                     }
                 }
-            } else
+            } else {
                 data[propertyName] = $input.prop('checked') ? 1 : 0
+            }
         })
 
         if (validationErrorFound)

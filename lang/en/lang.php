@@ -55,8 +55,9 @@ return [
         'code' => 'Code',
         'code_comment' => 'Enter the menu item code if you want to access it with the API.'
     ],
-    'textblock' => [
-        'menu_label' => 'Text blocks'
+    'content' => [
+        'menu_label' => 'Content',
+        'cant_save_to_dir' => 'Saving content files to the static-pages directory is not allowed.'
     ],
     'sidebar' => [
         'add' => 'Add',
@@ -69,7 +70,7 @@ return [
     'editor' => [
         'title' => 'Title',
         'new_title' => 'New page title',
-        'edit' => 'Edit',
+        'content' => 'Content',
         'url' => 'URL',
         'filename' => 'File Name',
         'layout' => 'Layout',

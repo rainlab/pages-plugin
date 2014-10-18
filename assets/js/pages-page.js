@@ -16,12 +16,14 @@
          * Bind event handlers
          */
 
+        var self = this
+
         // Item is clicked in the sidebar
         $(document).on('open.oc.treeview', 'form.layout[data-content-id=pages]', $.proxy(this.onSidebarItemClick, this))
 
         $(document).on('open.oc.list', this.$sidePanel, $.proxy(this.onSidebarItemClick, this))
 
-        // A master tab is shown / switched
+        // A tab is shown / switched
         this.$masterTabs.on('shown.bs.tab', $.proxy(this.onTabShown, this))
 
         // All master tabs are closed
@@ -36,20 +38,29 @@
         // AJAX success in the master tabs area
         $(document).on('ajaxSuccess', '#pages-master-tabs form', $.proxy(this.onAjaxSuccess, this))
 
+        // Before save a content block
+        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=content]', function(e, data) {
+            return self.onBeforeSaveContent(this, e, data)
+        })
+
+        // Layout changed
+        $(document).on('change', '#pages-master-tabs form[data-object-type=page] select[name="viewBag[layout]"]', $.proxy(this.onLayoutChanged, this))
+
         // Create object button click
-        $(document).on('click', '#pages-side-panel form [data-control=create-object]', $.proxy(this.onCreateObject, this))
+        $(document).on('click', '#pages-side-panel form [data-control=create-object], #pages-side-panel form [data-control=create-template]', 
+            $.proxy(this.onCreateObject, this))
 
         // Submenu item is clicked in the sidebar
         $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', $.proxy(this.onSidebarSubmenuItemClick, this))
 
         // The Delete Object button click
-        $(document).on('click', '#pages-side-panel form button[data-control=delete-object]', $.proxy(this.onDeleteObject, this))
+        $(document).on('click', '#pages-side-panel form button[data-control=delete-object], #pages-side-panel form button[data-control=delete-template]', 
+            $.proxy(this.onDeleteObject, this))
 
         // A new tab is added to the editor
         this.$masterTabs.on('initTab.oc.tab', $.proxy(this.onInitTab, this))
 
         // Handle the menu saving
-        var self = this
         $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=menu]', function(e, data) {
             return self.onSaveMenu(this, e, data)
         })
@@ -119,7 +130,8 @@
     PagesPage.prototype.updateModifiedCounter = function() {
         var counters = {
             page: {menu: 'pages', count: 0},
-            menu: {menu: 'menus', count: 0}
+            menu: {menu: 'menus', count: 0},
+            content: {menu: 'content', count: 0},
         }
 
         $('> div.tab-content > div.tab-pane[data-modified]', this.$masterTabs).each(function(){
@@ -133,21 +145,24 @@
     }
 
     /*
-     * Triggered when a master tab is displayed. Updated the current selection in the sidebar.
+     * Triggered when a tab is displayed. Updated the current selection in the sidebar and sets focus on an editor.
      */
     PagesPage.prototype.onTabShown = function(e) {
-        if ($(e.target).closest('[data-control=tab]').attr('id') != 'pages-master-tabs')
-            return
+        var $tabControl = $(e.target).closest('[data-control=tab]')
 
-        var dataId = $(e.target).closest('li').attr('data-tab-id'),
-            title = $(e.target).attr('title')
+        if ($tabControl.attr('id') == 'pages-master-tabs') {
+            var dataId = $(e.target).closest('li').attr('data-tab-id'),
+                title = $(e.target).attr('title')
 
-        if (title)
-            this.setPageTitle(title)
+            if (title)
+                this.setPageTitle(title)
 
-        this.$pageTree.treeView('markActive', dataId)
-        $('[data-control=filelist]', this.$sidePanel).fileList('markActive', dataId)
-        $(window).trigger('resize')
+            this.$pageTree.treeView('markActive', dataId)
+            $('[data-control=filelist]', this.$sidePanel).fileList('markActive', dataId)
+            $(window).trigger('resize')
+        } else if ($tabControl.hasClass('secondary')) {
+            // TODO: Focus the code or rich editor here
+        }
     }
 
     /*
@@ -210,11 +225,29 @@
         $('[data-control=filelist]', this.$sidePanel).fileList('markActive', tabId)
 
         var objectType = $('input[name=objectType]', $form).val()
-        if (objectType.length > 0)
+        if (objectType.length > 0 && context.handler == 'onSave')
            this.updateObjectList(objectType)
 
         if (context.handler == 'onSave' && (!data['X_OCTOBER_ERROR_FIELDS'] && !data['X_OCTOBER_ERROR_MESSAGE']))
             $form.trigger('unchange.oc.changeMonitor')
+    }
+
+    PagesPage.prototype.onBeforeSaveContent = function(form, e, data) {
+        var $tabPane = $(form).closest('.tab-pane')
+
+        this.updateContentEditorMode($tabPane, false)
+
+        var extension = this.getContentExtension($tabPane),
+            val = ''
+
+        if (extension == 'htm' || extension == 'html')
+            val = $('div[data-control=richeditor]', $tabPane).data('oc.richEditor').$textarea.redactor('code.get')
+        else {
+            var editor = $('[data-control=codeeditor]', $tabPane)
+            val = editor.data('oc.codeEditor').editor.getSession().getValue()
+        }
+
+       data.options.data['markup'] = val
     }
 
     /*
@@ -235,7 +268,7 @@
         $.oc.stripeLoadIndicator.show()
         $form.request(objectList + '::onUpdate', {
             complete: function(data) {
-                $('button[data-control=delete-object]', $form).trigger('oc.triggerOn.update')
+                $('button[data-control=delete-object], button[data-control=delete-template]', $form).trigger('oc.triggerOn.update')
             }
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
@@ -306,7 +339,7 @@
             $button = $(e.target),
             $form = $button.closest('form'),
             parent = $button.data('parent') !== undefined ? $button.data('parent') : null,
-            type = $form.data('object-type'),
+            type = $form.data('object-type') ? $form.data('object-type') : $form.data('template-type'),
             tabId = type + Math.random()
 
         $.oc.stripeLoadIndicator.show()
@@ -377,6 +410,35 @@
     }
 
     /*
+     * Triggered when a static page layout changes
+     */
+    PagesPage.prototype.onLayoutChanged = function(e) {
+        var $el = $(e.target),
+            $form = $el.closest('form'),
+            self = this,
+            $pane = $form.closest('.tab-pane'),
+            data = {
+                type: $('[name=objectType]', $form).val(),
+                theme: $('[name=theme]', $form).val(),
+                path: $('[name=objectPath]', $form).val(),
+            },
+            tab = $pane.data('tab')
+
+        $.oc.stripeLoadIndicator.show()
+        $form.request('onUpdatePageLayout', {
+            data: data,
+            success: function(data) {
+                this.success(data).done(function(){
+                    $.oc.stripeLoadIndicator.hide()
+                    self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
+                })
+            }
+        }).always(function(){
+            $.oc.stripeLoadIndicator.hide()
+        })
+    }
+
+    /*
      * Triggered when a new tab is added to the Editor
      */
     PagesPage.prototype.onInitTab = function(e, data) {
@@ -388,6 +450,8 @@
                 $secondaryPanel = $('.control-tabs.secondary', data.pane),
                 $primaryPanel = $('.control-tabs.primary', data.pane),
                 hasSecondaryTabs = $secondaryPanel.length > 0
+
+            $secondaryPanel.addClass('content-tabs')
 
             $panel.append($collapseIcon);
 
@@ -428,7 +492,8 @@
                         localStorage.ocPagesPrimaryCollapsed = $primaryPanel.hasClass('collapsed') ? 1 : 0
                     return false
                 })
-            }
+            } else
+                $secondaryPanel.addClass('primary-collapsed')
 
             if (typeof(localStorage) !== 'undefined') {
                 if (!$('a', data.tab).hasClass('new-template') && localStorage.ocPagesTablessCollapsed == 1)
@@ -444,6 +509,8 @@
             self = this,
             $panel = $('.form-tabless-fields', data.pane)
 
+        this.updateContentEditorMode(data.pane, true)
+
         $form.on('changed.oc.changeMonitor', function() {
             $panel.trigger('modified.oc.tab')
             self.updateModifiedCounter()
@@ -455,6 +522,9 @@
         })
     }
 
+    /*
+     * Triggered before a menu is saved
+     */
     PagesPage.prototype.onSaveMenu = function(form, e, data) {
         var items = [],
             $items = $('div[data-control=treeview] > ol > li', form)
@@ -476,6 +546,74 @@
         }
 
         data.options.data['itemData'] = iterator($items)
+    }
+
+    /*
+     * Updates the content editor to correspond the conten file extension
+     */
+    PagesPage.prototype.updateContentEditorMode = function(pane, initialization) {
+        if ($('[data-toolbar-type]', pane).data('toolbar-type') !== 'content')
+            return
+
+        var extension = this.getContentExtension(pane),
+            mode = 'html',
+            editor = $('[data-control=codeeditor]', pane)
+
+        if (extension == 'html')
+            extension = 'htm'
+
+        if (initialization)
+            $(pane).data('prev-extension', extension)
+
+        if (extension == 'htm') {
+            $('[data-field-name=markup]', pane).hide()
+            $('[data-field-name=markup_html]', pane).show()
+
+            if (!initialization && $(pane).data('prev-extension') != 'htm') {
+                var val = editor.data('oc.codeEditor').editor.getSession().getValue()
+                $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('set', val)
+            }
+        } else {
+            $('[data-field-name=markup]', pane).show()
+            $('[data-field-name=markup_html]', pane).hide()
+
+            if (!initialization && $(pane).data('prev-extension') == 'htm') {
+                var val = $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('get')
+                editor.data('oc.codeEditor').editor.getSession().setValue(val)
+            }
+
+            var modes = $.oc.codeEditorExtensionModes
+
+            if (modes[extension] !== undefined)
+                mode = modes[extension];
+
+            var setEditorMode = function() {
+                window.setTimeout(function(){
+                    editor.data('oc.codeEditor').editor.getSession().setMode({path: 'ace/mode/'+mode})
+                }, 200)
+            }
+
+            if (initialization)
+                editor.on('oc.codeEditorReady', setEditorMode)
+            else
+                setEditorMode()
+        }
+
+        if (!initialization)
+            $(pane).data('prev-extension', extension)
+    }
+
+    /*
+     * Returns the content file extension
+     */
+    PagesPage.prototype.getContentExtension = function(form) {
+        var fileName = $('input[name=fileName]', form).val(),
+            parts = fileName.split('.')
+
+        if (parts.length >= 2)
+            return parts.pop().toLowerCase()
+
+        return 'htm'
     }
 
     $(document).ready(function(){

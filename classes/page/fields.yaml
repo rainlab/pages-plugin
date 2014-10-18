@@ -47,7 +47,7 @@ secondaryTabs:
   stretch: true
   fields:
     markup:
-      tab: rainlab.pages::lang.editor.edit
+      tab: rainlab.pages::lang.editor.content
       type: richeditor
       stretch: true
       size: huge

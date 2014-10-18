@@ -48,6 +48,12 @@ class Page extends Content
      */
     public $parent;
 
+    /**
+     * @var RainLab\Pages\Classes\PlaceholderList Contains the page placeholder values.
+     * This property is used by the page editor internally.
+     */
+    public $placeholders;
+
     protected static $menuTreeCache = null;
 
     /**
@@ -63,6 +69,8 @@ class Page extends Content
             'url.regex' => Lang::get('rainlab.pages::lang.page.invalid_url'),
             'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
         ];
+
+        $this->placeholders = new PlaceholderList();
     }
 
     /**
@@ -115,6 +123,13 @@ class Page extends Content
 
     protected function parseSettings()
     {
+        $this->fillViewBagArray();
+
+        parent::parseSettings();
+    }
+
+    protected function fillViewBagArray()
+    {
         /*
          * Copy view bag properties to the view bag array.
          * This is required for the back-end editors.
@@ -122,8 +137,6 @@ class Page extends Content
         $viewBag = $this->getViewBag();
         foreach ($viewBag->getProperties() as $name=>$value)
             $this->viewBag[$name] = $value;
-
-        parent::parseSettings();
     }
 
     /**
@@ -140,6 +153,7 @@ class Page extends Content
          */
         if (array_key_exists('settings', $attributes) && array_key_exists('viewBag', $attributes['settings'])) {
             $this->getViewBag()->setProperties($attributes['settings']['viewBag']);
+            $this->fillViewBagArray();
         }
     }
 
@@ -186,12 +200,9 @@ class Page extends Content
      */
     public function getLayoutOptions()
     {
-        if (!($theme = Theme::getEditTheme()))
-            throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
-
         $result = [];
 
-        $layouts = Layout::listInTheme($theme, true);
+        $layouts = Layout::listInTheme($this->theme, true);
         foreach ($layouts as $layout) {
             if (!$layout->hasComponent('staticPage'))
                 continue;
@@ -202,6 +213,82 @@ class Page extends Content
 
         if (!$result)
             $result[null] = Lang::get('rainlab.pages::lang.page.layouts_not_found');
+
+        return $result;
+    }
+
+    /**
+     * Returns the Twig content string
+     */
+    public function getTwigContent()
+    {
+        return $this->code;
+    }
+
+    /**
+     * Returns information about placeholders defined in the page layout.
+     * @return array Returns an associative array of the placeholder name and codes.
+     */
+    public function listLayoutPlaceholders()
+    {
+        $viewBag = $this->getViewBag();
+        $layout = $viewBag->property('layout');
+
+        if (!$layout) {
+            $layouts = $this->getLayoutOptions();
+            $layout = count($layouts) ? array_keys($layouts)[0] : null;
+        }
+
+        if (!$layout)
+            return [];
+
+        $layout = Layout::load($this->theme, $layout);
+        if (!$layout)
+            return [];
+
+        $result = [];
+        $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
+        foreach ($bodyNode as $node) {
+            if ($node instanceof \Cms\Twig\PlaceholderNode) {
+
+                $title = $node->hasAttribute('title') ? trim($node->getAttribute('title')) : null;
+                if (!strlen($title))
+                    $title = $node->getAttribute('name');
+
+                $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
+
+                $placeholderInfo = [
+                    'title' => $title,
+                    'type' => $type ?: 'html'
+                ];
+
+                $result[$node->getAttribute('name')] = $placeholderInfo;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Parses the page placeholder {% put %} tags and extracts the placeholder values.
+     * @return array Returns an associative array of the placeholder names and values.
+     */
+    public function getPlaceholderValues()
+    {
+        if (!strlen($this->code))
+            return [];
+
+        $bodyNode = $this->getTwigNodeTree($this->code)->getNode('body')->getNode(0);
+        if ($bodyNode instanceof \Cms\Twig\PutNode)
+            $bodyNode = [$bodyNode];
+
+        $result = [];
+        foreach ($bodyNode as $node) {
+            if ($node instanceof \Cms\Twig\PutNode) {
+                $bodyNode = $node->getNode('body');
+                $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
+            }
+        }
 
         return $result;
     }
@@ -427,5 +514,14 @@ class Page extends Content
     {
         $key = crc32($theme->getPath()).'static-page-menu-tree';
         Cache::forget($key);
+    }
+
+    /**
+     * Determines if the content of the code section should be wrapped to PHP tags.
+     * @return boolean
+     */
+    protected function wrapCodeToPhpTags()
+    {
+        return false;
     }
 }

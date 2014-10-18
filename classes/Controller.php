@@ -3,6 +3,7 @@
 use Cms\Classes\Page;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
+use Cms\Classes\CmsException;
 use RainLab\Pages\Classes\Router;
 
 /**
@@ -13,16 +14,16 @@ use RainLab\Pages\Classes\Router;
  */
 class Controller
 {
+    use \October\Rain\Support\Traits\Singleton;
+
     protected $theme;
 
     /**
-     * Creates the controller.
-     * @param \Cms\Classes\Theme $theme Specifies the CMS theme.
-     * If the theme is not specified, the current active theme used.
+     * Initialize this singleton.
      */
-    public function __construct($theme = null)
+    protected function init()
     {
-        $this->theme = $theme ? $theme : Theme::getActiveTheme();
+        $this->theme = Theme::getActiveTheme();
         if (!$this->theme)
             throw new CmsException(Lang::get('cms::lang.theme.active.not_found'));
     }
@@ -43,6 +44,8 @@ class Controller
         $viewBag = $page->getViewBag();
 
         $cmsPage = new Page($this->theme);
+        $cmsPage->apiBag['staticPage'] = $page;
+
         $cmsPage->title = $viewBag->property('title');
         $cmsPage->settings['url'] = $url;
         $cmsPage->settings['components'] = [];
@@ -50,5 +53,27 @@ class Controller
         $cmsPage->settings['layout'] = $viewBag->property('layout');
 
         return $cmsPage;
+    }
+
+    public function injectPageTwig($page, $loader, $twig)
+    {
+        if (!isset($page->apiBag['staticPage']))
+            return;
+
+        $staticPage = $page->apiBag['staticPage'];
+
+        CmsException::mask($staticPage, 400);
+        $loader->setObject($staticPage);
+        $template = $twig->loadTemplate($staticPage->getFullPath());
+        $template->render([]);
+        CmsException::unmask();
+    }
+
+    public function getPageContents($page)
+    {
+        if (!isset($page->apiBag['staticPage']))
+            return;
+
+        return $page->apiBag['staticPage']->markup;
     }
 }
