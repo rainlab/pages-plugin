@@ -112,4 +112,13 @@ class Plugin extends PluginBase
 
         StaticPage::clearMenuCache($activeTheme);
     }
+
+    public function registerPermissions()
+    {
+        return [
+            'rainlab.pages.manage_pages'    => ['label' => 'Manage Pages', 'tab' => 'Rainlab.Pages'],
+            'rainlab.pages.manage_menus'    => ['label' => 'Manage Menus', 'tab' => 'Rainlab.Pages'],
+            'rainlab.pages.manage_content'  => ['label' => 'Manage Contents', 'tab' => 'Rainlab.Pages']
+        ];
+    }
 }
