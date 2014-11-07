@@ -382,7 +382,7 @@
 
         this.$itemDataContainer.data('menu-item', data)
         this.itemSaved = true
-        this.$popupForm.trigger('close.oc.popover')
+        this.$popupContainer.trigger('close.oc.popover')
         this.$el.trigger('change')
     }
 
