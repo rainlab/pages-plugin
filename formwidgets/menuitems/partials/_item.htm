@@ -1,8 +1,8 @@
 <?php
     $groupStatus = true;
 ?>
-<li 
-    class="<?= $item->items ? 'has-subitems' : null ?>" 
+<li
+    class="<?= $item->items ? 'has-subitems' : null ?>"
     data-status="<?= $groupStatus || !$item->items ? 'expanded' : 'collapsed' ?>"
     data-menu-item="<?= e(json_encode($item->toArray())) ?>"
 >
@@ -15,18 +15,16 @@
         <ul class="submenu">
             <li>
                 <p>
-                    <a 
-                        href="#" 
-                        data-control="create-item" 
-                    ><i class="icon-plus"></i> <?= trans(e($this->addSubitemLabel)) ?></a>
+                    <a href="javascript:;" data-control="create-item">
+                        <i class="icon-plus"></i> <?= trans(e($this->addSubitemLabel)) ?>
+                    </a>
                 </p>
             </li>
             <li>
                 <p>
-                    <a 
-                        href="#" 
-                        data-control="delete-menu-item" 
-                    ><i class="icon-trash-o control-icon"></i></a>
+                    <a href="javascript:;" data-control="delete-menu-item">
+                        <i class="icon-trash-o control-icon"></i>
+                    </a>
                 </p>
             </li>
         </ul>
@@ -34,7 +32,7 @@
 
     <ol>
         <?php if ($subItems = $item->items): ?>
-            <?= $this->makePartial('itemlist', ['items'=>$subItems]) ?>
+            <?= $this->makePartial('itemlist', ['items' => $subItems]) ?>
         <?php endif ?>
     </ol>
 </li>

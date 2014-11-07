@@ -1,15 +1,15 @@
-<div 
+<div
     class="layout-absolute"
     data-control="menu-item-editor"
     data-alias="<?= $this->alias ?>"
     data-item-properties="<?= e($itemProperties) ?>"
 >
     <div class="control-scrollbar" data-control="scrollbar">
-        <div class="control-treeview light" 
-            data-control="treeview" 
+        <div class="control-treeview light"
+            data-control="treeview"
             id="<?= $this->getId('item-list') ?>"
         >
-            <?= $this->makePartial('items', ['items'=>$items]) ?>
+            <?= $this->makePartial('items', ['items' => $items]) ?>
         </div>
     </div>
 
@@ -17,8 +17,7 @@
         <?= $this->makePartial('editortemplate') ?>
     </script>
 
-
     <script type="text/template" data-item-template>
-        <?= $this->makePartial('item', ['item'=>$emptyItem]) ?>
+        <?= $this->makePartial('item', ['item' => $emptyItem]) ?>
     </script>
 </div>

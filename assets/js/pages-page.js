@@ -15,7 +15,6 @@
         /*
          * Bind event handlers
          */
-
         var self = this
 
         // Item is clicked in the sidebar

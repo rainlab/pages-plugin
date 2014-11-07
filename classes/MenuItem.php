@@ -74,11 +74,11 @@ class MenuItem
     public $exists = false;
 
     public $fillable = [
-        'title', 
-        'nesting', 
-        'type', 
-        'url', 
-        'code', 
+        'title',
+        'nesting',
+        'type',
+        'url',
+        'code',
         'reference',
         'cmsPage',
         'replace'

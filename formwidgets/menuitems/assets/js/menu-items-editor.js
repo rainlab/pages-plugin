@@ -146,7 +146,8 @@
             if ($input.prop('type') !== 'checkbox' ) {
                 $input.val(this)
                 $input.change()
-            } else {
+            }
+            else {
                 var checked = !(this == '0' || this == 'false' || this == 0 || this == undefined || this == null)
 
                 checked ? $input.prop('checked', 'checked') : $input.removeAttr('checked')
@@ -191,33 +192,35 @@
             $referenceFormGroup.show()
 
             var iterator = function(options, level, path) {
-                    $.each(options, function(code) {
-                        var $option = $('<option></option>').attr('value', code),
-                            offset = Array(level*4).join('&nbsp;'),
-                            isObject = $.type(this) == 'object'
+                $.each(options, function(code) {
+                    var $option = $('<option></option>').attr('value', code),
+                        offset = Array(level*4).join('&nbsp;'),
+                        isObject = $.type(this) == 'object'
 
-                        $option.text(isObject ? this.title : this)
+                    $option.text(isObject ? this.title : this)
 
-                        var optionPath = path.length > 0 ? 
-                            (path + ' / ' + $option.text()) : 
-                            $option.text()
+                    var optionPath = path.length > 0
+                        ? (path + ' / ' + $option.text())
+                        : $option.text()
 
-                        $option.data('path', optionPath)
+                    $option.data('path', optionPath)
 
-                        $option.html(offset + $option.html())
+                    $option.html(offset + $option.html())
 
-                        $optionSelector.append($option)
+                    $optionSelector.append($option)
 
-                        if (isObject)
-                            iterator(this.items, level+1, optionPath)
-                    })
-                }
+                    if (isObject)
+                        iterator(this.items, level+1, optionPath)
+                })
+            }
 
             iterator(typeInfo.references, 0, '')
 
             $optionSelector.val(prevSelectedReference ? prevSelectedReference : this.properties.reference)
-        } else
+        }
+        else {
             $referenceFormGroup.hide()
+        }
 
         if (typeInfo.cmsPages) {
             $cmsPageSelector.find('option').remove()
@@ -231,8 +234,10 @@
             })
 
             $cmsPageSelector.val(prevSelectedPage ? prevSelectedPage : this.properties.cmsPage)
-        } else
+        }
+        else {
             $cmsPageFormGroup.hide()
+        }
 
         $nestingFormGroup.toggle(typeInfo.nesting !== undefined && typeInfo.nesting)
         $urlFormGroup.toggle(type == 'url')
@@ -363,14 +368,13 @@
 
         $('> div span.title', self.$itemDataContainer).text(data.title)
 
-
         var referenceDescription = $.trim($('select[name=type] option:selected', self.$popupContainer).text())
 
-        if (data.type == 'url')
+        if (data.type == 'url') {
             referenceDescription += ': ' + $('input[name=url]', self.$popupContainer).val()
-        else {
-            if (typeInfo.references)
-                referenceDescription += ': ' + $.trim($('select[name=reference] option:selected', self.$popupContainer).data('path'))
+        }
+        else if (typeInfo.references) {
+            referenceDescription += ': ' + $.trim($('select[name=reference] option:selected', self.$popupContainer).data('path'))
         }
 
         $('> div span.comment', self.$itemDataContainer).text(referenceDescription)
