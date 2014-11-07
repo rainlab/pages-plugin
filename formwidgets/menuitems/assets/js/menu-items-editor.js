@@ -129,7 +129,8 @@
             modal: true,
             closeOnPageClick: true,
             highlightModalTarget: true,
-            width: 600
+            width: 600,
+            useAnimation: true
         })
 
         return false
