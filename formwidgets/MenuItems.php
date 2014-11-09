@@ -53,12 +53,12 @@ class MenuItems extends FormWidgetBase
      */
     public function prepareVars()
     {
-        $menuItem = new MenuItem();
+        $menuItem = new MenuItem;
 
         $this->vars['itemProperties'] = json_encode($menuItem->fillable);
         $this->vars['items'] = $this->model->items;
 
-        $emptyItem = new MenuItem();
+        $emptyItem = new MenuItem;
         $emptyItem->title = trans('rainlab.pages::lang.menuitem.new_item');
         $emptyItem->type = 'url';
         $emptyItem->url = '/';
@@ -88,9 +88,9 @@ class MenuItems extends FormWidgetBase
         return strlen($value) ? $value : null;
     }
 
-    /*
-     * Methods for the internal use
-     */
+    //
+    // Methods for the internal use
+    //
 
     /**
      * Returns the item reference description.

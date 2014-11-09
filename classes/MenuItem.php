@@ -94,14 +94,17 @@ class MenuItem
         $result = [];
 
         foreach ($items as $itemData) {
-            $obj = new self();
+            $obj = new self;
 
-            foreach ($itemData as $name=>$value) {
+            foreach ($itemData as $name => $value) {
                 if ($name != 'items') {
-                    if (property_exists($obj, $name))
+                    if (property_exists($obj, $name)) {
                         $obj->$name = $value;
-                } else
+                    }
+                }
+                else {
                     $obj->items = self::initFromArray($value);
+                }
             }
 
             $result[] = $obj;
@@ -121,11 +124,13 @@ class MenuItem
         $apiResult = Event::fire('pages.menuitem.listTypes');
         if (is_array($apiResult)) {
             foreach ($apiResult as $typeList) {
-                if (!is_array($typeList))
+                if (!is_array($typeList)) {
                     continue;
+                }
 
-                foreach ($typeList as $typeCode=>$typeName)
+                foreach ($typeList as $typeCode => $typeName) {
                     $result[$typeCode] = $typeName;
+                }
             }
         }
 
@@ -148,8 +153,9 @@ class MenuItem
         $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
         if (is_array($apiResult)) {
             foreach ($apiResult as $typeInfo) {
-                if (!is_array($typeInfo))
+                if (!is_array($typeInfo)) {
                     continue;
+                }
 
                 foreach ($typeInfo as $name=>$value) {
                     if ($name == 'cmsPages') {
@@ -160,7 +166,9 @@ class MenuItem
                             $pos = strrpos ($baseName, '/');
 
                             $dir = $pos !== false ? substr($baseName, 0, $pos).' / ' : null;
-                            $cmsPages[$baseName] = strlen($page->title) ? $dir.$page->title : $baseName;
+                            $cmsPages[$baseName] = strlen($page->title)
+                                ? $dir.$page->title
+                                : $baseName;
                         }
 
                         $value = $cmsPages;
@@ -181,8 +189,9 @@ class MenuItem
     public function toArray()
     {
         $result = [];
-        foreach ($this->fillable as $property)
+        foreach ($this->fillable as $property) {
             $result[$property] = $this->$property;
+        }
 
         return $result;
     }
