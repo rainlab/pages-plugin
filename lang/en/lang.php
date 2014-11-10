@@ -29,7 +29,7 @@ return [
         'items' => 'Menu items',
         'add_subitem' => 'Add subitem',
         'no_records' => 'No items found',
-        'code_required' => 'The Code is requried',
+        'code_required' => 'The Code is required',
         'invalid_code' => 'Invalid Code format. The Code can contain digits, Latin letters and the following symbols: _-'
     ],
     'menuitem' => [
@@ -41,7 +41,7 @@ return [
         'url' => 'URL',
         'reference' => 'Reference',
         'title_required' => 'The Title is required',
-        'unknown_type' => 'Uknown menu item type',
+        'unknown_type' => 'Unknown menu item type',
         'unnamed' => 'Unnamed menu item',
         'add_item' => 'Add <u>I</u>tem',
         'new_item' => 'New menu item',
