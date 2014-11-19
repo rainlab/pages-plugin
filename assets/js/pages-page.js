@@ -452,14 +452,10 @@
 
             $secondaryPanel.addClass('content-tabs')
 
-            $panel.append($collapseIcon);
+            $panel.append($collapseIcon)
 
             if (!hasSecondaryTabs) {
-                $primaryPanel.parent().removeClass('min-size')
-                $primaryPanel.removeClass('layout-row min-size').addClass('layout')
-                $('> div:first-child', $primaryPanel).addClass('layout-row min-size')
-                $('.tab-content', $primaryPanel).addClass('layout-row')
-                $('.tab-pane', $primaryPanel).addClass('layout-cell full-size')
+                $('.tab-pane', $primaryPanel).addClass('pane-compact')
             }
 
             $collapseIcon.click(function(){
@@ -481,7 +477,7 @@
             $primaryTabContainer.addClass('master-area')
 
             if ($primaryPanel.length > 0) {
-                $secondaryPanel.append($primaryCollapseIcon);
+                $secondaryPanel.append($primaryCollapseIcon)
 
                 $primaryCollapseIcon.click(function(){
                     $primaryPanel.toggleClass('collapsed')
@@ -491,8 +487,9 @@
                         localStorage.ocPagesPrimaryCollapsed = $primaryPanel.hasClass('collapsed') ? 1 : 0
                     return false
                 })
-            } else
+            } else {
                 $secondaryPanel.addClass('primary-collapsed')
+            }
 
             if (typeof(localStorage) !== 'undefined') {
                 if (!$('a', data.tab).hasClass('new-template') && localStorage.ocPagesTablessCollapsed == 1)
