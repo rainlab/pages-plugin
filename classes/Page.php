@@ -413,6 +413,7 @@ class Page extends Content
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
             $result['url'] = URL::to($pageInfo['url']);
+            $result['mtime'] = $pageInfo['mtime'];
             $result['isActive'] = $result['url'] == $url;
         }
 
@@ -433,6 +434,7 @@ class Page extends Content
                     $branchItem['url'] = URL::to($itemInfo['url']);
                     $branchItem['isActive'] = $branchItem['url'] == $url;
                     $branchItem['title'] = $itemInfo['title'];
+                    $branchItem['mtime'] = $itemInfo['mtime'];
 
                     if ($itemInfo['items'])
                         $branchItem['items'] = $iterator($itemInfo['items']);
@@ -480,8 +482,9 @@ class Page extends Content
                 $pageCode = $item->page->getBaseFileName();
 
                 $itemData = [
-                    'url' => Str::lower(RouterHelper::normalizeUrl($viewBag->property('url'))),
+                    'url'   => Str::lower(RouterHelper::normalizeUrl($viewBag->property('url'))),
                     'title' => $viewBag->property('title'),
+                    'mtime' => $item->page->mtime,
                     'items' => $iterator($item->subpages, $pageCode, $level+1),
                     'parent' => $parent,
                     'navigation_hidden' => $viewBag->property('navigation_hidden')
