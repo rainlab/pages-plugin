@@ -14,8 +14,8 @@ class Plugin extends PluginBase
     public function pluginDetails()
     {
         return [
-            'name'        => 'Static Pages',
-            'description' => 'Pages & menus features.',
+            'name'        => 'rainlab.pages::lang.plugin.name',
+            'description' => 'rainlab.pages::lang.plugin.description',
             'author'      => 'Alexey Bobkov, Samuel Georges',
             'icon'        => 'icon-files-o'
         ];
@@ -34,7 +34,7 @@ class Plugin extends PluginBase
     {
         return [
             'pages' => [
-                'label'       => 'rainlab.pages::lang.plugin_name',
+                'label'       => 'rainlab.pages::lang.plugin.name',
                 'url'         => Backend::url('rainlab/pages'),
                 'icon'        => 'icon-files-o',
                 'permissions' => ['rainlab.pages.*'],
