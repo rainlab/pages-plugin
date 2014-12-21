@@ -6,6 +6,7 @@ use System\Classes\PluginBase;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\Snippet;
 use Cms\Classes\Theme;
 
 class Plugin extends PluginBase
@@ -61,6 +62,13 @@ class Plugin extends PluginBase
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'content'],
                         'permissions' => ['rainlab.pages.manage_content'],
+                    ],
+                    'snippets' => [
+                        'label'       => 'rainlab.pages::lang.snippet.menu_label',
+                        'icon'        => 'icon-newspaper-o',
+                        'url'         => 'javascript:;',
+                        'attributes'  => ['data-menu-item'=>'snippet'],
+                        'permissions' => ['rainlab.pages.access_snippets'],
                     ]
                 ]
 
@@ -100,6 +108,11 @@ class Plugin extends PluginBase
         Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
             if ($type == 'static-page' || $type == 'all-static-pages')
                 return StaticPage::resolveMenuItem($item, $url, $theme);
+        });
+
+        Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
+            if ($formWidget->model instanceof \Cms\Classes\Partial)
+                Snippet::extendPartialForm($formWidget);
         });
     }
 

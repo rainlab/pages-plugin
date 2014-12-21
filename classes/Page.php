@@ -37,12 +37,6 @@ class Page extends Content
     ];
 
     /**
-     * @var array Contains the view bag properties.
-     * This property is used by the page editor internally.
-     */
-    public $viewBag = [];
-
-    /**
      * @var string Contains the page parent file name.
      * This property is used by the page editor internally.
      */
@@ -119,24 +113,6 @@ class Page extends Content
             $pageList = new PageList($this->theme);
             $pageList->appendPage($this);
         }
-    }
-
-    protected function parseSettings()
-    {
-        $this->fillViewBagArray();
-
-        parent::parseSettings();
-    }
-
-    protected function fillViewBagArray()
-    {
-        /*
-         * Copy view bag properties to the view bag array.
-         * This is required for the back-end editors.
-         */
-        $viewBag = $this->getViewBag();
-        foreach ($viewBag->getProperties() as $name=>$value)
-            $this->viewBag[$name] = $value;
     }
 
     /**

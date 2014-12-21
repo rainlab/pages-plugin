@@ -16,6 +16,7 @@ use System\Classes\ApplicationException;
 use Backend\Traits\InspectableContainer;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
+use RainLab\Pages\Widgets\SnippetList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItem;
@@ -52,6 +53,7 @@ class Index extends Controller
 
             new PageList($this, 'pageList');
             new MenuList($this, 'menuList');
+            new SnippetList($this, 'snippetList');
 
             $theme = $this->theme;
             new TemplateList($this, 'contentList', function() use ($theme) {
@@ -64,6 +66,7 @@ class Index extends Controller
 
         $this->addJs('/modules/backend/assets/js/october.treeview.js', 'core');
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js');
+        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js');
         $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
 
         $this->bodyClass = 'compact-container side-panel-not-fixed';
@@ -477,7 +480,7 @@ class Index extends Controller
         return [
             'tabTitle' => $this->getTabTitle($type, $object),
             'tab' => $this->makePartial('form_page', [
-                'form'          => $widget,
+                'form'        => $widget,
                 'objectType'  => $type,
                 'objectTheme' => $this->theme->getDirName(),
                 'objectMtime' => $object->mtime

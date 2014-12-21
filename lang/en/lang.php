@@ -83,4 +83,15 @@ return [
         'navigation_hidden' => 'Hide in navigation',
         'navigation_hidden_comment' => 'Check this box to hide this page from automatically generated menus and breadcrumbs.',
     ],
+    'snippet' => [
+        'partialtab' => 'Snippet',
+        'code' => 'Snippet code',
+        'code_comment' => 'Enter a code to make this partial available as a snippet in the Static Pages plugin.',
+        'name' => 'Name',
+        'name_comment' => 'The name is displayed in the snippet list in the Static Pages sidebar and on a Page when a snippet is added.',
+        'no_records' => 'No snippets found',
+        'menu_label' => 'Snippets',
+        'properties' => 'Properties',
+        'column_title' => 'Title'
+    ]
 ];

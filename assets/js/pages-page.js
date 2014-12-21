@@ -11,6 +11,7 @@
         this.$sidePanel = $('#pages-side-panel')
         this.$pageTree = $('[data-control=treeview]', this.$sidePanel)
         this.masterTabsObj = this.$masterTabs.data('oc.tab')
+        this.snippetManager = new $.oc.pages.snippetManager(this.$masterTabs)
 
         /*
          * Bind event handlers
@@ -304,6 +305,12 @@
                 path: $item.data('item-path')
             },
             tabId = data.type + '-' + data.theme + '-' + data.path
+
+        if ($item.data('type') == 'snippet') {
+            this.snippetManager.onSidebarSnippetClick($item)
+
+            return
+        }
 
         /*
          * Find if the tab is already opened
