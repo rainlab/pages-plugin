@@ -48,7 +48,7 @@ class StaticPage extends ComponentBase
 
         if ($this->page) {
             $this->title = $this->page['title'] = $this->page->getViewBag()->property('title');
-            $this->content = $this->page['content'] = $this->page->markup;
+            $this->content = $this->page['content'] = $this->page->getProcessedMarkup();
         }
     }
 }

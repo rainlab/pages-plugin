@@ -114,15 +114,28 @@ class Plugin extends PluginBase
             if ($formWidget->model instanceof \Cms\Classes\Partial)
                 Snippet::extendPartialForm($formWidget);
         });
+
+        Event::listen('cms.template.save', function($controller, $template, $type) {
+            Plugin::clearCache();
+        });
+
+        Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
+            $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
+        });
+
+        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template) {
+            Snippet::processTemplateSettings($template);
+        });
     }
 
     public static function clearCache()
     {
-        $activeTheme = Theme::getActiveTheme();
+        $theme = Theme::getEditTheme();
 
-        $router = new Router($activeTheme);
+        $router = new Router($theme);
         $router->clearCache();
 
-        StaticPage::clearMenuCache($activeTheme);
+        StaticPage::clearMenuCache($theme);
+        Snippet::clearCache($theme);
     }
 }

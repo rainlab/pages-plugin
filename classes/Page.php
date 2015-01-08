@@ -3,6 +3,7 @@
 use Cms\Classes\Content;
 use RainLab\Pages\Classes\PageList;
 use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\Snippet;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use ApplicationException;
@@ -49,6 +50,8 @@ class Page extends Content
     public $placeholders;
 
     protected static $menuTreeCache = null;
+
+    protected $processedMarkupCache = false;
 
     /**
      * Creates an instance of the object and associates it with a CMS theme.
@@ -267,6 +270,19 @@ class Page extends Content
         }
 
         return $result;
+    }
+
+    public function getProcessedMarkup()
+    {
+        if ($this->processedMarkupCache !== false)
+            return $this->processedMarkupCache;
+
+        $markup = Snippet::processPageMarkup(
+            $this->getFileName(), 
+            $this->theme, 
+            $this->markup);
+
+        return $this->processedMarkupCache = $markup;
     }
 
     /**

@@ -91,7 +91,14 @@ return [
         'name_comment' => 'The name is displayed in the snippet list in the Static Pages sidebar and on a Page when a snippet is added.',
         'no_records' => 'No snippets found',
         'menu_label' => 'Snippets',
-        'properties' => 'Properties',
-        'column_title' => 'Title'
+        'column_property' => 'Property title',
+        'column_type' => 'Type',
+        'column_code' => 'Code',
+        'column_default' => 'Default',
+        'column_options' => 'Options',
+        'column_type_string' => 'String',
+        'column_type_checkbox' => 'Checkbox',
+        'column_type_dropdown' => 'Dropdown',
+        'not_found' => 'Snippet with the requested code was not found in the theme.'
     ]
 ];

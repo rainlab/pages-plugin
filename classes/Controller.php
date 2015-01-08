@@ -5,6 +5,7 @@ use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\CmsException;
 use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\Snippet;
 
 /**
  * Represents a static page controller.
@@ -74,6 +75,8 @@ class Controller
         if (!isset($page->apiBag['staticPage']))
             return;
 
-        return $page->apiBag['staticPage']->markup;
+        $markup = $page->apiBag['staticPage']->getProcessedMarkup();
+
+        return $markup;
     }
 }

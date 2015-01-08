@@ -3,7 +3,7 @@
         <?php foreach ($items as $item):
             $dataId = 'snippet-'.$item->code;
         ?>
-            <li class="item" data-id="<?= e($dataId) ?>" data-snippet="<?= e($item->code) ?>" data-snippet-name="<?= e($item->name) ?>" data-type="snippet" data-properties="<?= e($this->snippetPropertiesToJson($item)) ?>" data-description="<?= e($item->description) ?>">
+            <li class="item" data-id="<?= e($dataId) ?>" data-snippet="<?= e($item->code) ?>" data-snippet-name="<?= e($item->name) ?>" data-type="snippet" data-description="<?= e($item->description) ?>">
                 <a href="#">
                     <span class="title"><?= e($item->name) ?></span>
                     <span class="description">

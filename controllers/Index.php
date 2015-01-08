@@ -17,6 +17,7 @@ use Backend\Traits\InspectableContainer;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
+use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItem;
@@ -239,6 +240,46 @@ class Index extends Controller
         $object = $this->fillObjectFromPost($type);
 
         return $this->pushObjectForm($type, $object);
+    }
+
+    public function onGetInspectorConfiguration()
+    {
+        $configuration = [];
+
+        $snippetCode = Request::input('snippet');
+
+        if (strlen($snippetCode)) {
+            $snippet = Snippet::findByCode($this->theme, $snippetCode);
+            if (!$snippet)
+                throw new ApplicationException(trans('rainlab.pages::lang.snippet.not_found'));
+
+            $configuration = $snippet->getProperties();
+        }
+
+        return [
+            'configuration' => [
+                'properties'=>$configuration,
+                'title' => $snippet->name,
+                'description' => $snippet->description
+            ]
+        ];
+    }
+
+    public function onGetSnippetNames()
+    {
+        $codes = array_unique(Request::input('codes'));
+        $result = [];
+        foreach ($codes as $snippetCode) {
+            $snippet = Snippet::findByCode($this->theme, $snippetCode);
+            if (!$snippet)
+                $result[$snippetCode] = trans('rainlab.pages::lang.snippet.not_found');
+            else
+                $result[$snippetCode] =$snippet->name;
+        }
+
+        return [
+            'names' => $result
+        ];
     }
 
     //

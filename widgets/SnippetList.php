@@ -86,20 +86,6 @@ class SnippetList extends WidgetBase
         return $snippets;
     }
 
-    protected function snippetPropertiesToJson($snippet)
-    {
-        $properties = $snippet->getProperties();
-
-        $result = [];
-        foreach ($properties as $name=>$params) {
-            $params['name'] = $name;
-
-            $result[] = $params;
-        }
-
-        return json_encode($result);
-    }
-
     protected function updateList()
     {
         return ['#'.$this->getId('snippet-list') => $this->makePartial('items', ['items'=>$this->getData()])];
