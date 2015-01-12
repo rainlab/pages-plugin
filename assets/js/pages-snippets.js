@@ -46,7 +46,7 @@
         }
 
         var $textarea = $('[data-field-name="markup"] [data-control="richeditor"] textarea', $pageForm),
-            $snippetNode = $('<figure data-inspectable contenteditable="false" data-inspector-css-class="hero" />')
+            $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />')
 
         $snippetNode.attr('data-snippet', $sidebarItem.data('snippet'))
         $snippetNode.attr('data-name', $sidebarItem.data('snippet-name'))
@@ -135,7 +135,6 @@
 
             $snippet.removeAttr('contenteditable')
             $snippet.removeAttr('data-name')
-            $snippet.removeAttr('data-inspectable')
             $snippet.removeAttr('tabindex')
             $snippet.removeAttr('data-inspector-css-class')
 

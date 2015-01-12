@@ -99,6 +99,7 @@ return [
         'column_type_string' => 'String',
         'column_type_checkbox' => 'Checkbox',
         'column_type_dropdown' => 'Dropdown',
-        'not_found' => 'Snippet with the requested code was not found in the theme.'
+        'not_found' => 'Snippet with the requested code was not found in the theme.',
+        'property_format_error' => 'Property code should start with a Latin leter and can contain only Latin letters and digits'
     ]
 ];

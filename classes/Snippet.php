@@ -318,12 +318,31 @@ class Snippet
         $fieldConfig = [
             'tab' => 'rainlab.pages::lang.snippet.partialtab',
             'type' => 'datatable',
+            'height' => '150',
+            'dynamicHeight' => true,
             'columns' => [
                 'title' => [
                     'title' => 'rainlab.pages::lang.snippet.column_property',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'Please provide the property title',
+                            'applyIfNotEmpty' => 'property'
+                        ]
+                    ]
                 ],
                 'property' => [
                     'title' => 'rainlab.pages::lang.snippet.column_code',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'Please provide the property code',
+                            'applyIfNotEmpty' => 'title'
+                        ],
+                        'regex' => [
+                            'pattern' => '^[a-z][a-z0-9]*$',
+                            'modifiers' => 'i',
+                            'message' => trans('rainlab.pages::lang.snippet.property_format_error')
+                        ]
+                    ]
                 ],
                 'type' => [
                     'title' => 'rainlab.pages::lang.snippet.column_type',
@@ -332,6 +351,11 @@ class Snippet
                         'string' => 'rainlab.pages::lang.snippet.column_type_string',
                         'checkbox' => 'rainlab.pages::lang.snippet.column_type_checkbox',
                         'dropdown' => 'rainlab.pages::lang.snippet.column_type_dropdown'
+                    ],
+                    'validation' => [
+                        'required' => [
+                            'applyIfNotEmpty' => 'title'
+                        ]
                     ]
                 ],
                 'default' => [
