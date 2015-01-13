@@ -83,7 +83,7 @@ class MenuItems extends FormWidgetBase
     /**
      * {@inheritDoc}
      */
-    public function getSaveData($value)
+    public function getSaveValue($value)
     {
         return strlen($value) ? $value : null;
     }
