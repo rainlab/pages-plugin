@@ -153,6 +153,9 @@ class Snippet
 
             $paramName = trim($qualifiers[1]);
 
+            if ($paramName == 'default')
+                $paramName = 'placeholder';
+
             // Handling the "[viewMode|options|list] => Display as a list" case
             if ($qualifiers[1] == 'options') {
                 if ($cnt > 2) {
@@ -326,7 +329,7 @@ class Snippet
                     'validation' => [
                         'required' => [
                             'message' => 'Please provide the property title',
-                            'applyIfNotEmpty' => 'property'
+                            'requiredWith' => 'property'
                         ]
                     ]
                 ],
@@ -335,7 +338,7 @@ class Snippet
                     'validation' => [
                         'required' => [
                             'message' => 'Please provide the property code',
-                            'applyIfNotEmpty' => 'title'
+                            'requiredWith' => 'title'
                         ],
                         'regex' => [
                             'pattern' => '^[a-z][a-z0-9]*$',
@@ -354,7 +357,7 @@ class Snippet
                     ],
                     'validation' => [
                         'required' => [
-                            'applyIfNotEmpty' => 'title'
+                            'requiredWith' => 'title'
                         ]
                     ]
                 ],

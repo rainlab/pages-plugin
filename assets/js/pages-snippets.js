@@ -74,8 +74,9 @@
                     $paragraph.remove()
             } else {
                 // If snippet is inserted into another snippet, insert it after the snippet.
-                if ($(current).attr('data-snippet') !== undefined) {
-                    $snippetNode.insertBefore(current)
+                var $closestSnippet = $(current).closest('[data-snippet]')
+                if ($closestSnippet.length > 0) {
+                    $snippetNode.insertBefore($closestSnippet.get(0))
                     inserted = true
                 }
             }
