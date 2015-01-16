@@ -6,6 +6,7 @@ use Cache;
 use DOMDocument;
 use System\Classes\ApplicationException;
 use Cms\Classes\Controller as CmsController;
+use October\Rain\Support\ValidationException;
 
 /**
  * Represents a static page snippet.
@@ -133,7 +134,7 @@ class Snippet
     /**
      * Parses properties stored in a template in the INI format and converts them to an array.
      */
-    protected static function parseIniProperties($properties)
+    protected static function parseIniProperties($properties, $inspectorCompatible = true)
     {
         $result = [];
 
@@ -153,7 +154,7 @@ class Snippet
 
             $paramName = trim($qualifiers[1]);
 
-            if ($paramName == 'default')
+            if ($paramName == 'default' && $inspectorCompatible)
                 $paramName = 'placeholder';
 
             // Handling the "[viewMode|options|list] => Display as a list" case
@@ -173,7 +174,7 @@ class Snippet
     }
 
     /**
-     * Parses the static page markup and renders snippets from the page.
+     * Parses the static page markup and renders defined on the page.
      * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
      * @param \Cms\Classes\Theme $theme Specifies a parent theme.
      * @param string $markup Specifies the markup string to process.
@@ -185,15 +186,16 @@ class Snippet
         //
         $key = crc32($theme->getPath()).self::CACHE_PAGE_SNIPPET_MAP;
 
-        $map = [];
+        $map = null;
         $cached = Cache::get($key, false);
+
         if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
             if (array_key_exists($pageName, $cached))
                 $map = $cached[$pageName];
         }
 
-        if (!$map) {
-            $map = self::extractSnippetsFromMarkup($markup);
+        if (!is_array($map)) {
+            $map = self::extractSnippetsFromMarkup($markup, $theme);
 
             if (!is_array($cached))
                 $cached = [];
@@ -249,7 +251,8 @@ class Snippet
                     $properties['staticPageSnippetProperties['.$row['property'].'|default]'] = $row['default'];
 
                 if (isset($row['options']) && strlen($row['options'])) {
-                    $options = explode('|', $row['options']);
+                    $options = self::dropDownOptionsToArray($row['options']);
+
                     foreach ($options as $index=>$option)
                         $properties['staticPageSnippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
                 }
@@ -269,16 +272,50 @@ class Snippet
         if (!isset($template->viewBag['staticPageSnippetProperties']))
             return;
 
-        $parsedProperties = self::parseIniProperties($template->viewBag['staticPageSnippetProperties']);
+        $parsedProperties = self::parseIniProperties($template->viewBag['staticPageSnippetProperties'], false);
 
         foreach ($parsedProperties as $index=>&$property) {
             $property['id'] = $index;
 
             if (isset($property['options']))
-                $property['options'] = implode('|', $property['options']);
+                $property['options'] = self::dropDownOptionsToString($property['options']);
         }
 
         $template->viewBag['staticPageSnippetProperties'] = $parsedProperties;
+    }
+
+    protected static function dropDownOptionsToArray($optionsString)
+    {
+        $options = explode('|', $optionsString);
+
+        $result = [];
+        foreach ($options as $index=>$optionStr) {
+            $parts = explode(':', $optionStr, 2);
+
+            if (count($parts) > 1 ) {
+                $key = trim($parts[0]);
+
+                if (strlen($key)) {
+                    if (!preg_match('/^[0-9a-z-_]+$/i', $key))
+                        throw new ValidationException(['staticPageSnippetProperties' =>sprintf(trans('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+
+                    $result[$key] = trim($parts[1]);
+                } else
+                    $result[$index] = trim($optionStr);
+            } else
+                $result[$index] = trim($optionStr);
+        }
+
+        return $result;
+    }
+
+    protected static function dropDownOptionsToString($optionsArray)
+    {
+        $result = [];
+        foreach ($optionsArray as $optionIndex=>$optionValue)
+            $result[] = $optionIndex.':'.$optionValue;
+
+        return implode(' | ', $result);
     }
 
     /**
@@ -399,7 +436,7 @@ class Snippet
         return $result;
     }
 
-    protected static function extractSnippetsFromMarkup($markup)
+    protected static function extractSnippetsFromMarkup($markup, $theme)
     {
         $map = [];
         $matches = [];
@@ -411,14 +448,28 @@ class Snippet
 
                 $snippetCode = $nameMatch[1];
 
-                $propertyMatches = [];
-                if (!preg_match_all('/data\-property-(?<property>[^=]+)\s*=\s*\"(?<value>[^\"]+)\"/i', $snippetDeclaration, $propertyMatches))
-                    continue;
-
                 $properties = [];
 
-                foreach ($propertyMatches['property'] as $index=>$propertyNames)
-                    $properties[$propertyNames] = $propertyMatches['value'][$index];
+                $propertyMatches = [];
+                if (preg_match_all('/data\-property-(?<property>[^=]+)\s*=\s*\"(?<value>[^\"]+)\"/i', $snippetDeclaration, $propertyMatches)) {
+                    foreach ($propertyMatches['property'] as $index=>$propertyName)
+                        $properties[$propertyName] = $propertyMatches['value'][$index];
+                }
+
+                // Apply default values for properties not defined in the markup
+
+                $snippet = Snippet::findByCode($theme, $snippetCode);
+                if (!$snippet)
+                    throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
+
+                $snippetProperties = $snippet->getProperties();
+                foreach ($snippetProperties as $propertyInfo) {
+                    $propertyCode = $propertyInfo['property'];
+                    if (!array_key_exists($propertyCode, $properties)) {
+                        if (array_key_exists('placeholder', $propertyInfo))
+                            $properties[$propertyCode] = $propertyInfo['placeholder'];
+                    }
+                }
 
                 $map[$snippetDeclaration] = [
                     'code' => $snippetCode,

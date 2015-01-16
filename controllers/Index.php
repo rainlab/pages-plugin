@@ -251,7 +251,7 @@ class Index extends Controller
         if (strlen($snippetCode)) {
             $snippet = Snippet::findByCode($this->theme, $snippetCode);
             if (!$snippet)
-                throw new ApplicationException(trans('rainlab.pages::lang.snippet.not_found'));
+                throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
 
             $configuration = $snippet->getProperties();
         }
@@ -272,7 +272,7 @@ class Index extends Controller
         foreach ($codes as $snippetCode) {
             $snippet = Snippet::findByCode($this->theme, $snippetCode);
             if (!$snippet)
-                $result[$snippetCode] = trans('rainlab.pages::lang.snippet.not_found');
+                $result[$snippetCode] = sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode);
             else
                 $result[$snippetCode] =$snippet->name;
         }

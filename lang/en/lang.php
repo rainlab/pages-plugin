@@ -99,7 +99,8 @@ return [
         'column_type_string' => 'String',
         'column_type_checkbox' => 'Checkbox',
         'column_type_dropdown' => 'Dropdown',
-        'not_found' => 'Snippet with the requested code was not found in the theme.',
-        'property_format_error' => 'Property code should start with a Latin leter and can contain only Latin letters and digits'
+        'not_found' => 'Snippet with the requested code %s was not found in the theme.',
+        'property_format_error' => 'Property code should start with a Latin letter and can contain only Latin letters and digits',
+        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -'
     ]
 ];
