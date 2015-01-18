@@ -74,18 +74,27 @@ class Plugin extends PluginBase
             return Controller::instance()->initCmsPage($url);
         });
 
-        Event::listen('cms.page.beforeTwigRender', function($page, $loader, $twig) {
-            return Controller::instance()->injectPageTwig($page, $loader, $twig);
-        });
+        Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
+            /*
+             * Before twig renders
+             */
+            $twig = $controller->getTwig();
+            $loader = $controller->getLoader();
+            Controller::instance()->injectPageTwig($page, $loader, $twig);
 
-        Event::listen('cms.page.getRenderedContents', function($page) {
-            return Controller::instance()->getPageContents($page);
+            /*
+             * Get rendered content
+             */
+            $contents = Controller::instance()->getPageContents($page);
+            if (strlen($contents)) {
+                return $contents;
+            }
         });
 
         Event::listen('pages.menuitem.listTypes', function() {
             return [
-                'static-page'=>'Static page',
-                'all-static-pages'=>'All static pages'
+                'static-page'      => 'Static page',
+                'all-static-pages' => 'All static pages'
             ];
         });
 
