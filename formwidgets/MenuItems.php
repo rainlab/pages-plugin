@@ -1,8 +1,8 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
+use Request;
 use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\MenuItem;
-use Request;
 
 /**
  * Menu items widget.
@@ -53,22 +53,17 @@ class MenuItems extends FormWidgetBase
      */
     public function prepareVars()
     {
-        $menuItem = new MenuItem();
+        $menuItem = new MenuItem;
 
         $this->vars['itemProperties'] = json_encode($menuItem->fillable);
         $this->vars['items'] = $this->model->items;
 
-        $emptyItem = new MenuItem();
+        $emptyItem = new MenuItem;
         $emptyItem->title = trans('rainlab.pages::lang.menuitem.new_item');
         $emptyItem->type = 'url';
         $emptyItem->url = '/';
 
         $this->vars['emptyItem'] = $emptyItem;
-
-        $formConfigs = [
-            'page' => '@/plugins/rainlab/pages/classes/page/fields.yaml',
-            'menu' => '@/plugins/rainlab/pages/classes/menu/fields.yaml',
-        ];
 
         $widgetConfig = $this->makeConfig('@/plugins/rainlab/pages/classes/menuitem/fields.yaml');
         $widgetConfig->model = $menuItem;
@@ -88,14 +83,14 @@ class MenuItems extends FormWidgetBase
     /**
      * {@inheritDoc}
      */
-    public function getSaveData($value)
+    public function getSaveValue($value)
     {
         return strlen($value) ? $value : null;
     }
 
-    /*
-     * Methods for the internal use
-     */
+    //
+    // Methods for the internal use
+    //
 
     /**
      * Returns the item reference description.
@@ -116,10 +111,14 @@ class MenuItems extends FormWidgetBase
             if ($item->type !== 'url') {
                 if (isset($this->typeInfoCache[$item->type]['references']))
                     $result .= ': '.$this->findReferenceName($item->reference, $this->typeInfoCache[$item->type]['references']);
-            } else
+            }
+            else {
                 $result .= ': '.$item->url;
-        } else
+            }
+
+        } else {
             $result = trans('rainlab.pages::lang.menuitem.unknown_type');
+        }
 
         return $result;
     }
@@ -137,8 +136,9 @@ class MenuItems extends FormWidgetBase
                 if (is_array($info) && isset($info['items'])) {
                     $result = $iterator($info['items'], $path . ' / '.$this->getMenuItemTitle($info));
 
-                    if (strlen($result))
+                    if (strlen($result)) {
                         return strlen($path) ? $path.' / ' .$result : $result;
+                    }
                 }
             }
         };

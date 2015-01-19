@@ -147,12 +147,12 @@ class Menu extends CmsObject
                 if ($item->type == 'url') {
                     $parentReference->url = $item->url;
                     $parentReference->isActive = $currentUrl == Str::lower($item->url) || $activeMenuItem === $item->code;
-                } else {
+                }
+                else {
                     /*
                      * If the item type is not URL, use the API to request the item type's provider to
                      * return the item URL, subitems and determine whether the item is active.
                      */
-
                     $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
                     if (is_array($apiResult)) {
                         foreach ($apiResult as $itemInfo) {
@@ -194,11 +194,13 @@ class Menu extends CmsObject
                     }
                 }
 
-                if ($item->items)
+                if ($item->items) {
                     $parentReference->items = $iterator($item->items);
+                }
 
-                if (!$item->replace)
+                if (!$item->replace) {
                     $result[] = $parentReference;
+                }
                 else {
                     foreach ($parentReference->items as $subItem)
                         $result[] = $subItem;

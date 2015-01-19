@@ -229,7 +229,7 @@ class Index extends Controller
         $type = Request::input('type');
 
         return [
-            'menuItemTypeInfo' => MenuItem::getTypeInfo(Request::input('type'))
+            'menuItemTypeInfo' => MenuItem::getTypeInfo($type)
         ];
     }
 
@@ -306,8 +306,9 @@ class Index extends Controller
     {
         $class = $this->resolveTypeClassName($type);
         if (!($object = call_user_func(array($class, 'load'), $this->theme, $path))) {
-            if (!$ignoreNotFound)
+            if (!$ignoreNotFound) {
                 throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
+            }
 
             return null;
         }
@@ -316,8 +317,9 @@ class Index extends Controller
             $fileName = $object->getFileName();
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
 
-            if ($extension == 'htm')
+            if ($extension == 'htm') {
                 $object->markup_html = $object->markup;
+            }
         }
 
         return $object;
@@ -327,8 +329,9 @@ class Index extends Controller
     {
         $class = $this->resolveTypeClassName($type);
 
-        if (!($object = new $class($this->theme)))
+        if (!($object = new $class($this->theme))) {
             throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
+        }
 
         return $object;
     }
@@ -341,8 +344,9 @@ class Index extends Controller
             'content' => 'Cms\Classes\Content'
         ];
 
-        if (!array_key_exists($type, $types))
+        if (!array_key_exists($type, $types)) {
             throw new ApplicationException(trans('rainlab.pages::lang.object.invalid_type'));
+        }
 
         return $types[$type];
     }
@@ -355,8 +359,9 @@ class Index extends Controller
             'content' => '@/plugins/rainlab/pages/classes/content/fields.yaml'
         ];
 
-        if (!array_key_exists($type, $formConfigs))
+        if (!array_key_exists($type, $formConfigs)) {
             throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
+        }
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
@@ -364,10 +369,11 @@ class Index extends Controller
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
 
-        if ($type == 'page')
+        if ($type == 'page') {
             $widget->bindEvent('form.extendFieldsBefore', function() use ($widget, $object) {
                 $this->addPagePlaceholders($widget, $object);
             });
+        }
 
         return $widget;
     }
@@ -384,8 +390,9 @@ class Index extends Controller
                 'size' => 'huge'
             ];
 
-            if ($info['type'] != 'text')
+            if ($info['type'] != 'text') {
                 $fieldConfig['type'] = 'richeditor';
+            }
             else {
                 $fieldConfig['type'] = 'codeeditor';
                 $fieldConfig['language'] = 'text';
@@ -402,8 +409,9 @@ class Index extends Controller
         }
 
         $placeholderValues = $page->getPlaceholderValues();
-        foreach ($placeholderValues as $name=>$value)
+        foreach ($placeholderValues as $name => $value) {
             $page->placeholders->add($name, $value);
+        }
     }
 
     protected function getTabTitle($type, $object)
@@ -411,20 +419,28 @@ class Index extends Controller
         if ($type == 'page') {
             $viewBag = $object->getViewBag();
             $result = $viewBag ? $viewBag->property('title') : false;
-            if (!$result)
+            if (!$result) {
                 $result = trans('rainlab.pages::lang.page.new');
+            }
 
             return $result;
-        } elseif ($type == 'menu') {
+        }
+        elseif ($type == 'menu') {
             $result = $object->name;
-            if (!strlen($result))
+            if (!strlen($result)) {
                 $result = trans('rainlab.pages::lang.menu.new');
+            }
 
             return $result;
-        } elseif ($type == 'content') {
-            $result = in_array($type, ['asset', 'content']) ? $object->getFileName() : $object->getBaseFileName();
-            if (!$result)
+        }
+        elseif ($type == 'content') {
+            $result = in_array($type, ['asset', 'content'])
+                ? $object->getFileName()
+                : $object->getBaseFileName();
+
+            if (!$result) {
                 $result = trans('cms::lang.'.$type.'.new');
+            }
 
             return $result;
         }
@@ -485,12 +501,14 @@ class Index extends Controller
 
         $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
 
-        if ($type != 'menu' && $type != 'content')
+        if ($type != 'menu' && $type != 'content') {
             $fields[] = 'parent';
+        }
 
         foreach ($fields as $field) {
-            if (array_key_exists($field, $_POST))
+            if (array_key_exists($field, $_POST)) {
                 $objectData[$field] = Request::input($field);
+            }
         }
 
         if ($type == 'page') {
@@ -504,15 +522,17 @@ class Index extends Controller
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
 
         if (!Request::input('objectForceSave') && $object->mtime) {
-            if (Request::input('objectMtime') != $object->mtime)
+            if (Request::input('objectMtime') != $object->mtime) {
                 throw new ApplicationException('mtime-mismatch');
+            }
         }
 
         if ($type == 'content') {
             $fileName = $objectData['fileName'];
 
-            if (dirname($fileName) == 'static-pages')
+            if (dirname($fileName) == 'static-pages') {
                 throw new ApplicationException(trans('rainlab.pages::lang.content.cant_save_to_dir'));
+            }
         }
 
         $object->fill($objectData);
@@ -525,8 +545,9 @@ class Index extends Controller
 
         $this->vars['objectPath'] = Request::input('path');
 
-        if ($type == 'page')
+        if ($type == 'page') {
             $this->vars['pageUrl'] = URL::to($object->getViewBag()->property('url'));
+        }
 
         return [
             'tabTitle' => $this->getTabTitle($type, $object),
