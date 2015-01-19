@@ -1,7 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'Pages',
+    'plugin' => [
+        'name' => 'Pages',
+        'description' => 'Pages & menus features.'
+    ],
     'page' => [
         'menu_label' => 'Pages',
         'delete_confirmation' => 'Do you really want to delete selected pages? This will also delete the subpages, if any.',
@@ -81,6 +84,6 @@ return [
         'hidden' => 'Hidden',
         'hidden_comment' => 'Hidden pages are accessible only by logged-in back-end users.',
         'navigation_hidden' => 'Hide in navigation',
-        'navigation_hidden_comment' => 'Check this box to hide this page from automatically generated menus and breadcrumbs.',
-    ],
+        'navigation_hidden_comment' => 'Check this box to hide this page from automatically generated menus and breadcrumbs.'
+    ]
 ];
