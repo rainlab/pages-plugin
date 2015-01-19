@@ -8,6 +8,7 @@ use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
 use Cms\Classes\Theme;
+use RainLab\Pages\Classes\SnippetManager;
 
 class Plugin extends PluginBase
 {
@@ -136,6 +137,6 @@ class Plugin extends PluginBase
         $router->clearCache();
 
         StaticPage::clearMenuCache($theme);
-        Snippet::clearCache($theme);
+        SnippetManager::clearCache($theme);
     }
 }

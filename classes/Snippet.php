@@ -2,9 +2,9 @@
 
 use Cms\Classes\Partial;
 use Config;
-use Cache;
 use DOMDocument;
 use System\Classes\ApplicationException;
+use Cms\Classes\ComponentHelpers;
 use Cms\Classes\Controller as CmsController;
 use October\Rain\Support\ValidationException;
 
@@ -16,10 +16,6 @@ use October\Rain\Support\ValidationException;
  */
 class Snippet
 {
-    const CACHE_KEY_PARTIAL_MAP = 'snippet-partial-map';
-
-    const CACHE_PAGE_SNIPPET_MAP = 'snippet-map';
-
     /**
      * @var string Specifies the snippet code.
      */
@@ -28,23 +24,37 @@ class Snippet
     /**
      * @var string Specifies the snippet description.
      */
-    public $description;
+    protected $description = null;
 
     /**
      * @var string Specifies the snippet name.
      */
-    public $name;
+    protected $name = null;
 
     /**
-     * @var string Snippet properties
+     * @var string Snippet properties.
      */
     protected $properties;
 
     /**
-     * Creates a snippet object and loads its configuration from a partial.
+     * @var string Snippet component class name.
+     */
+    protected $componentClass = null;
+
+    /**
+     * @var \Cms\Classes\ComponentBase Snippet component object.
+     */
+    protected $componentObj = null;
+
+    public function __construct()
+    {
+    }
+
+    /**
+     * Initializes the snippet from a CMS partial.
      * @param \Cms\Classes\Partial $parital A partial to load the configuration from.
      */
-    public function __construct($partial)
+    public function initFromPartial($partial)
     {
         $viewBag = $partial->getViewBag();
 
@@ -55,80 +65,69 @@ class Snippet
     }
 
     /**
-     * Returns the list of snippets in the specified theme.
-     * This method is used internally by the system and shouldn't be used
-     * in front-end request handling calls.
-     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
-     * @return array Returns an array of Snippet objects.
+     * Initializes the snippet from a CMS component information.
+     * @param string $componentClass Specifies the component class.
+     * @param string $componentCode Specifies the component code.
      */
-    public static function listInTheme($theme)
+    public function initFromComponentInfo($componentClass, $componentCode)
     {
-        $partials = Partial::listInTheme($theme, true);
-        foreach ($partials as $partial) {
-            $viewBag = $partial->getViewBag();
-            if (strlen($viewBag->property('staticPageSnippetCode')))
-                $result[] = new self($partial);
-        }
-
-        return $result;
+        $this->code = $componentCode;
+        $this->componentClass = $componentClass;
     }
 
     /**
-     * Finds a snippet by its code.
-     * This method is used internally by the system.
-     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
-     * @param string $code Specifies the snippet code.
-     * @param boolean $getPartialSnippetMap Specifies whether caching is allowed for the call.
-     * @return array Returns an array of Snippet objects.
+     * Returns the snippet name.
+     * This method should not be used in the front-end request handling.
+     * @return string
      */
-    public static function findByCode($theme, $code, $allowCaching = false)
+    public function getName()
     {
-        if (!$allowCaching) {
-            // If caching is not allowed, list snippets in the theme, 
-            // initialize the snippet object and return it.
-            $snippets = self::listInTheme($theme);
-            foreach ($snippets as $snippet) {
-                if ($snippet->code == $code)
-                    return $snippet;
-            }
+        if ($this->name !== null)
+            return $this->name;
 
-            return null;
-        }
-
-        // If caching is allowed, try to load the partial name from the
-        // cache and initialize the snippet from the partial.
-
-        $map = self::getPartialSnippetMap($theme);
-        if (!array_key_exists($code, $map))
+        if ($this->componentClass === null)
             return null;
 
-        $partialName = $map[$code];
-        $partial = Partial::loadCached($theme, $partialName);
-        if ($partial)
-            return null;
-
-        return new self($partial);
+        $component = $this->getComponent();
+        return $this->name = ComponentHelpers::getComponentName($component);
     }
 
     /**
-     * Clears front-end run-time cache.
-     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
+     * Returns the snippet description.
+     * This method should not be used in the front-end request handling.
+     * @return string
      */
-    public static function clearCache($theme)
+    public function getDescription()
     {
-        $keys = [self::CACHE_KEY_PARTIAL_MAP, self::CACHE_PAGE_SNIPPET_MAP];
-        $keyBase = crc32($theme->getPath());
+        if ($this->description !== null)
+            return $this->description;
 
-        foreach ($keys as $key)
-            Cache::forget($keyBase.$key);
+        if ($this->componentClass === null)
+            return null;
+
+        $component = $this->getComponent();
+        return $this->description = ComponentHelpers::getComponentDescription($component);
     }
 
     /**
-     * Returns the component property list as array, in format compatible with Inspector.
+     * Returns the snippet component class name.
+     * If the snippet is a partial snippet, returns NULL.
+     * @return string Returns the snippet component class name
+     */
+    public function getComponentClass()
+    {
+        return $this->componentClass;
+    }
+
+    /**
+     * Returns the snippet property list as array, in format compatible with Inspector.
      */
     public function getProperties()
     {
-        return self::parseIniProperties($this->properties);
+        if (!$this->componentClass)
+            return self::parseIniProperties($this->properties);
+        else
+            return ComponentHelpers::getComponentsPropertyConfig($this->getComponent(), false);
     }
 
     /**
@@ -167,6 +166,16 @@ class Snippet
                 }
             } else {
                 $result[$propertyCode][$paramName] = $value;
+            }
+        }
+
+        foreach ($result as &$propertyInfo) {
+            // Drop-down lists should use the "default" parameter instead of the placeholer.
+            if (isset($propertyInfo['type']) && $propertyInfo['type'] == 'dropdown') {
+                if (isset($propertyInfo['placeholder'])) {
+                    $propertyInfo['default'] = $propertyInfo['placeholder'];
+                    unset($propertyInfo['placeholder']);
+                }
             }
         }
 
@@ -410,32 +419,6 @@ class Snippet
        $formWidget->config->tabs['fields']['viewBag[staticPageSnippetProperties]'] = $fieldConfig;
     }
 
-    protected static function getPartialSnippetMap($theme)
-    {
-        $result = [];
-
-        $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
-        
-        $cached = Cache::get($key, false);
-        if ($cached !== false && ($cached = @unserialize($cached)) !== false)
-            return $cached;
-
-        $partials = Partial::listInTheme($theme);
-        foreach ($partials as $partial) {
-            $viewBag = $partial->getViewBag();
-
-            $snippetCode = $viewBag->property('staticPageSnippetCode');
-            if (!strlen($snippetCode))
-                continue;
-
-            $result[$snippetCode] = $partial->getFileName();
-        }
-
-        Cache::put($key, serialize($result), Config::get('cms.parsedPageCacheTTL', 10));
-
-        return $result;
-    }
-
     protected static function extractSnippetsFromMarkup($markup, $theme)
     {
         $map = [];
@@ -457,7 +440,7 @@ class Snippet
                 }
 
                 // Apply default values for properties not defined in the markup
-
+// Fix the next call
                 $snippet = Snippet::findByCode($theme, $snippetCode);
                 if (!$snippet)
                     throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
@@ -479,5 +462,23 @@ class Snippet
         }
 
         return $map;
+    }
+
+    /**
+     * Returns a component corresponding to the snippet.
+     * This method should not be used in the front-end request handling code.
+     * @return \Cms\Classes\ComponentBase
+     */
+    protected function getComponent()
+    {
+        if ($this->componentClass === null)
+            return null;
+
+        if ($this->componentObj !== null)
+            return $this->componentObj;
+
+        $componentClass = $this->componentClass;
+
+        return $this->componentObj = new $componentClass();
     }
 }

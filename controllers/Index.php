@@ -24,6 +24,7 @@ use RainLab\Pages\Classes\MenuItem;
 use Cms\Classes\Content;
 use Cms\Widgets\TemplateList;
 use RainLab\Pages\Plugin as PagesPlugin;
+use RainLab\Pages\Classes\SnippetManager;
 
 /**
  * Pages and Menus index
@@ -247,9 +248,10 @@ class Index extends Controller
         $configuration = [];
 
         $snippetCode = Request::input('snippet');
+        $componentClass = Request::input('component');
 
         if (strlen($snippetCode)) {
-            $snippet = Snippet::findByCode($this->theme, $snippetCode);
+            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
             if (!$snippet)
                 throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
 
@@ -259,8 +261,8 @@ class Index extends Controller
         return [
             'configuration' => [
                 'properties'=>$configuration,
-                'title' => $snippet->name,
-                'description' => $snippet->description
+                'title' => $snippet->getName(),
+                'description' => $snippet->getDescription()
             ]
         ];
     }
@@ -270,11 +272,19 @@ class Index extends Controller
         $codes = array_unique(Request::input('codes'));
         $result = [];
         foreach ($codes as $snippetCode) {
-            $snippet = Snippet::findByCode($this->theme, $snippetCode);
+            $parts = explode('|', $snippetCode);
+            $componentClass = null;
+
+            if (count($parts) > 1) {
+                $snippetCode = $parts[0];
+                $componentClass = $parts[1];
+            }
+
+            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
             if (!$snippet)
                 $result[$snippetCode] = sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode);
             else
-                $result[$snippetCode] =$snippet->name;
+                $result[$snippetCode] =$snippet->getName();
         }
 
         return [

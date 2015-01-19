@@ -2,6 +2,7 @@
 
 use Backend\Classes\WidgetBase;
 use RainLab\Pages\Classes\Snippet;
+use RainLab\Pages\Classes\SnippetManager;
 use Cms\Classes\Theme;
 use Input;
 use Response;
@@ -67,7 +68,8 @@ class SnippetList extends WidgetBase
 
     protected function getData()
     {
-        $snippets = Snippet::listInTheme($this->theme);
+        $manager = SnippetManager::instance();
+        $snippets = $manager->listSnippets($this->theme);
 
         $searchTerm = Str::lower($this->getSearchTerm());
 
@@ -76,12 +78,16 @@ class SnippetList extends WidgetBase
             $filteredSnippets = [];
 
             foreach ($snippets as $snippet) {
-                if ($this->textMatchesSearch($words, $snippet->code.' '.$snippet->description))
+                if ($this->textMatchesSearch($words, $snippet->getName().' '.$snippet->code.' '.$snippet->getDescription()))
                     $filteredSnippets[] = $snippet;
             }
 
             $snippets = $filteredSnippets;
         }
+
+        usort($snippets, function($a, $b){
+            return strcmp($a->getName(), $b->getName());
+        });
 
         return $snippets;
     }

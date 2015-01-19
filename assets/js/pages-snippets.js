@@ -46,11 +46,28 @@
         }
 
         var $textarea = $('[data-field-name="markup"] [data-control="richeditor"] textarea', $pageForm),
-            $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />')
+            $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />'),
+            componentClass = $sidebarItem.attr('data-component-class'),
+            snippetCode = $sidebarItem.data('snippet')
 
-        $snippetNode.attr('data-snippet', $sidebarItem.data('snippet'))
-        $snippetNode.attr('data-name', $sidebarItem.data('snippet-name'))
-        $snippetNode.attr('tabindex', '0')
+        if (componentClass) {
+            $snippetNode.attr({
+                'data-component': componentClass,
+                'data-inspector-class': componentClass
+            })
+
+            // If a component-based snippet was added, make sure that
+            // its code is unique, as it will be used as a component 
+            // alias.
+
+            snippetCode = this.generateUniqueComponentSnippetCode(componentClass, snippetCode, $textarea)
+        }
+
+        $snippetNode.attr({
+            'data-snippet': snippetCode,
+            'data-name': $sidebarItem.data('snippet-name'),
+            'tabindex': '0'
+        })
 
         $snippetNode.get(0).contentEditable = false
 
@@ -90,6 +107,19 @@
         redactor.code.sync();
     }
 
+    SnippetManager.prototype.generateUniqueComponentSnippetCode = function(componentClass, originalCode, $textarea) {
+        var $codeDom = $('<div>' + $textarea.redactor('code.get') + '</div>'),
+            updatedCode = originalCode,
+            counter = 2
+
+        while ($codeDom.find('[data-snippet="'+updatedCode+'"][data-component]').length > 0) {
+            updatedCode = originalCode + counter
+            counter++
+        }
+
+        return updatedCode
+    }
+
     SnippetManager.prototype.syncEditorCode = function(inspectable) {
         var $textarea = $(inspectable).closest('[data-control=richeditor]').find('textarea')
 
@@ -101,12 +131,24 @@
         var snippetCodes = []
 
         $('.redactor-editor [data-snippet]', $editor).each(function(){
-            snippetCodes.push($(this).attr('data-snippet'))
+            var $snippet = $(this),
+                snippetCode = $snippet.attr('data-snippet'),
+                componentClass = $snippet.attr('data-component')
 
-            $(this).addClass('loading')
-            $(this).attr('data-name', 'Loading...')
-            $(this).attr('tabindex', '0')
-            $(this).attr('data-inspector-css-class', 'hero')
+            if (componentClass)
+                snippetCode += '|' + componentClass
+
+            snippetCodes.push(snippetCode)
+
+            $snippet.addClass('loading')
+            $snippet.attr({
+                'data-name': 'Loading...',
+                'tabindex': '0',
+                'data-inspector-css-class': 'hero'
+            })
+
+            if (componentClass)
+                $snippet.attr('data-inspector-class', componentClass)
             
             this.contentEditable = false
         })
@@ -134,10 +176,7 @@
         $('[data-snippet]', $domTree).each(function(){
             var $snippet = $(this)
 
-            $snippet.removeAttr('contenteditable')
-            $snippet.removeAttr('data-name')
-            $snippet.removeAttr('tabindex')
-            $snippet.removeAttr('data-inspector-css-class')
+            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty')
 
             if (!$snippet.attr('class'))
                 $snippet.removeAttr('class')
