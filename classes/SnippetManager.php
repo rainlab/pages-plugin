@@ -5,6 +5,7 @@ use System\Classes\PluginManager;
 use System\Classes\SystemException;
 use Cms\Classes\Partial;
 use Cache;
+use Config;
 
 /**
  * Returns information about snippets based on partials and components.
@@ -17,8 +18,6 @@ class SnippetManager
     use \October\Rain\Support\Traits\Singleton;
 
     const CACHE_KEY_PARTIAL_MAP = 'snippet-partial-map';
-
-    const CACHE_PAGE_SNIPPET_MAP = 'snippet-map';
 
     protected $snippets = null;
 
@@ -91,7 +90,7 @@ class SnippetManager
                 throw new SystemException(sprintf('The snippet component class %s is not found.', $componentClass));
 
             $snippet = new Snippet();
-            $snippet->initFromComponentInfo($code, $componentClass);
+            $snippet->initFromComponentInfo($componentClass, $code);
 
             return $snippet;
         }
@@ -103,11 +102,42 @@ class SnippetManager
      */
     public static function clearCache($theme)
     {
-        $keys = [self::CACHE_KEY_PARTIAL_MAP, self::CACHE_PAGE_SNIPPET_MAP];
+        $keys = [self::CACHE_KEY_PARTIAL_MAP, Snippet::CACHE_PAGE_SNIPPET_MAP];
         $keyBase = crc32($theme->getPath());
 
         foreach ($keys as $key)
             Cache::forget($keyBase.$key);
+    }
+
+    /**
+     * Returns a list of partial-based snippets and corresponding partial names.
+     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
+     * @return Returns an associative array with the snippet code in keys and partial file names in values.
+     */
+    public function getPartialSnippetMap($theme)
+    {
+        $result = [];
+
+        $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
+        
+        $cached = Cache::get($key, false);
+        if ($cached !== false && ($cached = @unserialize($cached)) !== false)
+            return $cached;
+
+        $partials = Partial::listInTheme($theme);
+        foreach ($partials as $partial) {
+            $viewBag = $partial->getViewBag();
+
+            $snippetCode = $viewBag->property('staticPageSnippetCode');
+            if (!strlen($snippetCode))
+                continue;
+
+            $result[$snippetCode] = $partial->getFileName();
+        }
+
+        Cache::put($key, serialize($result), Config::get('cms.parsedPageCacheTTL', 10));
+
+        return $result;
     }
 
     /**
@@ -160,31 +190,4 @@ class SnippetManager
 
         return $result;
     }
-
-    protected function getPartialSnippetMap($theme)
-    {
-        $result = [];
-
-        $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
-        
-        $cached = Cache::get($key, false);
-        if ($cached !== false && ($cached = @unserialize($cached)) !== false)
-            return $cached;
-
-        $partials = Partial::listInTheme($theme);
-        foreach ($partials as $partial) {
-            $viewBag = $partial->getViewBag();
-
-            $snippetCode = $viewBag->property('staticPageSnippetCode');
-            if (!strlen($snippetCode))
-                continue;
-
-            $result[$snippetCode] = $partial->getFileName();
-        }
-
-        Cache::put($key, serialize($result), Config::get('cms.parsedPageCacheTTL', 10));
-
-        return $result;
-    }
-
 }

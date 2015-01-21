@@ -2,6 +2,7 @@
 
 use Cms\Classes\Partial;
 use Config;
+use Cache;
 use DOMDocument;
 use System\Classes\ApplicationException;
 use Cms\Classes\ComponentHelpers;
@@ -16,6 +17,8 @@ use October\Rain\Support\ValidationException;
  */
 class Snippet
 {
+    const CACHE_PAGE_SNIPPET_MAP = 'snippet-map';
+
     /**
      * @var string Specifies the snippet code.
      */
@@ -40,6 +43,11 @@ class Snippet
      * @var string Snippet component class name.
      */
     protected $componentClass = null;
+
+    /**
+     * @var array Internal cache of snippet declarations defined on a page.
+     */
+    protected static $pageSnippetMap = [];
 
     /**
      * @var \Cms\Classes\ComponentBase Snippet component object.
@@ -127,7 +135,7 @@ class Snippet
         if (!$this->componentClass)
             return self::parseIniProperties($this->properties);
         else
-            return ComponentHelpers::getComponentsPropertyConfig($this->getComponent(), false);
+            return ComponentHelpers::getComponentsPropertyConfig($this->getComponent(), false, true);
     }
 
     /**
@@ -153,9 +161,6 @@ class Snippet
 
             $paramName = trim($qualifiers[1]);
 
-            if ($paramName == 'default' && $inspectorCompatible)
-                $paramName = 'placeholder';
-
             // Handling the "[viewMode|options|list] => Display as a list" case
             if ($qualifiers[1] == 'options') {
                 if ($cnt > 2) {
@@ -169,21 +174,11 @@ class Snippet
             }
         }
 
-        foreach ($result as &$propertyInfo) {
-            // Drop-down lists should use the "default" parameter instead of the placeholer.
-            if (isset($propertyInfo['type']) && $propertyInfo['type'] == 'dropdown') {
-                if (isset($propertyInfo['placeholder'])) {
-                    $propertyInfo['default'] = $propertyInfo['placeholder'];
-                    unset($propertyInfo['placeholder']);
-                }
-            }
-        }
-
         return array_values($result);
     }
 
     /**
-     * Parses the static page markup and renders defined on the page.
+     * Parses the static page markup and renders snippets defined on the page.
      * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
      * @param \Cms\Classes\Theme $theme Specifies a parent theme.
      * @param string $markup Specifies the markup string to process.
@@ -191,45 +186,55 @@ class Snippet
      */
     public static function processPageMarkup($pageName, $theme, $markup)
     {
-        // Load or initialize the snippet map for the given markup.
-        //
-        $key = crc32($theme->getPath()).self::CACHE_PAGE_SNIPPET_MAP;
+        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
 
-        $map = null;
-        $cached = Cache::get($key, false);
+        $controller = CmsController::getController();
 
-        if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
-            if (array_key_exists($pageName, $cached))
-                $map = $cached[$pageName];
-        }
-
-        if (!is_array($map)) {
-            $map = self::extractSnippetsFromMarkup($markup, $theme);
-
-            if (!is_array($cached))
-                $cached = [];
-
-            $cached[$pageName] = $map;
-            Cache::put($key, serialize($cached), Config::get('cms.parsedPageCacheTTL', 10));
-        }
-
-        $partialSnippetMap = self::getPartialSnippetMap($theme);
+        $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
         $controller = CmsController::getController();
         foreach ($map as $snippetDeclaration => $snippetInfo) {
             $snippetCode = $snippetInfo['code'];
 
-            if (!array_key_exists($snippetCode, $partialSnippetMap))
-                throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
+            if (!isset($snippetInfo['component'])) {
+                if (!array_key_exists($snippetCode, $partialSnippetMap))
+                    throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
 
-            $partialName = $partialSnippetMap[$snippetCode];
-
-            $partialCode = $controller->renderPartial($partialName, $snippetInfo['properties']);
+                $partialName = $partialSnippetMap[$snippetCode];
+                $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
+            } else {
+                $generatedMarkup = $controller->renderComponent($snippetCode);
+            }
 
             $pattern = preg_quote($snippetDeclaration);
-            $markup = mb_ereg_replace($pattern, $partialCode, $markup);
+            $markup = mb_ereg_replace($pattern, $generatedMarkup, $markup);
         }
 
         return $markup;
+    }
+
+    /**
+     * Returns a list of component definitions declared on the page.
+     * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
+     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
+     * @return array Returns an array of component definitions
+     */
+    public static function listPageComponents($pageName, $theme, $markup)
+    {
+        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
+
+        $result = [];
+        foreach ($map as $snippetDeclaration => $snippetInfo) {
+            if (!isset($snippetInfo['component']))
+                continue;
+
+            $result[] = [
+                'class' => $snippetInfo['component'],
+                'alias' => $snippetInfo['code'],
+                'properties' => $snippetInfo['properties']
+            ];
+        }
+
+        return $result;
     }
 
     public static function processTemplateSettingsArray($settingsArray)
@@ -439,29 +444,86 @@ class Snippet
                         $properties[$propertyName] = $propertyMatches['value'][$index];
                 }
 
-                // Apply default values for properties not defined in the markup
-// Fix the next call
-                $snippet = Snippet::findByCode($theme, $snippetCode);
-                if (!$snippet)
-                    throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
+                $componentMatch = [];
+                $componentClass = null;
+                if (preg_match('/data\-component\s*=\s*"([^"]+)"/', $snippetDeclaration, $componentMatch)) 
+                    $componentClass = $componentMatch[1];
 
-                $snippetProperties = $snippet->getProperties();
-                foreach ($snippetProperties as $propertyInfo) {
-                    $propertyCode = $propertyInfo['property'];
-                    if (!array_key_exists($propertyCode, $properties)) {
-                        if (array_key_exists('placeholder', $propertyInfo))
-                            $properties[$propertyCode] = $propertyInfo['placeholder'];
-                    }
-                }
+                // Apply default values for properties not defined in the markup
+                // and normalize property code names.
+                $properties = self::preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties);
 
                 $map[$snippetDeclaration] = [
                     'code' => $snippetCode,
+                    'component' => $componentClass,
                     'properties' => $properties
                 ];
             }
         }
 
         return $map;
+    }
+
+    protected static function extractSnippetsFromMarkupCached($theme, $pageName, $markup)
+    {
+        if (array_key_exists($pageName, self::$pageSnippetMap))
+            return self::$pageSnippetMap[$pageName];
+
+        $key = crc32($theme->getPath()).self::CACHE_PAGE_SNIPPET_MAP;
+
+        $map = null;
+        $cached = Cache::get($key, false);
+
+        if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
+            if (array_key_exists($pageName, $cached))
+                $map = $cached[$pageName];
+        }
+
+        if (!is_array($map)) {
+            $map = self::extractSnippetsFromMarkup($markup, $theme);
+
+            if (!is_array($cached))
+                $cached = [];
+
+            $cached[$pageName] = $map;
+            Cache::put($key, serialize($cached), Config::get('cms.parsedPageCacheTTL', 10));
+        }
+
+        self::$pageSnippetMap[$pageName] = $map;
+
+        return $map;
+    }
+
+    /**
+     * Apples default property values and fixes property names.
+     *
+     * As snippet properties are defined with data attributes, they are lower case, whereas
+     * real property names are case sensitive. This method finds original property names defined
+     * in snippet classes or partials and replaces property names defined in the static page markup.
+     */
+    protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
+    {
+        $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
+        if (!$snippet)
+            throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
+
+        $properties = array_change_key_case($properties);
+        $snippetProperties = $snippet->getProperties();
+        foreach ($snippetProperties as $propertyInfo) {
+            $propertyCode = $propertyInfo['property'];
+            $lowercaseCode = strtolower($propertyCode);
+
+            if (!array_key_exists($lowercaseCode, $properties)) {
+                if (array_key_exists('default', $propertyInfo))
+                    $properties[$propertyCode] = $propertyInfo['default'];
+            } else {
+                $markupPropertyInfo = $properties[$lowercaseCode];
+                unset($properties[$lowercaseCode]);
+                $properties[$propertyCode] = $markupPropertyInfo;
+            }
+        }
+
+        return $properties;
     }
 
     /**

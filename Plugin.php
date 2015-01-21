@@ -100,6 +100,10 @@ class Plugin extends PluginBase
             }
         });
 
+        Event::listen('cms.page.initComponents', function($controller, $page) {
+            Controller::instance()->initPageComponents($controller, $page);
+        });
+
         Event::listen('pages.menuitem.listTypes', function() {
             return [
                 'static-page'      => 'Static page',

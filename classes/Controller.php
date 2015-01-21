@@ -79,4 +79,12 @@ class Controller
 
         return $markup;
     }
+
+    public function initPageComponents($cmsController, $page)
+    {
+        if (!isset($page->apiBag['staticPage']))
+            return;
+
+        $page->apiBag['staticPage']->initCmsComponents($cmsController);
+    }
 }

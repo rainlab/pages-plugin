@@ -4,6 +4,7 @@ use Cms\Classes\Content;
 use RainLab\Pages\Classes\PageList;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
+use Cms\Classes\ComponentManager;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use ApplicationException;
@@ -283,6 +284,34 @@ class Page extends Content
             $this->markup);
 
         return $this->processedMarkupCache = $markup;
+    }
+
+    /**
+     * Initializes CMS components associated with the page.
+     */
+    public function initCmsComponents($cmsController)
+    {
+        $snippetComponents = Snippet::listPageComponents(
+            $this->getFileName(), 
+            $this->theme,
+            $this->markup
+        );
+
+        $componentManager = ComponentManager::instance();
+        foreach ($snippetComponents as $componentInfo) {
+            // Register components for snippet-based components
+            // if they're not defined yet. This is required because
+            // not all snippet components are registered as components,
+            // but it's safe to register them in render-time.
+            
+            if (!$componentManager->hasComponent($componentInfo['class']))
+                $componentManager->registerComponent($componentInfo['class'], $componentInfo['alias']);
+
+            $cmsController->addComponent(
+                $componentInfo['class'],
+                $componentInfo['alias'],
+                $componentInfo['properties']);
+        }
     }
 
     /**
