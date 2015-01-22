@@ -395,7 +395,7 @@ Partial-based snippets provide simpler functionality and usually are just contai
 
 To create snippet from a partial just enter the snippet code and snippet name in the partial form. 
 
-![image](http://i61.tinypic.com/244ae09.png)
+![image](http://http://i61.tinypic.com/2juurl.png)
 
 The snippet properties are optional and can be defined with the grid control on the partial settings form. The table has the following columns:
 
