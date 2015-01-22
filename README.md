@@ -18,6 +18,20 @@ Optional properties of static pages are **Hidden** and **Hide in navigation**. T
 
 If a static layout contains [placeholders](http://octobercms.com/docs/cms/layouts#placeholders), the static page editor will show tabs for editing the placeholder contents. The plugin automatically detects text and HTML placeholders and displays a corresponding editor for them - the WYSIWYG editor for HTML placeholders and a text editor for text placeholders.
 
+## Snippets
+
+Snippets are elements that can be added by a Static Page, in the rich text editor. They allow to inject complex (and interactive) areas to pages. There are many possible applications and examples of using Snippets:
+
+* Google Maps snippet - outputs a map centered on specific coordinates with predefined zoom factor. That snippet would be great for static pages that explain directions.
+* Universal commenting system - allows visitors to post comments to any static page.
+* Third-party integrations - for example with Yelp or TripAdvisor for displaying extra information on a static page.
+
+Snippets are displayed in the sidebar list on the Static Pages and can be added into a rich editor with a mouse click. Snippets are configurable and have properties that users can manage with the Inspector.
+
+![image](http://i61.tinypic.com/k9gl6f.jpg)
+
+![image](http://i60.tinypic.com/15citzp.png)
+
 ## Managing menus
 
 You can manage menus on the Menus tab of the Static Pages plugin. A website can contain multiple menus, for example the main menu, footer menu, sidebar menu, etc. A theme developer can place menus to a page layout with the `staticMenu` component.
@@ -95,7 +109,6 @@ In the simplest case you could create a [layout](http://octobercms.com/docs/cms/
 ```
 
 ![http://oi58.tinypic.com/6gbnsn.jpg](http://oi58.tinypic.com/6gbnsn.jpg)  {.img-responsive .frame}
-
 
 ##### Static pages
 Include the Static Page [component ](http://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
@@ -363,3 +376,54 @@ $url = URL::to(Str::lower(RouterHelper::normalizeUrl($url)));
 ```
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
+
+#### Snippets
+
+Snippets are elements that can be added by non-technical user to a Static Page, in the rich text editor. They allow to inject complex (and interactive) areas to pages. There are many possible applications and examples of using Snippets:
+
+* Google Maps snippet - outputs a map centered on specific coordinates with predefined zoom factor. That snippet would be great for static pages that explain directions.
+* Universal commenting system - allows visitors to post comments to any static page.
+* Third-party integrations - for example with Yelp or TripAdvisor for displaying extra information on a static page.
+
+Snippets are displayed in the sidebar list on the Static Pages and can be added into a rich editor with a mouse click. Snippets are configurable and have properties that users can manage with the Inspector.
+
+Snippets can be created from partials or programmatically in plugins. Conceptually snippets are similar to CMS components (and technically, components can act as snippets).
+
+###### Snippets created from partials
+
+Partial-based snippets provide simpler functionality and usually are just containers for HTML markup (or markup generated with Twig in a snippet).
+
+To create snippet from a partial just enter the snippet code and snippet name in the partial form. 
+
+![image](http://i61.tinypic.com/244ae09.png)
+
+The snippet properties are optional and can be defined with the grid control on the partial settings form. The table has the following columns:
+
+* Property title - specifies the property title. The property title will be visible to the end user in the snippet inspector popup window. 
+* Property code - specifies the property code. The property code is used for accessing the property values in the partial markup. See the example below. The property code should start with a Latin letter and can contain Latin letters and digits.
+* Type - the property type. Available types are String, Dropdown and Checkbox.
+* Default - the default property value. For Checkbox properties use 0 and 1 values.
+* Options - the option list for the drop-down properties. The option list should have the following format: `key:Value | key2:Value`. The keys represent the internal option value, and values represent the string that users see in the drop-down list. The pipe character separates individual options. Example: `us:US | ca:Canada`. The key is optional, if it's omitted (`US | Canada`), the internal option value will be zero-based integer (0, 1, ...). It's recommended to always use explicit option keys. The keys can contain only Latin letters, digits and characters - and _.
+
+Any property defined in the property list can be accessed within the partial markdown as a usual variable, for example: 
+
+```
+The country name is {{ country }}
+```
+
+In addition, properties can be passed to the partial components using an [external property value](http://octobercms.com/docs/cms/components#external-property-values).
+
+###### Snippets created from components
+
+Any component can be registered as a snippet and be used in Static Pages. To register a snippet, add the `registerPageSnippets()` method to your plugin class in the [registration file](http://octobercms.com/docs/plugin/registration#registration-file). The API for registering a snippet is similar to the one for [registering  components](http://octobercms.com/docs/plugin/registration#component-registration) - the method should return an array with class names in keys and aliases in values:
+
+```
+public function registerPageSnippets()
+{
+    return [
+       '\RainLab\Weather\Components\Weather' => 'weather'
+    ];
+}
+```
+
+A same component can be registered with registerPageSnippets() and  registerComponents() and used in CMS pages and Static Pages.
