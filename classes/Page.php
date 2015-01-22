@@ -54,6 +54,8 @@ class Page extends Content
 
     protected $processedMarkupCache = false;
 
+    protected $processedBlockMarkupCache = [];
+
     /**
      * Creates an instance of the object and associates it with a CMS theme.
      * @param \Cms\Classes\Theme $theme Specifies the theme the object belongs to.
@@ -286,6 +288,19 @@ class Page extends Content
         return $this->processedMarkupCache = $markup;
     }
 
+    public function getProcessedPlaceholderMarkup($placeholderName, $placeholderContents)
+    {
+        if (array_key_exists($placeholderName, $this->processedBlockMarkupCache))
+            return $this->processedBlockMarkupCache[$placeholderName];
+
+        $markup = Snippet::processPageMarkup(
+            $this->getFileName().md5($placeholderName), 
+            $this->theme, 
+            $placeholderContents);
+
+        return $this->processedBlockMarkupCache[$placeholderName] = $markup;
+    }
+
     /**
      * Initializes CMS components associated with the page.
      */
@@ -294,7 +309,7 @@ class Page extends Content
         $snippetComponents = Snippet::listPageComponents(
             $this->getFileName(), 
             $this->theme,
-            $this->markup
+            $this->markup.$this->code
         );
 
         $componentManager = ComponentManager::instance();

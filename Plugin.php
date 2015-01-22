@@ -8,6 +8,7 @@ use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
 use Cms\Classes\Theme;
+use Cms\Classes\Controller as CmsController;
 use RainLab\Pages\Classes\SnippetManager;
 
 class Plugin extends PluginBase
@@ -102,6 +103,17 @@ class Plugin extends PluginBase
 
         Event::listen('cms.page.initComponents', function($controller, $page) {
             Controller::instance()->initPageComponents($controller, $page);
+        });
+
+        Event::listen('cms.block.render', function($blockName, $blockContents) {
+            $page = CmsController::getController()->getPage();
+
+            if (!isset($page->apiBag['staticPage']))
+                return;
+
+            $contents = Controller::instance()->getPlaceholderContents($page, $blockName, $blockContents);
+            if (strlen($contents))
+                return $contents;
         });
 
         Event::listen('pages.menuitem.listTypes', function() {

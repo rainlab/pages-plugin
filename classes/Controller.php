@@ -75,9 +75,15 @@ class Controller
         if (!isset($page->apiBag['staticPage']))
             return;
 
-        $markup = $page->apiBag['staticPage']->getProcessedMarkup();
+        return $page->apiBag['staticPage']->getProcessedMarkup();
+    }
 
-        return $markup;
+    public function getPlaceholderContents($page, $placeholderName, $placeholderContents)
+    {
+        if (!isset($page->apiBag['staticPage']))
+            return;
+
+        return $page->apiBag['staticPage']->getProcessedPlaceholderMarkup($placeholderName, $placeholderContents);
     }
 
     public function initPageComponents($cmsController, $page)

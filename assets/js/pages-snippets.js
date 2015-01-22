@@ -45,10 +45,17 @@
             return
         }
 
-        var $textarea = $('[data-field-name="markup"] [data-control="richeditor"] textarea', $pageForm),
+        var $activeEditorTab = $('.control-tabs.secondary .tab-pane.active', $pageForm),
+            $textarea = $activeEditorTab.find('[data-control="richeditor"] textarea'),
             $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />'),
             componentClass = $sidebarItem.attr('data-component-class'),
             snippetCode = $sidebarItem.data('snippet')
+
+        if (!$textarea.length) {
+            alert('Snippets can only to page Content or HTML placeholders.')
+
+            return
+        }
 
         if (componentClass) {
             $snippetNode.attr({
@@ -60,7 +67,7 @@
             // its code is unique, as it will be used as a component 
             // alias.
 
-            snippetCode = this.generateUniqueComponentSnippetCode(componentClass, snippetCode, $textarea)
+            snippetCode = this.generateUniqueComponentSnippetCode(componentClass, snippetCode, $pageForm)
         }
 
         $snippetNode.attr({
@@ -79,6 +86,17 @@
             redactor.focus.setStart()
 
         current = redactor.selection.getCurrent()
+
+        if (current !== false) {
+            // If the current element doesn't belog to the redactor on the active tab,
+            // exit. A better solution would be inserting the snippet to the top of the
+            // text, but it looks like there's a bug in Redactor - although the redactor 
+            // object ponts to a correct editor on the page, calling redactor.insert.node 
+            // inserts the snippet to an editor on another tab.
+            var $currentParent = $(current).parent()
+            if ($currentParent.length && !$.contains($activeEditorTab.get(0), $currentParent.get(0))) 
+                return
+        }
 
         if (current !== false) {
             // If snippet is inserted into a paragraph, insert it after the paragraph.
@@ -107,15 +125,29 @@
         redactor.code.sync();
     }
 
-    SnippetManager.prototype.generateUniqueComponentSnippetCode = function(componentClass, originalCode, $textarea) {
-        var $codeDom = $('<div>' + $textarea.redactor('code.get') + '</div>'),
-            updatedCode = originalCode,
-            counter = 2
+    SnippetManager.prototype.generateUniqueComponentSnippetCode = function(componentClass, originalCode, $pageForm) {
+        var updatedCode = originalCode,
+            counter = 1,
+            snippetFound = false
 
-        while ($codeDom.find('[data-snippet="'+updatedCode+'"][data-component]').length > 0) {
-            updatedCode = originalCode + counter
-            counter++
-        }
+
+        do {
+            snippetFound = false
+
+            $('[data-control="richeditor"] textarea', $pageForm).each(function(){
+                var $textarea = $(this),
+                    $codeDom = $('<div>' + $textarea.redactor('code.get') + '</div>')
+
+                if ($codeDom.find('[data-snippet="'+updatedCode+'"][data-component]').length > 0) {
+                    snippetFound = true
+                    updatedCode = originalCode + counter
+                    counter++
+
+                    return false
+                }
+            })
+
+        } while (snippetFound)
 
         return updatedCode
     }

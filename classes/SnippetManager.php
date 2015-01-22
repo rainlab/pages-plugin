@@ -67,15 +67,15 @@ class SnippetManager
         // If caching is allowed, and the requested snippet is a partial snippet,
         // try to load the partial name from the cache and initialize the snippet
         // from the partial.
-
-        if (!$componentClass) {
+        
+        if (!strlen($componentClass)) {
             $map = $this->getPartialSnippetMap($theme);
             if (!array_key_exists($code, $map))
                 return null;
 
             $partialName = $map[$code];
             $partial = Partial::loadCached($theme, $partialName);
-            if ($partial)
+            if (!$partial)
                 return null;
 
             $snippet = new Snippet();

@@ -27,6 +27,11 @@ class PlaceholderList
         return null;
     }
 
+    public function __isset($name)
+    {
+        return array_key_exists($name, $this->placeholders);
+    }
+
     public function add($name, $content)
     {
         $this->placeholders[$name] = $content;
