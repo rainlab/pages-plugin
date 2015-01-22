@@ -1,11 +1,11 @@
 <?php namespace RainLab\Pages\Classes;
 
-use RainLab\Pages\Classes\Snippet;
-use System\Classes\PluginManager;
-use System\Classes\SystemException;
-use Cms\Classes\Partial;
 use Cache;
 use Config;
+use Cms\Classes\Partial;
+use System\Classes\PluginManager;
+use System\Classes\SystemException;
+use RainLab\Pages\Classes\Snippet;
 
 /**
  * Returns information about snippets based on partials and components.
@@ -28,8 +28,9 @@ class SnippetManager
      */
     public function listSnippets($theme)
     {
-        if ($this->snippets !== null)
+        if ($this->snippets !== null) {
             return $this->snippets;
+        }
 
         $themeSnippets = $this->listThemeSnippets($theme);
         $componentSnippets = $this->listComponentSnippets();
@@ -67,7 +68,7 @@ class SnippetManager
         // If caching is allowed, and the requested snippet is a partial snippet,
         // try to load the partial name from the cache and initialize the snippet
         // from the partial.
-        
+
         if (!strlen($componentClass)) {
             $map = $this->getPartialSnippetMap($theme);
             if (!array_key_exists($code, $map))
@@ -82,12 +83,14 @@ class SnippetManager
             $snippet->initFromPartial($partial);
 
             return $snippet;
-        } else {
+        }
+        else {
             // If the snippet is a component snippet, initialize it
             // from the component
 
-            if (!class_exists($componentClass))
+            if (!class_exists($componentClass)) {
                 throw new SystemException(sprintf('The snippet component class %s is not found.', $componentClass));
+            }
 
             $snippet = new Snippet();
             $snippet->initFromComponentInfo($componentClass, $code);
@@ -105,8 +108,9 @@ class SnippetManager
         $keys = [self::CACHE_KEY_PARTIAL_MAP, Snippet::CACHE_PAGE_SNIPPET_MAP];
         $keyBase = crc32($theme->getPath());
 
-        foreach ($keys as $key)
+        foreach ($keys as $key) {
             Cache::forget($keyBase.$key);
+        }
     }
 
     /**
@@ -119,18 +123,19 @@ class SnippetManager
         $result = [];
 
         $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
-        
         $cached = Cache::get($key, false);
-        if ($cached !== false && ($cached = @unserialize($cached)) !== false)
+        if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
             return $cached;
+        }
 
         $partials = Partial::listInTheme($theme);
         foreach ($partials as $partial) {
             $viewBag = $partial->getViewBag();
 
             $snippetCode = $viewBag->property('staticPageSnippetCode');
-            if (!strlen($snippetCode))
+            if (!strlen($snippetCode)) {
                 continue;
+            }
 
             $result[$snippetCode] = $partial->getFileName();
         }
@@ -148,6 +153,7 @@ class SnippetManager
     protected function listThemeSnippets($theme)
     {
         $result = [];
+
         $partials = Partial::listInTheme($theme, true);
         foreach ($partials as $partial) {
             $viewBag = $partial->getViewBag();
@@ -168,9 +174,10 @@ class SnippetManager
      */
     protected function listComponentSnippets()
     {
+        $result = [];
+
         $pluginManager = PluginManager::instance();
         $plugins = $pluginManager->getPlugins();
-        $result = [];
 
         foreach ($plugins as $id => $plugin) {
             if (!method_exists($plugin, 'registerPageSnippets'))
