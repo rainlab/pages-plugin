@@ -147,6 +147,7 @@ class SnippetManager
      */
     protected function listThemeSnippets($theme)
     {
+        $result = [];
         $partials = Partial::listInTheme($theme, true);
         foreach ($partials as $partial) {
             $viewBag = $partial->getViewBag();
