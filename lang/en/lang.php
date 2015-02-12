@@ -13,7 +13,11 @@ return [
         'url_not_unique' => 'This URL is already used by another page.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Layouts not found',
-        'saved' => 'The page has been successfully saved.'
+        'saved' => 'The page has been successfully saved.',
+        'manage_pages' => 'Manage the static pages',
+        'manage_menus' => 'Manage the static menus',
+        'access_snippets' => 'Manage snippets',
+        'manage_content' => 'Manage content'
     ],
     'menu' => [
         'menu_label' => 'Menus',
