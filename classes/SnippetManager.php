@@ -4,7 +4,7 @@ use Cache;
 use Config;
 use Cms\Classes\Partial;
 use System\Classes\PluginManager;
-use System\Classes\SystemException;
+use SystemException;
 use RainLab\Pages\Classes\Snippet;
 
 /**

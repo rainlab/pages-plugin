@@ -1,12 +1,12 @@
 <?php namespace RainLab\Pages\Classes;
 
-use RainLab\Pages\Classes\Page;
 use File;
-use DirectoryIterator;
-use ApplicationException;
-use October\Rain\Support\Yaml;
-use System\Classes\SystemException;
+use Yaml;
+use RainLab\Pages\Classes\Page;
+use SystemException;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
+use ApplicationException;
+use DirectoryIterator;
 
 /**
  * Contains a list of page placeholders.

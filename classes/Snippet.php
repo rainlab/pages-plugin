@@ -4,10 +4,10 @@ use Cms\Classes\Partial;
 use Config;
 use Cache;
 use DOMDocument;
-use System\Classes\ApplicationException;
+use ApplicationException;
 use Cms\Classes\ComponentHelpers;
 use Cms\Classes\Controller as CmsController;
-use October\Rain\Support\ValidationException;
+use ValidationException;
 
 /**
  * Represents a static page snippet.

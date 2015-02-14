@@ -1,26 +1,26 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Cms\Classes\Theme;
-use October\Rain\Support\Yaml;
-use System\Classes\SystemException;
-use Cms\Classes\CmsObject;
-use RainLab\Pages\Classes\MenuItem;
-use RainLab\Pages\Classes\MenuItemReference;
-use October\Rain\Support\ValidationException;
-use ApplicationException;
-use DirectoryIterator;
-use Validator;
-use Exception;
+use URL;
 use File;
 use Lang;
+use Yaml;
+use Event;
 use Config;
 use Request;
-use Event;
-use URL;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
+use Validator;
+use RainLab\Pages\Classes\MenuItem;
+use RainLab\Pages\Classes\MenuItemReference;
+use Cms\Classes\Theme;
+use Cms\Classes\CmsObject;
+use Cms\Classes\Controller as CmsController;
+use SystemException;
+use ValidationException;
+use ApplicationException;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
-use Cms\Classes\Controller as CmsController;
+use Symfony\Component\Yaml\Dumper as YamlDumper;
+use DirectoryIterator;
+use Exception;
 
 /**
  * Represents a front-end menu.

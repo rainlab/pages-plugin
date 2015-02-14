@@ -65,7 +65,7 @@ class MenuItems extends FormWidgetBase
 
         $this->vars['emptyItem'] = $emptyItem;
 
-        $widgetConfig = $this->makeConfig('@/plugins/rainlab/pages/classes/menuitem/fields.yaml');
+        $widgetConfig = $this->makeConfig('~/plugins/rainlab/pages/classes/menuitem/fields.yaml');
         $widgetConfig->model = $menuItem;
         $widgetConfig->alias = $this->alias.'MenuItem';
 

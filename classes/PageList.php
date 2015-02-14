@@ -1,12 +1,12 @@
 <?php namespace RainLab\Pages\Classes;
 
-use RainLab\Pages\Classes\Page;
+use Yaml;
 use File;
-use DirectoryIterator;
 use ApplicationException;
-use October\Rain\Support\Yaml;
-use System\Classes\SystemException;
+use RainLab\Pages\Classes\Page;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
+use SystemException;
+use DirectoryIterator;
 
 /**
  * The page list class reads and manages the static page hierarchy.
@@ -53,9 +53,14 @@ class PageList
             $fileName = null;
             $urlList = [];
 
-            $cacheable = Config::get('cms.enableRoutesCache') && in_array(Config::get('cache.driver'), ['apc', 'memcached', 'redis', 'array']);
-            if ($cacheable)
+            $cacheable = Config::get('cms.enableRoutesCache') && in_array(
+                Cache::getDefaultDriver(),
+                ['apc', 'memcached', 'redis', 'array']
+            );
+
+            if ($cacheable) {
                 $fileName = $this->getCachedUrlFileName($url, $urlList);
+            }
 
             /*
              * Find the page by URL and cache the route

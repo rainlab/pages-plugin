@@ -12,7 +12,7 @@ use BackendMenu;
 use Cms\Classes\Theme;
 use Backend\Classes\Controller;
 use Backend\Classes\WidgetManager;
-use System\Classes\ApplicationException;
+use ApplicationException;
 use Backend\Traits\InspectableContainer;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
@@ -354,9 +354,9 @@ class Index extends Controller
     protected function makeObjectFormWidget($type, $object)
     {
         $formConfigs = [
-            'page' => '@/plugins/rainlab/pages/classes/page/fields.yaml',
-            'menu' => '@/plugins/rainlab/pages/classes/menu/fields.yaml',
-            'content' => '@/plugins/rainlab/pages/classes/content/fields.yaml'
+            'page' => '~/plugins/rainlab/pages/classes/page/fields.yaml',
+            'menu' => '~/plugins/rainlab/pages/classes/menu/fields.yaml',
+            'content' => '~/plugins/rainlab/pages/classes/content/fields.yaml'
         ];
 
         if (!array_key_exists($type, $formConfigs)) {
