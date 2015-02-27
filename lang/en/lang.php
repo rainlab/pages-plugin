@@ -53,7 +53,13 @@ return [
         'url_required' => 'The URL is required',
         'cms_page_required' => 'Please select a CMS page',
         'code' => 'Code',
-        'code_comment' => 'Enter the menu item code if you want to access it with the API.'
+        'code_comment' => 'Enter the menu item code if you want to access it with the API.',
+        'target' => 'Target',
+        'target_comment' => 'The target attribute specifies where to open the linked document.',
+        'target_option_blank' => 'Opens the linked document in a new window or tab',
+        'target_option_self' => 'Opens the linked document in the same frame as it was clicked (this is default)',
+        'target_option_parent' => 'Opens the linked document in the parent frame',
+        'target_option_top' => 'Opens the linked document in the full body of the window'
     ],
     'content' => [
         'menu_label' => 'Content',

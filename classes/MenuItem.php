@@ -53,6 +53,11 @@ class MenuItem
     public $code;
 
     /**
+     * @var string Specifies the menu item target.
+     */
+    public $target;
+
+    /**
      * @var string Specifies the object identifier the item refers to.
      * The identifier could be the database identifier or an object code.
      */
@@ -79,13 +84,14 @@ class MenuItem
         'type',
         'url',
         'code',
+        'target',
         'reference',
         'cmsPage',
         'replace'
     ];
 
     /**
-     * Initializes a menu item from a data array. 
+     * Initializes a menu item from a data array.
      * @param array $items Specifies the menu item data.
      * @return Returns an array of the MenuItem objects.
      */

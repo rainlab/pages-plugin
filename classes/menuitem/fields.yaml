@@ -38,3 +38,13 @@ fields:
     code:
         label: rainlab.pages::lang.menuitem.code
         comment: rainlab.pages::lang.menuitem.code_comment
+
+    target:
+        label: rainlab.pages::lang.menuitem.target
+        comment: rainlab.pages::lang.menuitem.target_comment
+        type: dropdown
+        options:
+            _blank: rainlab.pages::lang.menuitem.target_option_blank
+            _self: rainlab.pages::lang.menuitem.target_option_self
+            _parent: rainlab.pages::lang.menuitem.target_option_parent
+            _top: rainlab.pages::lang.menuitem.target_option_top

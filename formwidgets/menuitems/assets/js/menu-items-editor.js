@@ -1,5 +1,5 @@
 /*
- * The menu item editor. Provides tools for managing the 
+ * The menu item editor. Provides tools for managing the
  * menu items.
  */
 +function ($) { "use strict";
@@ -278,7 +278,8 @@
             basicProperties = {
                 'title': 1,
                 'type': 1,
-                'code': 1
+                'code': 1,
+                'target': 1
             },
             typeInfoPropertyMap = {
                 reference: 'references',
@@ -334,7 +335,7 @@
                     return
 
                 var typeInfoProperty = typeInfoPropertyMap[property] !== undefined ? typeInfoPropertyMap[property] : property
-                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false) 
+                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false)
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
