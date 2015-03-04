@@ -18,7 +18,7 @@ class MenuItems extends FormWidgetBase
     /**
      * {@inheritDoc}
      */
-    public $defaultAlias = 'menuitems';
+    protected $defaultAlias = 'menuitems';
 
     public $addSubitemLabel = 'rainlab.pages::lang.menu.add_subitem';
 

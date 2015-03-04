@@ -1,13 +1,14 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Cms\Classes\Partial;
-use Config;
+use Lang;
 use Cache;
-use DOMDocument;
+use Config;
 use ApplicationException;
+use Cms\Classes\Partial;
 use Cms\Classes\ComponentHelpers;
 use Cms\Classes\Controller as CmsController;
 use ValidationException;
+use DOMDocument;
 
 /**
  * Represents a static page snippet.
@@ -145,7 +146,7 @@ class Snippet
     {
         $result = [];
 
-        foreach ($properties as $propertyInfo=>$value) {
+        foreach ($properties as $propertyInfo => $value) {
             $qualifiers = explode('|', $propertyInfo);
 
             if (($cnt = count($qualifiers)) < 2) {
@@ -169,7 +170,8 @@ class Snippet
 
                     $result[$propertyCode]['options'][$qualifiers[2]] = $value;
                 }
-            } else {
+            }
+            else {
                 $result[$propertyCode][$paramName] = $value;
             }
         }
@@ -201,7 +203,8 @@ class Snippet
 
                 $partialName = $partialSnippetMap[$snippetCode];
                 $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
-            } else {
+            }
+            else {
                 $generatedMarkup = $controller->renderComponent($snippetCode);
             }
 
@@ -224,8 +227,7 @@ class Snippet
 
         $result = [];
         foreach ($map as $snippetDeclaration => $snippetInfo) {
-            if (!isset($snippetInfo['component']))
-                continue;
+            if (!isset($snippetInfo['component'])) continue;
 
             $result[] = [
                 'class' => $snippetInfo['component'],
@@ -255,8 +257,7 @@ class Snippet
                     }
                 }
 
-                if (!$rowHasData)
-                    continue;
+                if (!$rowHasData) continue;
 
                 $properties['staticPageSnippetProperties['.$row['property'].'|type]'] = $row['type'];
                 $properties['staticPageSnippetProperties['.$row['property'].'|title]'] = $row['title'];
@@ -267,15 +268,17 @@ class Snippet
                 if (isset($row['options']) && strlen($row['options'])) {
                     $options = self::dropDownOptionsToArray($row['options']);
 
-                    foreach ($options as $index=>$option)
+                    foreach ($options as $index => $option) {
                         $properties['staticPageSnippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
+                    }
                 }
             }
 
             unset($settingsArray['viewBag']['staticPageSnippetProperties']);
 
-            foreach ($properties as $name=>$value)
+            foreach ($properties as $name => $value) {
                 $settingsArray['viewBag'][$name] = $value;
+            }
         }
 
         return $settingsArray;
@@ -303,7 +306,7 @@ class Snippet
         $options = explode('|', $optionsString);
 
         $result = [];
-        foreach ($options as $index=>$optionStr) {
+        foreach ($options as $index => $optionStr) {
             $parts = explode(':', $optionStr, 2);
 
             if (count($parts) > 1 ) {
@@ -311,7 +314,7 @@ class Snippet
 
                 if (strlen($key)) {
                     if (!preg_match('/^[0-9a-z-_]+$/i', $key))
-                        throw new ValidationException(['staticPageSnippetProperties' =>sprintf(trans('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                        throw new ValidationException(['staticPageSnippetProperties' =>sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
 
                     $result[$key] = trim($parts[1]);
                 } else
@@ -326,8 +329,9 @@ class Snippet
     protected static function dropDownOptionsToString($optionsArray)
     {
         $result = [];
-        foreach ($optionsArray as $optionIndex=>$optionValue)
+        foreach ($optionsArray as $optionIndex => $optionValue) {
             $result[] = $optionIndex.':'.$optionValue;
+        }
 
         return implode(' | ', $result);
     }
@@ -349,7 +353,7 @@ class Snippet
             'span' => 'left'
         ];
 
-        $formWidget->config->tabs['fields']['viewBag[staticPageSnippetCode]'] = $fieldConfig;
+        $formWidget->tabs['fields']['viewBag[staticPageSnippetCode]'] = $fieldConfig;
 
         /*
          * Snippet description field
@@ -363,7 +367,7 @@ class Snippet
             'span' => 'right'
         ];
 
-        $formWidget->config->tabs['fields']['viewBag[staticPageSnippetName]'] = $fieldConfig;
+        $formWidget->tabs['fields']['viewBag[staticPageSnippetName]'] = $fieldConfig;
 
         /*
          * Snippet properties field
@@ -394,7 +398,7 @@ class Snippet
                         'regex' => [
                             'pattern' => '^[a-z][a-z0-9]*$',
                             'modifiers' => 'i',
-                            'message' => trans('rainlab.pages::lang.snippet.property_format_error')
+                            'message' => Lang::get('rainlab.pages::lang.snippet.property_format_error')
                         ]
                     ]
                 ],
@@ -421,7 +425,7 @@ class Snippet
             ]
         ];
 
-       $formWidget->config->tabs['fields']['viewBag[staticPageSnippetProperties]'] = $fieldConfig;
+       $formWidget->tabs['fields']['viewBag[staticPageSnippetProperties]'] = $fieldConfig;
     }
 
     protected static function extractSnippetsFromMarkup($markup, $theme)
@@ -431,8 +435,9 @@ class Snippet
         if (preg_match_all('/\<figure\s+[^\>]+\>[^\<]*\<\/figure\>/i', $markup, $matches)) {
             foreach ($matches[0] as $snippetDeclaration) {
                 $nameMatch = [];
-                if (!preg_match('/data\-snippet\s*=\s*"([^"]+)"/', $snippetDeclaration, $nameMatch))
+                if (!preg_match('/data\-snippet\s*=\s*"([^"]+)"/', $snippetDeclaration, $nameMatch)) {
                     continue;
+                }
 
                 $snippetCode = $nameMatch[1];
 
@@ -440,8 +445,9 @@ class Snippet
 
                 $propertyMatches = [];
                 if (preg_match_all('/data\-property-(?<property>[^=]+)\s*=\s*\"(?<value>[^\"]+)\"/i', $snippetDeclaration, $propertyMatches)) {
-                    foreach ($propertyMatches['property'] as $index=>$propertyName)
+                    foreach ($propertyMatches['property'] as $index => $propertyName) {
                         $properties[$propertyName] = $propertyMatches['value'][$index];
+                    }
                 }
 
                 $componentMatch = [];
@@ -466,8 +472,9 @@ class Snippet
 
     protected static function extractSnippetsFromMarkupCached($theme, $pageName, $markup)
     {
-        if (array_key_exists($pageName, self::$pageSnippetMap))
+        if (array_key_exists($pageName, self::$pageSnippetMap)) {
             return self::$pageSnippetMap[$pageName];
+        }
 
         $key = crc32($theme->getPath()).self::CACHE_PAGE_SNIPPET_MAP;
 
@@ -475,8 +482,9 @@ class Snippet
         $cached = Cache::get($key, false);
 
         if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
-            if (array_key_exists($pageName, $cached))
+            if (array_key_exists($pageName, $cached)) {
                 $map = $cached[$pageName];
+            }
         }
 
         if (!is_array($map)) {
@@ -504,8 +512,9 @@ class Snippet
     protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
     {
         $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
-        if (!$snippet)
-            throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
+        if (!$snippet) {
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.snippet.not_found', ['code'=>$snippetCode]));
+        }
 
         $properties = array_change_key_case($properties);
         $snippetProperties = $snippet->getProperties();
@@ -514,9 +523,11 @@ class Snippet
             $lowercaseCode = strtolower($propertyCode);
 
             if (!array_key_exists($lowercaseCode, $properties)) {
-                if (array_key_exists('default', $propertyInfo))
+                if (array_key_exists('default', $propertyInfo)) {
                     $properties[$propertyCode] = $propertyInfo['default'];
-            } else {
+                }
+            }
+            else {
                 $markupPropertyInfo = $properties[$lowercaseCode];
                 unset($properties[$lowercaseCode]);
                 $properties[$propertyCode] = $markupPropertyInfo;

@@ -6,3 +6,4 @@
 1.0.6: Minor updates to the internal API.
 1.0.7: Added the Snippets feature.
 1.0.8: Minor improvements to the code.
+1.0.9: Fixes issue where Snippet tab is missing from the Partials form.
