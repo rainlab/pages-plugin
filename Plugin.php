@@ -13,14 +13,14 @@ use RainLab\Pages\Classes\SnippetManager;
 
 class Plugin extends PluginBase
 {
-
     public function pluginDetails()
     {
         return [
             'name'        => 'rainlab.pages::lang.plugin.name',
             'description' => 'rainlab.pages::lang.plugin.description',
             'author'      => 'Alexey Bobkov, Samuel Georges',
-            'icon'        => 'icon-files-o'
+            'icon'        => 'icon-files-o',
+            'homepage'    => 'https://github.com/rainlab/pages-plugin'
         ];
     }
 
@@ -59,28 +59,28 @@ class Plugin extends PluginBase
                         'icon'        => 'icon-files-o',
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'pages'],
-                        'permissions' => ['rainlab.pages.manage_pages'],
+                        'permissions' => ['rainlab.pages.manage_pages']
                     ],
                     'menus' => [
                         'label'       => 'rainlab.pages::lang.menu.menu_label',
                         'icon'        => 'icon-sitemap',
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'menus'],
-                        'permissions' => ['rainlab.pages.manage_menus'],
+                        'permissions' => ['rainlab.pages.manage_menus']
                     ],
                     'content' => [
                         'label'       => 'rainlab.pages::lang.content.menu_label',
                         'icon'        => 'icon-file-text-o',
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'content'],
-                        'permissions' => ['rainlab.pages.manage_content'],
+                        'permissions' => ['rainlab.pages.manage_content']
                     ],
                     'snippets' => [
                         'label'       => 'rainlab.pages::lang.snippet.menu_label',
                         'icon'        => 'icon-newspaper-o',
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'snippet'],
-                        'permissions' => ['rainlab.pages.access_snippets'],
+                        'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
 
