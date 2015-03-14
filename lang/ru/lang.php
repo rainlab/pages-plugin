@@ -1,7 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'Страницы',
+    'plugin' => [
+        'name' => 'Страницы',
+        'description' => 'Pages & menus features.',
+    ],
     'page' => [
         'menu_label' => 'Страницы',
         'delete_confirmation' => 'Вы действительно хотите удалить выбранные страницы? Это также удалит имеющиеся подстраницы.',

@@ -1,7 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'صفحات',
+    'plugin' => [
+        'name' => 'صفحات',
+        'description' => 'Pages & menus features.',
+    ],
     'page' => [
         'menu_label' => 'صفحات',
         'delete_confirmation' => 'آیا از حذف صفحات انتخاب شده اطمینان دارید؟ اگر صفحات دارای زیر صفحه باشند آنها نیز حذف خواهند شد.',

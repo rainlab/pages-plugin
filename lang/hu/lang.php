@@ -1,7 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'Lapok',
+    'plugin' => [
+        'name' => 'Lapok',
+        'description' => 'Pages & menus features.',
+    ],
     'page' => [
         'menu_label' => 'Lapok',
         'delete_confirmation' => 'Valóban törölni akarja a bejelölt lapokat? Ez az allapokat is törölni fogja, ha van valamilyen.',

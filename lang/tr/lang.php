@@ -1,7 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'Sayfalar',
+    'plugin' => [
+        'name' => 'Sayfalar',
+        'description' => 'Pages & menus features.',
+    ],
     'page' => [
         'menu_label' => 'Sayfalar',
         'delete_confirmation' => 'Seçili sayfaları silmek istiyor musunuz? Alt sayfalar da silinecektir.',

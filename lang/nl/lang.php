@@ -1,8 +1,10 @@
 <?php
 
 return [
-    'plugin_name' => 'Pages',
-    
+    'plugin' => [
+        'name' => 'Pages',
+        'description' => 'Pages & menus features.',
+    ],
     'page' => [
         'menu_label' => 'Pagina\'s',
         'delete_confirmation' => 'Bent u zeker dat u de geselecteerde pagina\'s wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
