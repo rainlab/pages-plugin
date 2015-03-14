@@ -1,3 +1,7 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
 fields:
     fileName:
         label: cms::lang.editor.filename

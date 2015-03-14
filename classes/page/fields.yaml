@@ -1,3 +1,7 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
 fields:
     viewBag[title]:
         span: left
@@ -10,11 +14,10 @@ fields:
         span: right
         placeholder: /
         label: rainlab.pages::lang.editor.url
-        attributes:
-            data-input-preset: 'input[name="viewBag[title]"]'
-            data-input-preset-type: url
-            data-input-preset-closest-parent: form
-            data-input-preset-prefix-input: 'input[data-parent-url]'
+        preset:
+            field: viewBag[title]
+            type: url
+            prefixInput: input[data-parent-url]
 
     toolbar:
         type: partial

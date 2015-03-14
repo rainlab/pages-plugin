@@ -369,7 +369,7 @@ if (!$page)
     return; 
 
 // Generate the URL 
-$url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug], false);
+$url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug]);
 
 $url = URL::to(Str::lower(RouterHelper::normalizeUrl($url)));
 

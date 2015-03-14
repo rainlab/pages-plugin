@@ -281,9 +281,10 @@ class Page extends Content
             return $this->processedMarkupCache;
 
         $markup = Snippet::processPageMarkup(
-            $this->getFileName(), 
-            $this->theme, 
-            $this->markup);
+            $this->getFileName(),
+            $this->theme,
+            $this->markup
+        );
 
         return $this->processedMarkupCache = $markup;
     }
@@ -294,9 +295,10 @@ class Page extends Content
             return $this->processedBlockMarkupCache[$placeholderName];
 
         $markup = Snippet::processPageMarkup(
-            $this->getFileName().md5($placeholderName), 
-            $this->theme, 
-            $placeholderContents);
+            $this->getFileName().md5($placeholderName),
+            $this->theme,
+            $placeholderContents
+        );
 
         return $this->processedBlockMarkupCache[$placeholderName] = $markup;
     }
@@ -307,7 +309,7 @@ class Page extends Content
     public function initCmsComponents($cmsController)
     {
         $snippetComponents = Snippet::listPageComponents(
-            $this->getFileName(), 
+            $this->getFileName(),
             $this->theme,
             $this->markup.$this->code
         );
@@ -325,7 +327,8 @@ class Page extends Content
             $cmsController->addComponent(
                 $componentInfo['class'],
                 $componentInfo['alias'],
-                $componentInfo['properties']);
+                $componentInfo['properties']
+            );
         }
     }
 
@@ -344,8 +347,9 @@ class Page extends Content
                 if (
                     $existingPage->getBaseFileName() !== $this->getBaseFileName() &&
                     strtolower($existingPage->getViewBag()->property('url')) == $value
-                )
+                ) {
                     return false;
+                }
             }
 
             return true;
@@ -373,13 +377,15 @@ class Page extends Content
                 $pageName = $pageInfo->page->getViewBag()->property('title');
                 $fileName = $pageInfo->page->getBaseFileName();
 
-                if (!$pageInfo->subpages)
+                if (!$pageInfo->subpages) {
                     $result[$fileName] = $pageName;
-                else
+                }
+                else {
                     $result[$fileName] = [
                         'title' => $pageName,
                         'items' => $iterator($pageInfo->subpages)
                     ];
+                }
             }
 
             return $result;

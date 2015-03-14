@@ -559,4 +559,17 @@ class Index extends Controller
             ])
         ];
     }
+
+    /**
+     * Replaces Windows style (/r/n) line endings with unix style (/n)
+     * line endings.
+     * @param string $markup The markup to convert to unix style endings
+     * @return string
+     */
+    protected function convertLineEndings($markup)
+    {
+        $markup = str_replace("\r\n", "\n", $markup);
+        $markup = str_replace("\r", "\n", $markup);
+        return $markup;
+    }
 }

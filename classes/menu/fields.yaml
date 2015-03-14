@@ -1,3 +1,7 @@
+# ===================================
+#  Field Definitions
+# ===================================
+
 fields:
     name:
         span: left
@@ -10,10 +14,9 @@ fields:
         span: right
         placeholder: rainlab.pages::lang.menu.new_code
         label: rainlab.pages::lang.menu.code
-        attributes:
-            data-input-preset: 'input[name="name"]'
-            data-input-preset-type: file
-            data-input-preset-closest-parent: form
+        preset:
+            field: name
+            type: file
 
     toolbar:
         type: partial
