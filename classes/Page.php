@@ -70,7 +70,7 @@ class Page extends Content
             'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
         ];
 
-        $this->placeholders = new PlaceholderList();
+        $this->placeholders = new PlaceholderList;
     }
 
     /**
@@ -230,22 +230,22 @@ class Page extends Content
 
         $result = [];
         $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
+
         foreach ($bodyNode as $node) {
-            if ($node instanceof \Cms\Twig\PlaceholderNode) {
+            if (!$node instanceof \Cms\Twig\PlaceholderNode) continue;
 
-                $title = $node->hasAttribute('title') ? trim($node->getAttribute('title')) : null;
-                if (!strlen($title))
-                    $title = $node->getAttribute('name');
+            $title = $node->hasAttribute('title') ? trim($node->getAttribute('title')) : null;
+            if (!strlen($title))
+                $title = $node->getAttribute('name');
 
-                $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
+            $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
 
-                $placeholderInfo = [
-                    'title' => $title,
-                    'type' => $type ?: 'html'
-                ];
+            $placeholderInfo = [
+                'title' => $title,
+                'type' => $type ?: 'html'
+            ];
 
-                $result[$node->getAttribute('name')] = $placeholderInfo;
-            }
+            $result[$node->getAttribute('name')] = $placeholderInfo;
         }
 
         return $result;
@@ -266,10 +266,10 @@ class Page extends Content
 
         $result = [];
         foreach ($bodyNode as $node) {
-            if ($node instanceof \Cms\Twig\PutNode) {
-                $bodyNode = $node->getNode('body');
-                $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
-            }
+            if (!$node instanceof \Cms\Twig\PutNode) continue;
+
+            $bodyNode = $node->getNode('body');
+            $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
         }
 
         return $result;

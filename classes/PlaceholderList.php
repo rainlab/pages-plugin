@@ -1,13 +1,5 @@
 <?php namespace RainLab\Pages\Classes;
 
-use File;
-use Yaml;
-use RainLab\Pages\Classes\Page;
-use SystemException;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
-use ApplicationException;
-use DirectoryIterator;
-
 /**
  * Contains a list of page placeholders.
  * Objects of this class are used in the Editor internally.
@@ -21,8 +13,9 @@ class PlaceholderList
 
     public function __get($name)
     {
-        if (array_key_exists($name, $this->placeholders))
+        if (array_key_exists($name, $this->placeholders)) {
             return $this->placeholders[$name];
+        }
 
         return null;
     }

@@ -405,7 +405,7 @@ class Index extends Controller
                 $fieldConfig['wordWrap'] = '80';
             }
 
-            $formWidget->config->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
+            $formWidget->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
         }
 
         $placeholderValues = $page->getPlaceholderValues();
