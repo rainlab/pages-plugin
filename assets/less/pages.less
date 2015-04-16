@@ -164,19 +164,6 @@
 
 .redactor-editor {
     [data-snippet] {
-        display: block;
-        margin: 0 0 15px 0;
-        padding: 10px 10px 10px 36px;
-        border: 2px dotted #bdc3c7;
-        background: white;
-        position: relative;
-        cursor: pointer;
-        color: #6c7071;
-        font: 15px @font-family-sans-serif;
-        font-weight: 500;
-        line-height: 150%;
-        .border-radius(3px);
-
         &:before {
             content: attr(data-name);
         }
@@ -198,12 +185,6 @@
             top: 13px;
             content: ' ';
             .animation(spin 1s linear infinite);
-        }
-
-        &:focus, &.inspector-open {
-            border-color: #2581b8;
-            border-style: solid;
-            outline: none;
         }
     }
 }

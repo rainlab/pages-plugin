@@ -77,12 +77,12 @@
         var popup = $form.data('oc.popup'),
             self = this
 
-        $(popup.$target).on('click', 'button[data-action=reload]', function(){
+        $(popup.$container).on('click', 'button[data-action=reload]', function(){
             popup.hide()
             self.reloadForm($form)
         })
 
-        $(popup.$target).on('click', 'button[data-action=save]', function(){
+        $(popup.$container).on('click', 'button[data-action=save]', function(){
             popup.hide()
 
             $('input[name=objectForceSave]', $form).val(1)

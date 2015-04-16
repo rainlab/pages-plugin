@@ -26,10 +26,6 @@
             self.editorKeyDown(ev, originalEv, $editor, $textarea)
         })
 
-        $(this.$masterTabs).on('enter.oc.richeditor', '.redactor-box textarea', function(ev, originalEv, $editor, $textarea){
-            self.editorKeyDown(ev, originalEv, $editor, $textarea)
-        })
-
         $(document).on('click', '[data-snippet]', function(){
             $(this).inspector()
             return false
@@ -47,12 +43,13 @@
 
         var $activeEditorTab = $('.control-tabs.secondary .tab-pane.active', $pageForm),
             $textarea = $activeEditorTab.find('[data-control="richeditor"] textarea'),
+            $richeditorNode = $textarea.closest('[data-control="richeditor"]'),
             $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />'),
             componentClass = $sidebarItem.attr('data-component-class'),
             snippetCode = $sidebarItem.data('snippet')
 
         if (!$textarea.length) {
-            alert('Snippets can only to page Content or HTML placeholders.')
+            alert('Snippets can only be added to page Content or HTML placeholders.')
 
             return
         }
@@ -73,14 +70,14 @@
         $snippetNode.attr({
             'data-snippet': snippetCode,
             'data-name': $sidebarItem.data('snippet-name'),
-            'tabindex': '0'
+            'tabindex': '0',
+            'data-ui-block': 'true'
         })
 
         $snippetNode.get(0).contentEditable = false
 
         var redactor = $textarea.redactor('core.getObject'),
-            current = redactor.selection.getCurrent(),
-            inserted = false
+            current = redactor.selection.getCurrent()
 
         if (current === false)
             redactor.focus.setStart()
@@ -98,31 +95,7 @@
                 return
         }
 
-        if (current !== false) {
-            // If snippet is inserted into a paragraph, insert it after the paragraph.
-            var $paragraph = $(current).closest('p')
-            if ($paragraph.length > 0) {
-                redactor.caret.setAfter($paragraph.get(0))
-
-                // If the paragraph is empty, remove it.
-                if ($.trim($paragraph.text()).length == 0)
-                    $paragraph.remove()
-            } else {
-                // If snippet is inserted into another snippet, insert it after the snippet.
-                var $closestSnippet = $(current).closest('[data-snippet]')
-                if ($closestSnippet.length > 0) {
-                    $snippetNode.insertBefore($closestSnippet.get(0))
-                    inserted = true
-                }
-            }
-        }
-
-        if (!inserted)
-            redactor.insert.node($snippetNode)
-
-        $snippetNode.focus()
-
-        redactor.code.sync();
+        $richeditorNode.richEditor('insertUiBlock', $snippetNode)
     }
 
     SnippetManager.prototype.generateUniqueComponentSnippetCode = function(componentClass, originalCode, $pageForm) {
@@ -176,7 +149,8 @@
             $snippet.attr({
                 'data-name': 'Loading...',
                 'tabindex': '0',
-                'data-inspector-css-class': 'hero'
+                'data-inspector-css-class': 'hero',
+                'data-ui-block': true
             })
 
             if (componentClass)
@@ -208,7 +182,7 @@
         $('[data-snippet]', $domTree).each(function(){
             var $snippet = $(this)
 
-            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty')
+            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty data-ui-block')
 
             if (!$snippet.attr('class'))
                 $snippet.removeAttr('class')
@@ -226,82 +200,16 @@
         if (originalEv.target && $(originalEv.target).attr('data-snippet') !== undefined) {
             this.snippetKeyDown(originalEv, originalEv.target)
 
-            originalEv.preventDefault()
             return
-        }
-
-        switch (originalEv.which) {
-            case 38:
-                // Up arrow
-                var block = redactor.selection.getBlock()
-                if (block)
-                    this.handleSnippetCaretIn($(block).prev(), redactor)
-            break
-            case 40:
-                // Down arrow
-                var block = redactor.selection.getBlock()
-                if (block)
-                    this.handleSnippetCaretIn($(block).next(), redactor)
-            break
-        }
-    }
-
-    SnippetManager.prototype.handleSnippetCaretIn = function($block, redactor) {
-        if ($block.attr('data-snippet') !== undefined) {
-            $block.focus()
-            redactor.selection.remove()
-
-            return true
-        }
-
-        return false
-    }
-
-    SnippetManager.prototype.focusSnippetOrText = function(redactor, $block, gotoStart) {
-        if ($block.length > 0) {
-            if (!this.handleSnippetCaretIn($block, redactor)) {
-                if (gotoStart)
-                    redactor.caret.setStart($block.get(0))
-                else
-                    redactor.caret.setEnd($block.get(0))
-            }
         }
     }
 
     SnippetManager.prototype.snippetKeyDown = function(ev, snippet) {
-        if (ev.which == 40 || ev.which == 38 || ev.which == 13 || ev.which == 8 || ev.which == 32) {
+        if (ev.which == 32) {
             var $textarea = $(snippet).closest('.redactor-box').find('textarea'),
                 redactor = $textarea.redactor('core.getObject')
 
             switch (ev.which) {
-                case 40:
-                    // Down arrow
-                    this.focusSnippetOrText(redactor, $(snippet).next(), true)
-                break
-                case 38:
-                    // Up arrow
-                    this.focusSnippetOrText(redactor, $(snippet).prev(), false)
-                break
-                case 13:
-                    // Enter key
-                    var $paragraph = $('<p><br/></p>')
-                    $paragraph.insertAfter(snippet)
-                    redactor.caret.setStart($paragraph.get(0))
-                break
-                case 8:
-                    // Backspace key
-                    var $nextFocus = $(snippet).next(),
-                        gotoStart = true
-
-                    if ($nextFocus.length == 0) {
-                        $nextFocus = $(snippet).prev()
-                        gotoStart = false
-                    }
-
-                    this.focusSnippetOrText(redactor, $nextFocus, gotoStart)
-
-                    $(snippet).remove()
-                break
                 case 32: 
                     // Space key
                     $(snippet).inspector()

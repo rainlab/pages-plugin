@@ -72,7 +72,7 @@ class Index extends Controller
         $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
 
         $this->bodyClass = 'compact-container side-panel-not-fixed';
-        $this->pageTitle = 'rainlab.pages::lang.plugin_name';
+        $this->pageTitle = 'rainlab.pages::lang.plugin.name';
         $this->pageTitleTemplate = '%s Pages';
     }
 
