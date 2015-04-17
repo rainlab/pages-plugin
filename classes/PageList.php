@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Yaml;
+use Lang;
 use File;
 use ApplicationException;
 use RainLab\Pages\Classes\Page;
@@ -136,8 +137,9 @@ class PageList
                     }
                 }
 
-                if ($pageObject === null)
+                if ($pageObject === null) {
                     continue;
+                }
 
                 $result[] = (object)[
                     'page' => $pageObject,
@@ -167,12 +169,14 @@ class PageList
         $filePath = $this->getConfigFilePath();
         $dirPath = dirname($filePath);
         if (!file_exists($dirPath) || !is_dir($dirPath)) {
-            if (!File::makeDirectory($dirPath, 0777, true, true))
-                throw new ApplicationException(Lang::get('cms::lang.cms_object.error_creating_directory', ['name'=>$dirPath]));
+            if (!File::makeDirectory($dirPath, 0777, true, true)) {
+                throw new ApplicationException(Lang::get('cms::lang.cms_object.error_creating_directory', ['name' => $dirPath]));
+            }
         }
 
-        if (@File::put($filePath, $yamlData) === false)
-            throw new ApplicationException(Lang::get('cms::lang.cms_object.error_saving', ['name'=>$filePath]));
+        if (@File::put($filePath, $yamlData) === false) {
+            throw new ApplicationException(Lang::get('cms::lang.cms_object.error_saving', ['name' => $filePath]));
+        }
     }
 
     /**
@@ -186,11 +190,12 @@ class PageList
         $originalData = $this->getPagesConfig();
         $structure = $originalData['static-pages'];
 
-        if (!strlen($parent))
+        if (!strlen($parent)) {
             $structure[$page->getBaseFileName()] = [];
+        }
         else {
             $iterator = function(&$configPages) use (&$iterator, $parent, $page) {
-                foreach ($configPages as $fileName=>&$subpages) {
+                foreach ($configPages as $fileName => &$subpages) {
                     if ($fileName == $parent) {
                         $subpages[$page->getBaseFileName()] = [];
                         return true;
@@ -226,8 +231,9 @@ class PageList
                     return true;
                 }
 
-                if ($iterator($subpages) == true)
+                if ($iterator($subpages) == true) {
                     return true;
+                }
             }
         };
 
@@ -251,8 +257,9 @@ class PageList
             $result = [];
 
             foreach ($configPages as $fileName=>$subpages) {
-                if ($requestedFileName != $fileName)
+                if ($requestedFileName != $fileName) {
                     $result[$fileName] = $iterator($subpages);
+                }
             }
 
             return $result;
@@ -268,8 +275,9 @@ class PageList
      */
     protected function getPagesConfig()
     {
-        if (self::$configCache !== false)
+        if (self::$configCache !== false) {
             return self::$configCache;
+        }
 
         $filePath = $this->getConfigFilePath();
 
@@ -277,8 +285,9 @@ class PageList
             return self::$configCache = ['static-pages'=>[]];
 
         $config = Yaml::parse(File::get($filePath));
-        if (!array_key_exists('static-pages', $config))
+        if (!array_key_exists('static-pages', $config)) {
             throw new SystemException('The content of the theme meta/static-pages.yaml file is invalid: the "static-pages" root element is not found.');
+        }
 
         return self::$configCache = $config;
     }

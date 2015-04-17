@@ -158,8 +158,9 @@ class Page extends Content
 
         foreach ($subtree as $fileName=>$subPages) {
             $subPage = static::load($this->theme, $fileName);
-            if ($subPage)
+            if ($subPage) {
                 $result = array_merge($result, $subPage->delete());
+            }
         }
 
         $pageList->removeSubtree($this);
@@ -186,15 +187,17 @@ class Page extends Content
 
         $layouts = Layout::listInTheme($this->theme, true);
         foreach ($layouts as $layout) {
-            if (!$layout->hasComponent('staticPage'))
+            if (!$layout->hasComponent('staticPage')) {
                 continue;
+            }
 
             $baseName = $layout->getBaseFileName();
             $result[$baseName] = strlen($layout->name) ? $layout->name : $baseName;
         }
 
-        if (!$result)
+        if (!$result) {
             $result[null] = Lang::get('rainlab.pages::lang.page.layouts_not_found');
+        }
 
         return $result;
     }
@@ -221,22 +224,27 @@ class Page extends Content
             $layout = count($layouts) ? array_keys($layouts)[0] : null;
         }
 
-        if (!$layout)
+        if (!$layout) {
             return [];
+        }
 
         $layout = Layout::load($this->theme, $layout);
-        if (!$layout)
+        if (!$layout) {
             return [];
+        }
 
         $result = [];
         $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
 
         foreach ($bodyNode as $node) {
-            if (!$node instanceof \Cms\Twig\PlaceholderNode) continue;
+            if (!$node instanceof \Cms\Twig\PlaceholderNode) {
+                continue;
+            }
 
             $title = $node->hasAttribute('title') ? trim($node->getAttribute('title')) : null;
-            if (!strlen($title))
+            if (!strlen($title)) {
                 $title = $node->getAttribute('name');
+            }
 
             $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
 
@@ -257,16 +265,20 @@ class Page extends Content
      */
     public function getPlaceholderValues()
     {
-        if (!strlen($this->code))
+        if (!strlen($this->code)) {
             return [];
+        }
 
         $bodyNode = $this->getTwigNodeTree($this->code)->getNode('body')->getNode(0);
-        if ($bodyNode instanceof \Cms\Twig\PutNode)
+        if ($bodyNode instanceof \Cms\Twig\PutNode) {
             $bodyNode = [$bodyNode];
+        }
 
         $result = [];
         foreach ($bodyNode as $node) {
-            if (!$node instanceof \Cms\Twig\PutNode) continue;
+            if (!$node instanceof \Cms\Twig\PutNode) {
+                continue;
+            }
 
             $bodyNode = $node->getNode('body');
             $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
@@ -277,8 +289,9 @@ class Page extends Content
 
     public function getProcessedMarkup()
     {
-        if ($this->processedMarkupCache !== false)
+        if ($this->processedMarkupCache !== false) {
             return $this->processedMarkupCache;
+        }
 
         $markup = Snippet::processPageMarkup(
             $this->getFileName(),
@@ -291,8 +304,9 @@ class Page extends Content
 
     public function getProcessedPlaceholderMarkup($placeholderName, $placeholderContents)
     {
-        if (array_key_exists($placeholderName, $this->processedBlockMarkupCache))
+        if (array_key_exists($placeholderName, $this->processedBlockMarkupCache)) {
             return $this->processedBlockMarkupCache[$placeholderName];
+        }
 
         $markup = Snippet::processPageMarkup(
             $this->getFileName().md5($placeholderName),
@@ -321,8 +335,9 @@ class Page extends Content
             // not all snippet components are registered as components,
             // but it's safe to register them in render-time.
             
-            if (!$componentManager->hasComponent($componentInfo['class']))
+            if (!$componentManager->hasComponent($componentInfo['class'])) {
                 $componentManager->registerComponent($componentInfo['class'], $componentInfo['alias']);
+            }
 
             $cmsController->addComponent(
                 $componentInfo['class'],
@@ -447,8 +462,9 @@ class Page extends Content
     {
         $tree = self::buildMenuTree($theme);
 
-        if ($item->type == 'static-page' && !isset($tree[$item->reference]))
+        if ($item->type == 'static-page' && !isset($tree[$item->reference])) {
             return;
+        }
 
         $result = [];
 
@@ -469,8 +485,9 @@ class Page extends Content
 
                     $itemInfo = $tree[$itemName];
 
-                    if ($itemInfo['navigation_hidden'])
+                    if ($itemInfo['navigation_hidden']) {
                         continue;
+                    }
 
                     $branchItem = [];
                     $branchItem['url'] = URL::to($itemInfo['url']);
@@ -478,8 +495,9 @@ class Page extends Content
                     $branchItem['title'] = $itemInfo['title'];
                     $branchItem['mtime'] = $itemInfo['mtime'];
 
-                    if ($itemInfo['items'])
+                    if ($itemInfo['items']) {
                         $branchItem['items'] = $iterator($itemInfo['items']);
+                    }
 
                     $branch[] = $branchItem;
                 }
@@ -501,16 +519,18 @@ class Page extends Content
      */
     public static function buildMenuTree($theme)
     {
-        if (self::$menuTreeCache !== null)
+        if (self::$menuTreeCache !== null) {
             return self::$menuTreeCache;
+        }
 
         $key = crc32($theme->getPath()).'static-page-menu-tree';
 
         $cached = Cache::get($key, false);
         $unserialized = $cached ? @unserialize($cached) : false;
 
-        if ($unserialized !== false)
+        if ($unserialized !== false) {
             return self::$menuTreeCache = $unserialized;
+        }
 
         $menuTree = [
             '--root-pages--' => []
@@ -532,8 +552,9 @@ class Page extends Content
                     'navigation_hidden' => $viewBag->property('navigation_hidden')
                 ];
 
-                if ($level == 0)
+                if ($level == 0) {
                     $menuTree['--root-pages--'][] = $pageCode;
+                }
 
                 $result[] = $pageCode;
                 $menuTree[$pageCode] = $itemData;

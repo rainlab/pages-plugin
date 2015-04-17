@@ -48,14 +48,16 @@ class Router
     {
         $url = Str::lower(RouterHelper::normalizeUrl($url));
 
-        if (array_key_exists($url, self::$cache))
+        if (array_key_exists($url, self::$cache)) {
             return self::$cache[$url];
+        }
 
         $urlMap = $this->getUrlMap();
 
         $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
-        if (!array_key_exists($url, $urlMap))
+        if (!array_key_exists($url, $urlMap)) {
             return null;
+        }
 
         $fileName = $urlMap[$url];
 
@@ -123,8 +125,9 @@ class Router
             }
 
             self::$urlMap = $map;
-            if ($cacheable)
+            if ($cacheable) {
                 Cache::put($key, serialize($map), Config::get('cms.urlCacheTtl', 1));
+            }
 
             return false;
         }
