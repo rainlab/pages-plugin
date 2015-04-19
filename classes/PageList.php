@@ -3,6 +3,8 @@
 use Yaml;
 use Lang;
 use File;
+use Config;
+use Cache;
 use ApplicationException;
 use RainLab\Pages\Classes\Page;
 use October\Rain\Router\Helper as RouterHelper;
