@@ -5,6 +5,7 @@ use Lang;
 use File;
 use ApplicationException;
 use RainLab\Pages\Classes\Page;
+use October\Rain\Router\Helper as RouterHelper;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
 use SystemException;
 use DirectoryIterator;
