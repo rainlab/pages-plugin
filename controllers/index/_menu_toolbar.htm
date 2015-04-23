@@ -14,6 +14,6 @@
         class="btn btn-default empty oc-icon-trash-o <?php if (!$objectPath): ?>hide<?php endif ?>"
         data-request="onDelete"
         data-request-confirm="<?= e(trans('rainlab.pages::lang.menu.delete_confirm_single')) ?>"
-        data-request-success="$.oc.pagesPage.updateObjectList('menu'); $(element).trigger('close.oc.tab', [{force: true}])"
+        data-request-success="$.oc.pagesPage.updateObjectList('menu'); $(this).trigger('close.oc.tab', [{force: true}])"
         data-control="delete-button"></button>
 </div>
