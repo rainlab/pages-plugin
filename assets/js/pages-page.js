@@ -2,9 +2,17 @@
  * Handles the Pages main page.
  */
 +function ($) { "use strict";
+    var Base = $.oc.foundation.base,
+        BaseProto = Base.prototype
+
     var PagesPage = function () {
+        Base.call(this)
+
         this.init()
     }
+
+    PagesPage.prototype = Object.create(BaseProto)
+    PagesPage.prototype.constructor = PagesPage
 
     PagesPage.prototype.init = function() {
         this.$masterTabs = $('#pages-master-tabs')
@@ -13,57 +21,52 @@
         this.masterTabsObj = this.$masterTabs.data('oc.tab')
         this.snippetManager = new $.oc.pages.snippetManager(this.$masterTabs)
 
-        /*
-         * Bind event handlers
-         */
-        var self = this
+        this.registerHandlers()
+    }
 
+    PagesPage.prototype.registerHandlers = function() {
         // Item is clicked in the sidebar
-        $(document).on('open.oc.treeview', 'form.layout[data-content-id=pages]', $.proxy(this.onSidebarItemClick, this))
+        $(document).on('open.oc.treeview', 'form.layout[data-content-id=pages]', this.proxy(this.onSidebarItemClick))
 
-        $(document).on('open.oc.list', this.$sidePanel, $.proxy(this.onSidebarItemClick, this))
+        $(document).on('open.oc.list', this.$sidePanel, this.proxy(this.onSidebarItemClick))
 
         // A tab is shown / switched
-        this.$masterTabs.on('shown.bs.tab', $.proxy(this.onTabShown, this))
+        this.$masterTabs.on('shown.bs.tab', this.proxy(this.onTabShown))
 
         // All master tabs are closed
-        this.$masterTabs.on('afterAllClosed.oc.tab', $.proxy(this.onAllTabsClosed, this))
+        this.$masterTabs.on('afterAllClosed.oc.tab', this.proxy(this.onAllTabsClosed))
 
         // A master tab is closed
-        this.$masterTabs.on('closed.oc.tab', $.proxy(this.onTabClosed, this))
+        this.$masterTabs.on('closed.oc.tab', this.proxy(this.onTabClosed))
 
         // AJAX errors in the master tabs area
-        $(document).on('ajaxError', '#pages-master-tabs form', $.proxy(this.onAjaxError, this))
+        $(document).on('ajaxError', '#pages-master-tabs form', this.proxy(this.onAjaxError))
 
         // AJAX success in the master tabs area
-        $(document).on('ajaxSuccess', '#pages-master-tabs form', $.proxy(this.onAjaxSuccess, this))
+        $(document).on('ajaxSuccess', '#pages-master-tabs form', this.proxy(this.onAjaxSuccess))
 
         // Before save a content block
-        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=content]', function(e, data) {
-            return self.onBeforeSaveContent(this, e, data)
-        })
+        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=content]', this.proxy(this.onBeforeSaveContent))
 
         // Layout changed
-        $(document).on('change', '#pages-master-tabs form[data-object-type=page] select[name="viewBag[layout]"]', $.proxy(this.onLayoutChanged, this))
+        $(document).on('change', '#pages-master-tabs form[data-object-type=page] select[name="viewBag[layout]"]', this.proxy(this.onLayoutChanged))
 
         // Create object button click
         $(document).on('click', '#pages-side-panel form [data-control=create-object], #pages-side-panel form [data-control=create-template]', 
-            $.proxy(this.onCreateObject, this))
+            this.proxy(this.onCreateObject))
 
         // Submenu item is clicked in the sidebar
-        $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', $.proxy(this.onSidebarSubmenuItemClick, this))
+        $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', this.proxy(this.onSidebarSubmenuItemClick))
 
         // The Delete Object button click
         $(document).on('click', '#pages-side-panel form button[data-control=delete-object], #pages-side-panel form button[data-control=delete-template]', 
-            $.proxy(this.onDeleteObject, this))
+            this.proxy(this.onDeleteObject))
 
         // A new tab is added to the editor
-        this.$masterTabs.on('initTab.oc.tab', $.proxy(this.onInitTab, this))
+        this.$masterTabs.on('initTab.oc.tab', this.proxy(this.onInitTab))
 
         // Handle the menu saving
-        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=menu]', function(e, data) {
-            return self.onSaveMenu(this, e, data)
-        })
+        $(document).on('oc.beforeRequest', '#pages-master-tabs form[data-object-type=menu]', this.proxy(this.onSaveMenu))
     }
 
     /*
@@ -110,15 +113,12 @@
 
         $.oc.stripeLoadIndicator.show()
         $form.request('onOpen', {
-            data: data,
-            success: function(data) {
-                this.success(data).done(function(){
-                    $.oc.stripeLoadIndicator.hide()
-                    self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
-                    self.$masterTabs.ocTab('unmodifyTab', tab)
-                    self.updateModifiedCounter()
-                })
-            }
+            data: data
+        }).done(function(data) {
+            $.oc.stripeLoadIndicator.hide()
+            self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
+            self.$masterTabs.ocTab('unmodifyTab', tab)
+            self.updateModifiedCounter()
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
         })
@@ -232,8 +232,9 @@
             $form.trigger('unchange.oc.changeMonitor')
     }
 
-    PagesPage.prototype.onBeforeSaveContent = function(form, e, data) {
-        var $tabPane = $(form).closest('.tab-pane')
+    PagesPage.prototype.onBeforeSaveContent = function(e, data) {
+        var form = e.currentTarget,
+            $tabPane = $(form).closest('.tab-pane')
 
         this.updateContentEditorMode($tabPane, false)
 
@@ -324,13 +325,10 @@
 
         $.oc.stripeLoadIndicator.show()
         $form.request('onOpen', {
-            data: data,
-            success: function(data) {
-                this.success(data).done(function(){
-                    self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'))
-                })
-            }
-        }).always(function(){
+            data: data
+        }).done(function(data) {
+            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'))
+        }).always(function() {
             $.oc.stripeLoadIndicator.hide()
         })
 
@@ -353,14 +351,11 @@
             data: {
                type: type,
                parent: parent
-            },
-            success: function(data) {
-                this.success(data).done(function(){
-                    self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon') + ' new-template')
-                    $('#layout-side-panel').trigger('close.oc.sidePanel')
-                    self.setPageTitle(data.tabTitle)
-                })
-           }
+            }
+        }).done(function(data){
+            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon') + ' new-template')
+            $('#layout-side-panel').trigger('close.oc.sidePanel')
+            self.setPageTitle(data.tabTitle)
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
         })
@@ -432,13 +427,10 @@
 
         $.oc.stripeLoadIndicator.show()
         $form.request('onUpdatePageLayout', {
-            data: data,
-            success: function(data) {
-                this.success(data).done(function(){
-                    $.oc.stripeLoadIndicator.hide()
-                    self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
-                })
-            }
+            data: data
+        }).done(function(data){
+            $.oc.stripeLoadIndicator.hide()
+            self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
         })
@@ -528,8 +520,9 @@
     /*
      * Triggered before a menu is saved
      */
-    PagesPage.prototype.onSaveMenu = function(form, e, data) {
-        var items = [],
+    PagesPage.prototype.onSaveMenu = function(e, data) {
+        var form = e.currentTarget,
+            items = [],
             $items = $('div[data-control=treeview] > ol > li', form)
 
         var iterator = function(items) {
@@ -574,14 +567,14 @@
 
             if (!initialization && $(pane).data('prev-extension') != 'htm') {
                 var val = editor.data('oc.codeEditor').editor.getSession().getValue()
-                $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('set', val)
+                $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('code.set', val)
             }
         } else {
             $('[data-field-name=markup]', pane).show()
             $('[data-field-name=markup_html]', pane).hide()
 
             if (!initialization && $(pane).data('prev-extension') == 'htm') {
-                var val = $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('get')
+                var val = $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('code.get')
                 editor.data('oc.codeEditor').editor.getSession().setValue(val)
             }
 

@@ -71,6 +71,10 @@ class Index extends Controller
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js');
         $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
 
+        // Preload the code editor class as it could be needed
+        // before it loads dynamically.
+        $this->addJs('/modules/backend/formwidgets/codeeditor/assets/js/codeeditor.js', 'core');
+
         $this->bodyClass = 'compact-container side-panel-not-fixed';
         $this->pageTitle = 'rainlab.pages::lang.plugin.name';
         $this->pageTitleTemplate = '%s Pages';
