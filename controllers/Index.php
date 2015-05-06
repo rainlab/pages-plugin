@@ -91,8 +91,9 @@ class Index extends Controller
         $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/ace.js', 'core');
 
         $aceModes = ['markdown', 'plain_text', 'html', 'less', 'css', 'scss', 'sass', 'javascript'];
-        foreach ($aceModes as $mode)
+        foreach ($aceModes as $mode) {
             $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/mode-'.$mode.'.js', 'core');
+        }
     }
 
     public function index_onOpen()
@@ -131,9 +132,9 @@ class Index extends Controller
             'menu' => 'rainlab.pages::lang.menu.saved'
         ];
 
-        $successMessage = isset($successMessages[$type]) ?
-            $successMessages[$type] :
-            $successMessages['page'];
+        $successMessage = isset($successMessages[$type])
+            ? $successMessages[$type]
+            : $successMessages['page'];
 
         Flash::success(Lang::get($successMessage));
 
