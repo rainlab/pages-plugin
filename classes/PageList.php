@@ -3,11 +3,8 @@
 use Yaml;
 use Lang;
 use File;
-use Config;
-use Cache;
 use ApplicationException;
 use RainLab\Pages\Classes\Page;
-use October\Rain\Router\Helper as RouterHelper;
 use Symfony\Component\Yaml\Dumper as YamlDumper;
 use SystemException;
 use DirectoryIterator;
@@ -42,77 +39,6 @@ class PageList
     public function listPages($skipCache = false)
     {
         return Page::listInTheme($this->theme, $skipCache);
-    }
-
-    /**
-     * Finds a page by its URL. Returns the page object and sets the $parameters property.
-     * @param string $url The requested URL string.
-     * @return \Cms\Classes\Page Returns \Cms\Classes\Page object or null if the page cannot be found.
-     */
-    public function findByUrl($url)
-    {
-        $url = RouterHelper::normalizeUrl($url);
-
-        for ($pass = 1; $pass <= 2; $pass++) {
-            $fileName = null;
-            $urlList = [];
-
-            $cacheable = Config::get('cms.enableRoutesCache') && in_array(
-                Cache::getDefaultDriver(),
-                ['apc', 'memcached', 'redis', 'array']
-            );
-
-            if ($cacheable) {
-                $fileName = $this->getCachedUrlFileName($url, $urlList);
-            }
-
-            /*
-             * Find the page by URL and cache the route
-             */
-
-            if (!$fileName) {
-                $router = $this->getRouterObject();
-
-                if ($router->match($url)) {
-                    $this->parameters = $router->getParameters();
-
-                    $fileName = $router->matchedRoute();
-
-                    if ($cacheable) {
-                        if (!$urlList || !is_array($urlList))
-                            $urlList = [];
-
-                        $urlList[$url] = $fileName;
-
-                        $key = $this->getUrlListCacheKey();
-                        Cache::put($key, serialize($urlList), Config::get('cms.urlCacheTtl', 1));
-                    }
-                }
-            }
-
-            /*
-             * Return the page 
-             */
-
-            if ($fileName) {
-                if (($page = Page::loadCached($this->theme, $fileName)) === null) {
-                    /*
-                     * If the page was not found on the disk, clear the URL cache
-                     * and repeat the routing process.
-                     */
-                    if ($pass == 1) {
-                        $this->clearCache();
-                        continue;
-                    }
-
-                    return null;
-                }
-
-                return $page;
-            }
-
-            return null;
-        }
     }
 
     /**
