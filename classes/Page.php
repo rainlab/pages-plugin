@@ -1,21 +1,21 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Cms\Classes\Content;
-use RainLab\Pages\Classes\PageList;
-use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
-use Cms\Classes\ComponentManager;
-use Cms\Classes\Theme;
-use Cms\Classes\Layout;
-use ApplicationException;
-use October\Rain\Router\Helper as RouterHelper;
-use October\Rain\Support\Str;
-use Cache;
-use Validator;
+use URL;
 use File;
 use Lang;
+use Cache;
 use Config;
-use URL;
+use Validator;
+use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\Snippet;
+use RainLab\Pages\Classes\PageList;
+use Cms\Classes\Theme;
+use Cms\Classes\Layout;
+use Cms\Classes\Content;
+use Cms\Classes\ComponentManager;
+use October\Rain\Support\Str;
+use October\Rain\Router\Helper as RouterHelper;
+use ApplicationException;
 
 /**
  * Represents a static page.
@@ -156,7 +156,7 @@ class Page extends Content
 
         $subtree = $pageList->getPageSubTree($this);
 
-        foreach ($subtree as $fileName=>$subPages) {
+        foreach ($subtree as $fileName => $subPages) {
             $subPage = static::load($this->theme, $fileName);
             if ($subPage) {
                 $result = array_merge($result, $subPage->delete());

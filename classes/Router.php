@@ -1,11 +1,11 @@
 <?php namespace RainLab\Pages\Classes;
 
-use RainLab\Pages\Classes\Page;
-use Cms\Classes\Theme;
-use October\Rain\Router\Helper as RouterHelper;
 use Cache;
 use Config;
+use Cms\Classes\Theme;
+use RainLab\Pages\Classes\Page;
 use October\Rain\Support\Str;
+use October\Rain\Router\Helper as RouterHelper;
 
 /**
  * A router for static pages.
