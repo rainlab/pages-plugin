@@ -452,9 +452,13 @@ class Page extends Content
 
         $result = [];
 
+        // Grab the locale
+        $prefix = (class_exists('RainLab\Translate\Behaviors\TranslatableModel') ?
+            \RainLab\Translate\Classes\Translator::instance()->getLocale() : null);
+
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
-            $result['url'] = URL::to($pageInfo['url']);
+            $result['url'] = URL::to($prefix . $pageInfo['url']);
             $result['mtime'] = $pageInfo['mtime'];
             $result['isActive'] = $result['url'] == $url;
         }
@@ -473,7 +477,7 @@ class Page extends Content
                         continue;
 
                     $branchItem = [];
-                    $branchItem['url'] = URL::to($itemInfo['url']);
+                    $branchItem['url'] = URL::to($prefix . $itemInfo['url']);
                     $branchItem['isActive'] = $branchItem['url'] == $url;
                     $branchItem['title'] = $itemInfo['title'];
                     $branchItem['mtime'] = $itemInfo['mtime'];
