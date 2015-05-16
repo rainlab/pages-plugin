@@ -55,11 +55,13 @@ class SnippetManager
             $snippets = $this->listSnippets($theme);
 
             foreach ($snippets as $snippet) {
-                if ($componentClass && $snippet->getComponentClass() == $componentClass)
+                if ($componentClass && $snippet->getComponentClass() == $componentClass) {
                     return $snippet;
+                }
 
-                if ($snippet->code == $code)
+                if ($snippet->code == $code) {
                     return $snippet;
+                }
             }
 
             return null;
@@ -71,13 +73,15 @@ class SnippetManager
 
         if (!strlen($componentClass)) {
             $map = $this->getPartialSnippetMap($theme);
-            if (!array_key_exists($code, $map))
+            if (!array_key_exists($code, $map)) {
                 return null;
+            }
 
             $partialName = $map[$code];
             $partial = Partial::loadCached($theme, $partialName);
-            if (!$partial)
+            if (!$partial) {
                 return null;
+            }
 
             $snippet = new Snippet();
             $snippet->initFromPartial($partial);
@@ -180,12 +184,14 @@ class SnippetManager
         $plugins = $pluginManager->getPlugins();
 
         foreach ($plugins as $id => $plugin) {
-            if (!method_exists($plugin, 'registerPageSnippets'))
+            if (!method_exists($plugin, 'registerPageSnippets')) {
                 continue;
+            }
 
             $snippets = $plugin->registerPageSnippets();
-            if (!is_array($snippets))
+            if (!is_array($snippets)) {
                 continue;
+            }
 
             foreach ($snippets as $componentClass=>$componentCode) {
                 // TODO: register snippet components later, during 

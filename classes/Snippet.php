@@ -91,11 +91,13 @@ class Snippet
      */
     public function getName()
     {
-        if ($this->name !== null)
+        if ($this->name !== null) {
             return $this->name;
+        }
 
-        if ($this->componentClass === null)
+        if ($this->componentClass === null) {
             return null;
+        }
 
         $component = $this->getComponent();
         return $this->name = ComponentHelpers::getComponentName($component);
@@ -108,11 +110,13 @@ class Snippet
      */
     public function getDescription()
     {
-        if ($this->description !== null)
+        if ($this->description !== null) {
             return $this->description;
+        }
 
-        if ($this->componentClass === null)
+        if ($this->componentClass === null) {
             return null;
+        }
 
         $component = $this->getComponent();
         return $this->description = ComponentHelpers::getComponentDescription($component);
@@ -155,18 +159,20 @@ class Snippet
             }
 
             $propertyCode = trim($qualifiers[0]);
-            if (!array_key_exists($propertyCode, $result))
+            if (!array_key_exists($propertyCode, $result)) {
                 $result[$propertyCode] = [
                     'property' => $propertyCode
                 ];
+            }
 
             $paramName = trim($qualifiers[1]);
 
             // Handling the "[viewMode|options|list] => Display as a list" case
             if ($qualifiers[1] == 'options') {
                 if ($cnt > 2) {
-                    if (!array_key_exists('options', $result[$propertyCode])) 
+                    if (!array_key_exists('options', $result[$propertyCode])) {
                         $result[$propertyCode]['options'] = [];
+                    }
 
                     $result[$propertyCode]['options'][$qualifiers[2]] = $value;
                 }
@@ -198,8 +204,9 @@ class Snippet
             $snippetCode = $snippetInfo['code'];
 
             if (!isset($snippetInfo['component'])) {
-                if (!array_key_exists($snippetCode, $partialSnippetMap))
+                if (!array_key_exists($snippetCode, $partialSnippetMap)) {
                     throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
+                }
 
                 $partialName = $partialSnippetMap[$snippetCode];
                 $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
@@ -227,7 +234,9 @@ class Snippet
 
         $result = [];
         foreach ($map as $snippetDeclaration => $snippetInfo) {
-            if (!isset($snippetInfo['component'])) continue;
+            if (!isset($snippetInfo['component'])) {
+                continue;
+            }
 
             $result[] = [
                 'class' => $snippetInfo['component'],
@@ -257,13 +266,16 @@ class Snippet
                     }
                 }
 
-                if (!$rowHasData) continue;
+                if (!$rowHasData) {
+                    continue;
+                }
 
                 $properties['staticPageSnippetProperties['.$row['property'].'|type]'] = $row['type'];
                 $properties['staticPageSnippetProperties['.$row['property'].'|title]'] = $row['title'];
 
-                if (isset($row['default']) && strlen($row['default']))
-                    $properties['staticPageSnippetProperties['.$row['property'].'|default]'] = $row['default'];
+                if (isset($row['default']) && strlen($row['default'])) {
+                    $properties['staticPageSnippetProperties[' . $row['property'] . '|default]'] = $row['default'];
+                }
 
                 if (isset($row['options']) && strlen($row['options'])) {
                     $options = self::dropDownOptionsToArray($row['options']);
@@ -286,16 +298,18 @@ class Snippet
 
     public static function processTemplateSettings($template)
     {
-        if (!isset($template->viewBag['staticPageSnippetProperties']))
+        if (!isset($template->viewBag['staticPageSnippetProperties'])) {
             return;
+        }
 
         $parsedProperties = self::parseIniProperties($template->viewBag['staticPageSnippetProperties'], false);
 
         foreach ($parsedProperties as $index=>&$property) {
             $property['id'] = $index;
 
-            if (isset($property['options']))
+            if (isset($property['options'])) {
                 $property['options'] = self::dropDownOptionsToString($property['options']);
+            }
         }
 
         $template->viewBag['staticPageSnippetProperties'] = $parsedProperties;
@@ -313,14 +327,17 @@ class Snippet
                 $key = trim($parts[0]);
 
                 if (strlen($key)) {
-                    if (!preg_match('/^[0-9a-z-_]+$/i', $key))
-                        throw new ValidationException(['staticPageSnippetProperties' =>sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                    if (!preg_match('/^[0-9a-z-_]+$/i', $key)) {
+                        throw new ValidationException(['staticPageSnippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                    }
 
                     $result[$key] = trim($parts[1]);
-                } else
+                } else {
                     $result[$index] = trim($optionStr);
-            } else
+                }
+            } else {
                 $result[$index] = trim($optionStr);
+            }
         }
 
         return $result;
@@ -544,11 +561,13 @@ class Snippet
      */
     protected function getComponent()
     {
-        if ($this->componentClass === null)
+        if ($this->componentClass === null) {
             return null;
+        }
 
-        if ($this->componentObj !== null)
+        if ($this->componentObj !== null) {
             return $this->componentObj;
+        }
 
         $componentClass = $this->componentClass;
 

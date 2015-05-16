@@ -74,8 +74,9 @@ class Menu extends CmsObject
     public function getCode()
     {
         $place = strrpos($this->fileName, '.');
-        if ($place !== false)
+        if ($place !== false) {
             return substr($this->fileName, 0, $place);
+        }
 
         return null;
     }
@@ -127,8 +128,9 @@ class Menu extends CmsObject
     {
         $currentUrl = Request::path();
 
-        if (!strlen($currentUrl))
+        if (!strlen($currentUrl)) {
             $currentUrl = '/';
+        }
 
         $currentUrl = Str::lower(URL::to($currentUrl));
 
@@ -156,8 +158,9 @@ class Menu extends CmsObject
                     $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
                     if (is_array($apiResult)) {
                         foreach ($apiResult as $itemInfo) {
-                            if (!is_array($itemInfo))
+                            if (!is_array($itemInfo)) {
                                 continue;
+                            }
 
                             if (!$item->replace && isset($itemInfo['url'])) {
                                 $parentReference->url = $itemInfo['url'];
@@ -179,8 +182,9 @@ class Menu extends CmsObject
                                             $parentReference->isActive = $reference->isActive;
                                         }
 
-                                        if (isset($item['items']))
+                                        if (isset($item['items'])) {
                                             $reference->items = $itemIterator($item['items']);
+                                        }
 
                                         $result[] = $reference;
                                     }
@@ -202,8 +206,9 @@ class Menu extends CmsObject
                     $result[] = $parentReference;
                 }
                 else {
-                    foreach ($parentReference->items as $subItem)
+                    foreach ($parentReference->items as $subItem) {
                         $result[] = $subItem;
+                    }
                 }
             }
 
@@ -217,12 +222,14 @@ class Menu extends CmsObject
          */
         $hasActiveChild = function($items) use (&$hasActiveChild) {
             foreach ($items as $item) {
-                if ($item->isActive)
+                if ($item->isActive) {
                     return true;
+                }
 
                 $result = $hasActiveChild($item->items);
-                if ($result)
+                if ($result) {
                     return $result;
+                }
             }
         };
 

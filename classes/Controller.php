@@ -1,11 +1,10 @@
 <?php namespace RainLab\Pages\Classes;
 
+use Lang;
 use Cms\Classes\Page;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\CmsException;
-use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
 
 /**
  * Represents a static page controller.
@@ -25,8 +24,9 @@ class Controller
     protected function init()
     {
         $this->theme = Theme::getActiveTheme();
-        if (!$this->theme)
+        if (!$this->theme) {
             throw new CmsException(Lang::get('cms::lang.theme.active.not_found'));
+        }
     }
 
     /**
@@ -39,8 +39,9 @@ class Controller
         $router = new Router($this->theme);
 
         $page = $router->findByUrl($url);
-        if (!$page)
+        if (!$page) {
             return null;
+        }
 
         $viewBag = $page->getViewBag();
 
@@ -58,8 +59,9 @@ class Controller
 
     public function injectPageTwig($page, $loader, $twig)
     {
-        if (!isset($page->apiBag['staticPage']))
+        if (!isset($page->apiBag['staticPage'])) {
             return;
+        }
 
         $staticPage = $page->apiBag['staticPage'];
 
@@ -72,24 +74,27 @@ class Controller
 
     public function getPageContents($page)
     {
-        if (!isset($page->apiBag['staticPage']))
+        if (!isset($page->apiBag['staticPage'])) {
             return;
+        }
 
         return $page->apiBag['staticPage']->getProcessedMarkup();
     }
 
     public function getPlaceholderContents($page, $placeholderName, $placeholderContents)
     {
-        if (!isset($page->apiBag['staticPage']))
+        if (!isset($page->apiBag['staticPage'])) {
             return;
+        }
 
         return $page->apiBag['staticPage']->getProcessedPlaceholderMarkup($placeholderName, $placeholderContents);
     }
 
     public function initPageComponents($cmsController, $page)
     {
-        if (!isset($page->apiBag['staticPage']))
+        if (!isset($page->apiBag['staticPage'])) {
             return;
+        }
 
         $page->apiBag['staticPage']->initCmsComponents($cmsController);
     }
