@@ -27,6 +27,11 @@ class MenuItemReference
     public $url;
 
     /**
+     * @var string Specifies the item target
+     */
+    public $target;
+
+    /**
      * @var string Indicates whether the item corresponds the currently viewed page.
      */
     public $isActive = false;
