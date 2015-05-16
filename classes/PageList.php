@@ -57,7 +57,7 @@ class PageList
         $iterator = function($configPages) use (&$iterator, &$pages) {
             $result = [];
 
-            foreach ($configPages as $fileName=>$subpages) {
+            foreach ($configPages as $fileName => $subpages) {
                 $pageObject = null;
                 foreach ($pages as $page) {
                     if ($page->getBaseFileName() == $fileName) {
@@ -210,8 +210,9 @@ class PageList
 
         $filePath = $this->getConfigFilePath();
 
-        if (!file_exists($filePath))
+        if (!file_exists($filePath)) {
             return self::$configCache = ['static-pages'=>[]];
+        }
 
         $config = Yaml::parse(File::get($filePath));
         if (!array_key_exists('static-pages', $config)) {

@@ -1,13 +1,13 @@
 <?php namespace RainLab\Pages\Widgets;
 
-use Backend\Classes\WidgetBase;
-use RainLab\Pages\Classes\Menu;
-use Cms\Classes\Theme;
-use Input;
-use Response;
-use Request;
 use Str;
 use Lang;
+use Input;
+use Request;
+use Response;
+use RainLab\Pages\Classes\Menu;
+use Backend\Classes\WidgetBase;
+use Cms\Classes\Theme;
 
 /**
  * Menu list widget.
@@ -57,9 +57,9 @@ class MenuList extends WidgetBase
      */
     public function widgetDetails() {}
 
-    /*
-     * Event handlers
-     */
+    //
+    // Event handlers
+    //
 
     public function onUpdate()
     {
@@ -75,9 +75,9 @@ class MenuList extends WidgetBase
         return $this->updateList();
     }
 
-    /*
-     * Methods for the internal use
-     */
+    //
+    // Methods for the internal use
+    //
 
     protected function getData()
     {
@@ -90,8 +90,9 @@ class MenuList extends WidgetBase
             $filteredMenus = [];
 
             foreach ($menus as $menu) {
-                if ($this->textMatchesSearch($words, $menu->name.' '.$menu->fileName))
+                if ($this->textMatchesSearch($words, $menu->name.' '.$menu->fileName)) {
                     $filteredMenus[] = $menu;
+                }
             }
 
             $menus = $filteredMenus;
@@ -102,13 +103,14 @@ class MenuList extends WidgetBase
 
     protected function updateList()
     {
-        return ['#'.$this->getId('menu-list') => $this->makePartial('items', ['items'=>$this->getData()])];
+        $vars = ['items' => $this->getData()];
+        return ['#'.$this->getId('menu-list') => $this->makePartial('items', $vars)];
     }
 
     protected function getThemeSessionKey($prefix)
     {
-        return $prefix.$this->theme->getDirName();
-    }    
+        return $prefix . $this->theme->getDirName();
+    }
 
     protected function getSession($key = null, $default = null)
     {

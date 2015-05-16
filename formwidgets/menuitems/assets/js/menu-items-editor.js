@@ -14,7 +14,7 @@
         var self = this
 
         this.alias = this.$el.data('alias')
-        this.$treevView = this.$el.find('div[data-control="treeview"]')
+        this.$treeView = this.$el.find('div[data-control="treeview"]')
 
         this.typeInfo = {}
 
@@ -57,8 +57,8 @@
 
         $(window).trigger('oc.updateUi')
 
-        this.$treevView.treeView('update')
-        this.$treevView.treeView('fixSubItems')
+        this.$treeView.treeView('update')
+        this.$treeView.treeView('fixSubItems')
     }
 
     /*
@@ -119,8 +119,8 @@
             if (!self.itemSaved && newItemMode)
                 $item.remove()
 
-            self.$treevView.treeView('update')
-            self.$treevView.treeView('fixSubItems')
+            self.$treeView.treeView('update')
+            self.$treeView.treeView('fixSubItems')
         })
 
         $container.ocPopover({
@@ -394,7 +394,7 @@
             parentList = $(target).closest('div[data-control=treeview]').find(' > ol')
 
         parentList.append(item)
-        this.$treevView.treeView('update')
+        this.$treeView.treeView('update')
         $(window).trigger('oc.updateUi')
 
         this.onItemClick(item, true)

@@ -99,24 +99,28 @@ class MenuItems extends FormWidgetBase
      */
     protected function getReferenceDescription($item)
     {
-        if ($this->typeListCache === false)
+        if ($this->typeListCache === false) {
             $this->typeListCache = $item->getTypeOptions();
+        }
 
-        if (!isset($this->typeInfoCache[$item->type]))
+        if (!isset($this->typeInfoCache[$item->type])) {
             $this->typeInfoCache[$item->type] = MenuItem::getTypeInfo($item->type);
+        }
 
         if (isset($this->typeInfoCache[$item->type])) {
             $result = $this->typeListCache[$item->type];
 
             if ($item->type !== 'url') {
-                if (isset($this->typeInfoCache[$item->type]['references']))
+                if (isset($this->typeInfoCache[$item->type]['references'])) {
                     $result .= ': '.$this->findReferenceName($item->reference, $this->typeInfoCache[$item->type]['references']);
+                }
             }
             else {
                 $result .= ': '.$item->url;
             }
 
-        } else {
+        }
+        else {
             $result = trans('rainlab.pages::lang.menuitem.unknown_type');
         }
 
@@ -144,8 +148,9 @@ class MenuItems extends FormWidgetBase
         };
 
         $result = $iterator($typeOptionList, null);
-        if (!strlen($result))
+        if (!strlen($result)) {
             $result = trans('rainlab.pages::lang.menuitem.unnamed');
+        }
 
         $result = preg_replace('|^\s+\/|', '', $result);
 
@@ -155,8 +160,9 @@ class MenuItems extends FormWidgetBase
     protected function getMenuItemTitle($itemInfo)
     {
         if (is_array($itemInfo)) {
-            if (!array_key_exists('title', $itemInfo) || !strlen($itemInfo['title']))
+            if (!array_key_exists('title', $itemInfo) || !strlen($itemInfo['title'])) {
                 return trans('rainlab.pages::lang.menuitem.unnamed');
+            }
 
             return $itemInfo['title'];
         }
