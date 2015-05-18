@@ -16,7 +16,12 @@ return [
         'url_not_unique' => 'Это URL уже используется другой страницей.',
         'layout' => 'Шаблон',
         'layouts_not_found' => 'Шаблоны не найдены',
-        'saved' => 'Страница была успешно сохранена.'
+        'saved' => 'Страница была успешно сохранена.',
+        'tab' => 'Страницы',
+        'manage_pages' => 'Manage the static pages',
+        'manage_menus' => 'Manage the static menus',
+        'access_snippets' => 'Manage snippets',
+        'manage_content' => 'Manage content'
     ],
     'menu' => [
         'menu_label' => 'Меню',

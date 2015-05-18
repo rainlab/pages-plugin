@@ -27,8 +27,8 @@ class Plugin extends PluginBase
     public function registerComponents()
     {
         return [
-            '\RainLab\Pages\Components\StaticPage' => 'staticPage',
-            '\RainLab\Pages\Components\StaticMenu' => 'staticMenu',
+            '\RainLab\Pages\Components\StaticPage'        => 'staticPage',
+            '\RainLab\Pages\Components\StaticMenu'        => 'staticMenu',
             '\RainLab\Pages\Components\StaticBreadcrumbs' => 'staticBreadcrumbs'
         ];
     }
@@ -36,10 +36,10 @@ class Plugin extends PluginBase
     public function registerPermissions()
     {
         return [
-            'rainlab.pages.manage_pages'    => ['tab' => 'Pages', 'label' => 'rainlab.pages::lang.page.manage_pages'],
-            'rainlab.pages.manage_menus'    => ['tab' => 'Pages', 'label' => 'rainlab.pages::lang.page.manage_menus'],
-            'rainlab.pages.manage_content'  => ['tab' => 'Pages', 'label' => 'rainlab.pages::lang.page.manage_content'],
-            'rainlab.pages.access_snippets' => ['tab' => 'Pages', 'label' => 'rainlab.pages::lang.page.access_snippets']
+            'rainlab.pages.manage_pages'    => ['tab' => 'rainlab.pages::lang.page.tab', 'label' => 'rainlab.pages::lang.page.manage_pages'],
+            'rainlab.pages.manage_menus'    => ['tab' => 'rainlab.pages::lang.page.tab', 'label' => 'rainlab.pages::lang.page.manage_menus'],
+            'rainlab.pages.manage_content'  => ['tab' => 'rainlab.pages::lang.page.tab', 'label' => 'rainlab.pages::lang.page.manage_content'],
+            'rainlab.pages.access_snippets' => ['tab' => 'rainlab.pages::lang.page.tab', 'label' => 'rainlab.pages::lang.page.access_snippets']
         ];
     }
 
@@ -83,7 +83,6 @@ class Plugin extends PluginBase
                         'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
-
             ]
         ];
     }

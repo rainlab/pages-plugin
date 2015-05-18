@@ -16,7 +16,12 @@ return [
         'url_not_unique' => 'Deze URL wordt al gebruikt door een andere pagina.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Geen layout gevonden',
-        'saved' => 'De pagina is opgeslagen.'
+        'saved' => 'De pagina is opgeslagen.',
+        'tab' => 'Pages',
+        'manage_pages' => 'Manage the static pages',
+        'manage_menus' => 'Manage the static menus',
+        'access_snippets' => 'Manage snippets',
+        'manage_content' => 'Manage content'
     ],
     'menu' => [
         'menu_label' => 'Menu\'s',
@@ -84,6 +89,26 @@ return [
         'hidden' => 'Verborgen',
         'hidden_comment' => 'Verborgen pagina\'s zijn alleen toegankelijk voor ingelogde gebruikers.',
         'navigation_hidden' => 'Verbergen in de navigatie',
-        'navigation_hidden_comment' => 'Indien aangevinkt, zal deze pagina niet weergegeven worden in automatisch gegenereerde menu\'s en kruimelpaden (breadcrumbs).',
+        'navigation_hidden_comment' => 'Indien aangevinkt, zal deze pagina niet weergegeven worden in automatisch gegenereerde menu\'s en kruimelpaden (breadcrumbs).'
     ],
+    'snippet' => [
+        'partialtab' => 'Snippet',
+        'code' => 'Snippet code',
+        'code_comment' => 'Enter a code to make this partial available as a snippet in the Static Pages plugin.',
+        'name' => 'Name',
+        'name_comment' => 'The name is displayed in the snippet list in the Static Pages sidebar and on a Page when a snippet is added.',
+        'no_records' => 'No snippets found',
+        'menu_label' => 'Snippets',
+        'column_property' => 'Property title',
+        'column_type' => 'Type',
+        'column_code' => 'Code',
+        'column_default' => 'Default',
+        'column_options' => 'Options',
+        'column_type_string' => 'String',
+        'column_type_checkbox' => 'Checkbox',
+        'column_type_dropdown' => 'Dropdown',
+        'not_found' => 'Snippet with the requested code :code was not found in the theme.',
+        'property_format_error' => 'Property code should start with a Latin letter and can contain only Latin letters and digits',
+        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -'
+    ]
 ];
