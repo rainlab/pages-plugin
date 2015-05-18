@@ -17,6 +17,7 @@ return [
         'layout' => 'Layout',
         'layouts_not_found' => 'Keine Layouts gefunden',
         'saved' => 'Die Seite wurde erfolgreich gespeichert.',
+        'tab' => 'Seiten',
         'manage_pages' => 'Verwalte statische Seiten',
         'manage_menus' => 'Verwalte statische Menüs',
         'access_snippets' => 'Verwalte Snippets',
@@ -88,7 +89,7 @@ return [
         'hidden' => 'Verstecken',
         'hidden_comment' => 'Versteckte Seiten sind nur für eingeloggte administrations Benutzer zugänglich.',
         'navigation_hidden' => 'In der Navigation verstecken',
-        'navigation_hidden_comment' => 'Setzen Sie diese Option, um diese Seite von automatisch generierten Menüs und Breadcrumbs zu verstecken.',
+        'navigation_hidden_comment' => 'Setzen Sie diese Option, um diese Seite von automatisch generierten Menüs und Breadcrumbs zu verstecken.'
     ],
     'snippet' => [
         'partialtab' => 'Snippet',
@@ -110,4 +111,4 @@ return [
         'property_format_error' => 'Der Code für die Eigenschaft muss mit einem Buchstaben anfangen, und darf nur Buchstaben und Zahlen enthalten',
         'invalid_option_key' => 'Ungültiger Dropdown Optionsschlüssel: %s. Optionsschlüssel dürfen nur Zahlen, Buchstaben und die Zeichen _ und - enthalten'
     ]
-  ];
+];
