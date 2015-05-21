@@ -139,8 +139,9 @@ class Menu extends CmsObject
             $result = [];
 
             foreach ($items as $item) {
-                $parentReference = new MenuItemReference();
+                $parentReference = new MenuItemReference;
                 $parentReference->title = $item->title;
+                $parentReference->code = $item->code;
 
                 /*
                  * If the item type is URL, assign the reference the item's URL and compare the current URL with the item URL
@@ -172,7 +173,7 @@ class Menu extends CmsObject
                                     $result = [];
 
                                     foreach ($items as $item) {
-                                        $reference = new MenuItemReference();
+                                        $reference = new MenuItemReference;
                                         $reference->title = isset($item['title']) ? $item['title'] : '--no title--';
                                         $reference->url = isset($item['url']) ? $item['url'] : '#';
                                         $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;
