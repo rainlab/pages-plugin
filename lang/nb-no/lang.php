@@ -17,10 +17,10 @@ return [
         'layout' => 'Layout',
         'layouts_not_found' => 'Ingen layouts funnet',
         'saved' => 'Siden har blitt lagret.',
-        'manage_pages' => 'Håndtere statiske sider',
-        'manage_menus' => 'Håndtere statiske menyer',
+        'manage_pages' => 'Administrer statiske sider',
+        'manage_menus' => 'Administrer statiske menyer',
         'access_snippets' => 'Tilgang til snippets',
-        'manage_content' => 'Håndtere statisk innhold'
+        'manage_content' => 'Administrer statisk innhold'
     ],
     'menu' => [
         'menu_label' => 'Menyer',
