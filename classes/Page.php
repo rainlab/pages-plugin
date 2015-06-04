@@ -31,6 +31,19 @@ class Page extends Content
         'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-]*$/i', 'uniqueUrl']
     ];
 
+    /**
+     * @var array These view bag properties will be available as regular properties.
+     */
+    protected $viewBagVisible = [
+        'title',
+        'url',
+        'layout',
+        'hidden',
+        'navigation_hidden',
+        'meta_title',
+        'meta_description'
+    ];
+
     protected static $fillable = [
         'markup',
         'settings',
@@ -191,24 +204,19 @@ class Page extends Content
         /*
          * Delete subpages
          */
-
-        $pageList = new PageList($this->theme);
-
-        $subtree = $pageList->getPageSubTree($this);
-
-        foreach ($subtree as $fileName => $subPages) {
-            $subPage = static::load($this->theme, $fileName);
-            if ($subPage) {
-                $result = array_merge($result, $subPage->delete());
-            }
+        foreach ($this->getChildren() as $subPage) {
+            $result = array_merge($result, $subPage->delete());
         }
 
+        /*
+         * Remove from meta
+         */
+        $pageList = new PageList($this->theme);
         $pageList->removeSubtree($this);
 
         /*
          * Delete the object
          */
-
         $result = array_merge($result, [$this->getBaseFileName()]);
 
         parent::delete();
@@ -252,6 +260,26 @@ class Page extends Content
     //
     // Getters
     //
+
+    /**
+     * Returns all the child pages that belong to this one.
+     * @return array
+     */
+    public function getChildren()
+    {
+        $children = [];
+        $pageList = new PageList($this->theme);
+
+        $subtree = $pageList->getPageSubTree($this);
+        foreach ($subtree as $fileName => $subPages) {
+            $subPage = static::load($this->theme, $fileName);
+            if ($subPage) {
+                $children[] = $subPage;
+            }
+        }
+
+        return $children;
+    }
 
     /**
      * Returns a list of layouts available in the theme. 
