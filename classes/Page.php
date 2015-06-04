@@ -4,6 +4,7 @@ use URL;
 use File;
 use Lang;
 use Cache;
+use Route;
 use Config;
 use Validator;
 use RainLab\Pages\Classes\Router;
@@ -213,6 +214,39 @@ class Page extends Content
         parent::delete();
 
         return $result;
+    }
+
+    //
+    // Public API
+    //
+
+    /**
+     * Helper that makes a URL for a static page in the active theme.
+     *
+     * Guide for the page reference:
+     * - chairs -> content/static-pages/chairs.htm
+     *
+     * @param mixed $page Specifies the Content file name.
+     * @return string
+     */
+    public static function url($name)
+    {
+        $page = static::find($name);
+        $url = $page->getViewBag()->property('url');
+
+        if (substr($url, 0, 1) == '/') {
+            $url = substr($url, 1);
+        }
+
+        $routeAction = 'Cms\Classes\CmsController@run';
+        $actionExists = Route::getRoutes()->getByAction($routeAction) !== null;
+
+        if ($actionExists) {
+            return URL::action($routeAction, ['slug' => $url]);
+        }
+        else {
+            return URL::to($url);
+        }
     }
 
     //

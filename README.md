@@ -1,7 +1,5 @@
 # Pages plugin
 
-> Warning: This is a BETA version of the plugin. Use it at your own risk. The current version doesn't support editing content files, using placeholders and code snippets. The implemented parts are the Static Pages, Menus and Breadcrumbs.
-
 This plugin allows end users to create and edit static pages and menus with a simple WYSIWYG user interface.
 
 ## Managing static pages
@@ -95,23 +93,22 @@ The plugin currently includes three components: Static Page, Static Menu and Sta
 
 In the simplest case you could create a [layout](http://octobercms.com/docs/cms/layouts) in the CMS area and drop the plugin's components to its body. The next example layout outputs a menu, breadcrumbs and a static page:
 
-```
-<html>
-    <head>
-        <title>{{ this.page.title }}</title>
-    </head>
-    <body>
-        {% component 'staticMenu' %}
-        {% component 'staticBreadcrumbs' %}
-        {% page %}
-    </body>
-</html>
-```
+    <html>
+        <head>
+            <title>{{ this.page.title }}</title>
+        </head>
+        <body>
+            {% component 'staticMenu' %}
+            {% component 'staticBreadcrumbs' %}
+            {% page %}
+        </body>
+    </html>
 
 ![http://oi58.tinypic.com/6gbnsn.jpg](http://oi58.tinypic.com/6gbnsn.jpg)  {.img-responsive .frame}
 
 ##### Static pages
-Include the Static Page [component ](http://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
+
+Include the Static Page [component](http://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
 
 * `title` - specifies the static page title.
 * `content` - the static page content.
@@ -122,21 +119,19 @@ Add the staticMenu component to the static page layout to output a menu. The sta
 
 The static menu component injects the `menuItems` page variable. The default component partial outputs a simple nested unordered list for menus:
 
-```
-<ul>
-    <li>
-        <a href="http://example.com">Home</a>
-    </li>
-    <li class="child-active">
-        <a href="http://example.com/about">About</a>
-        <ul>
-            <li class="active">
-                <a href="http://example.com/about/directions">Directions</a>
-            </li>
-        </ul>
-    </li>
-</ul>
-```
+    <ul>
+        <li>
+            <a href="http://example.com">Home</a>
+        </li>
+        <li class="child-active">
+            <a href="http://example.com/about">About</a>
+            <ul>
+                <li class="active">
+                    <a href="http://example.com/about/directions">Directions</a>
+                </li>
+            </ul>
+        </li>
+    </ul>
 
 You might want to render the menus with your own code. The `menuItems` variable is an array of the `RainLab\Pages\Classes\MenuItemReference` objects. Each object has the following properties:
 
@@ -148,22 +143,18 @@ You might want to render the menus with your own code. The `menuItems` variable 
 
 The static menu component also has the `menuItems` property that you can access in the Twig code using the component's alias, for example:
 
-```
-{% for item in staticMenu.menuItems %}
-   <li><a href="{{ item.url }}">{{ item.title }}</a></li>
-{% endfor %}
-```
+    {% for item in staticMenu.menuItems %}
+       <li><a href="{{ item.url }}">{{ item.title }}</a></li>
+    {% endfor %}
 
 ##### Breadcrumbs
 
 The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs: 
 
-```
-<ul>
-    <li><a href="http://example.com/about">About</a></li>
-    <li class="active"><a href="http://example.com/about/directions">Directions</a></li>
-</ul>
-```
+    <ul>
+        <li><a href="http://example.com/about">About</a></li>
+        <li class="active"><a href="http://example.com/about/directions">Directions</a></li>
+    </ul>
 
 The component injects the `breadcrumbs` page variable that contains an array of the `MenuItemReference` objects described above.
 
@@ -171,34 +162,42 @@ The component injects the `breadcrumbs` page variable that contains an array of 
 
 In some cases you might want to mark a specific menu item as active explicitly. You can do that in the page's [`onInit()`](http://octobercms.com/docs/cms/pages#dynamic-pages) function with assigning the `activeMenuItem` page variable a value matching the menu item code you want to make active. Menu item codes are managed in the Edit Menu Item popup.
 
-```
-function onInit()
-{
-    $this['activeMenuItem'] = 'blog';
-}
-```
+    function onInit()
+    {
+        $this['activeMenuItem'] = 'blog';
+    }
+
+##### Linking to static pages
+
+When a static page is first created it will be assigned a file name based on the URL. For example, a page with the URL **/chairs** will create a content file called **static-pages/chairs.htm** in the theme. This file will not change even if the URL is changed at a later time.
+
+To create a link to a static page, use the `|staticPage` filter:
+
+    <a href="{{ 'chairs'|staticPage }}">Go to Chairs</a>
+
+This filter translates to PHP code as:
+
+    echo RainLab\Pages\Classes\Page::url('chairs');
+
+If you want to link to the static page by its URL, simply use the `|app` filter:
+
+    <a href="{{ '/chairs'|app }}">Go to Chairs</a>
 
 ### Placeholders
 
 [Placeholders](http://octobercms.com/docs/cms/layouts#placeholders) defined in the layout are automatically detected by the Static Pages plugin. The Edit Static Page form displays a tab for each placeholder defined in the layout used by the page. Placeholders are defined in the layout in the usual way: 
 
-```
-{% placeholder ordering %}
-```
+    {% placeholder ordering %}
 
 The `placeholder` tag accepts two optional attributes - `title` and `type`. The `title` attribute manages the tab title in the Static Page editor, and the type manages the placeholder type. There are two types supported at the moment - **text** and **html**. The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code and the `default` attribute, if it's presented. Example:
 
-```
-{% placeholder ordering title="Ordering information" type="text" %}
-```
+    {% placeholder ordering title="Ordering information" type="text" %}
 
-or 
+or
 
-```
-{% placeholder ordering default title="Ordering information" type="text" %}
-    There is no ordering information for this product.
-{% endplaceholder %}
-```
+    {% placeholder ordering default title="Ordering information" type="text" %}
+        There is no ordering information for this product.
+    {% endplaceholder %}
 
 ### Creating new menu item types
 
@@ -208,60 +207,53 @@ Plugins can extend the Static Pages plugin with new menu item types. Please refe
 * `pages.menuitem.getTypeInfo` event handler returns detailed information about a menu item type.
 * `pages.menuitem.resolveItem` event handler "resolves" a menu item information and returns the actual item URL, title, an indicator whether the item is currently active, and subitems, if any.
 
-
 The next example shows an event handler registration code for the Blog plugin. The Blog plugin registers two item types. As you can see, the Blog plugin uses the Category class to handle the events. That's a recommended approach.
 
-```
-public function boot()
-{
-    Event::listen('pages.menuitem.listTypes', function() {
-        return [
-            'blog-category'=>'Blog category',
-            'all-blog-categories'=>'All blog categories',
-        ];
-    });
+    public function boot()
+    {
+        Event::listen('pages.menuitem.listTypes', function() {
+            return [
+                'blog-category'=>'Blog category',
+                'all-blog-categories'=>'All blog categories',
+            ];
+        });
 
-    Event::listen('pages.menuitem.getTypeInfo', function($type) {
-        if ($type == 'blog-category' || $type == 'all-blog-categories')
-            return Category::getMenuTypeInfo($type);
-    });
+        Event::listen('pages.menuitem.getTypeInfo', function($type) {
+            if ($type == 'blog-category' || $type == 'all-blog-categories')
+                return Category::getMenuTypeInfo($type);
+        });
 
-    Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
-        if ($type == 'blog-category' || $type == 'all-blog-categories')
-            return Category::resolveMenuItem($item, $url, $theme);
-    });
-}
-```
+        Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
+            if ($type == 'blog-category' || $type == 'all-blog-categories')
+                return Category::resolveMenuItem($item, $url, $theme);
+        });
+    }
 
 ##### Registering new menu item types
 
 New menu item types are registered with the `pages.menuitem.listTypes` event handlers. The handler should return an associative array with the type codes in indexes and type names in values. It's highly recommended to use the plugin name in the type codes, to avoid conflicts with other menu item type providers. Example:
 
-```
-[
-    `my-plugin-item-type` => 'My plugin menu item type'
-]
-```
+    [
+        `my-plugin-item-type` => 'My plugin menu item type'
+    ]
 
 ##### Returning information about an item type
 
 Plugins should provide detailed information about the supported menu item types with the `pages.menuitem.getTypeInfo` event handlers. The handler gets a single parameter - the menu item type code (one of the codes you registered with the `pages.menuitem.listTypes` handler). The handler code must check whether the requested item type code belongs to the plugin. The handler should return an associative array in the following format:
 
-```
-Array (
-    [dynamicItems]  => 0,
-    [nesting]       => 0,
-    [references]    => Array (
-        [11] => News,
-        [12] => Tutorials,
-        [33] => Philosophy
+    Array (
+        [dynamicItems]  => 0,
+        [nesting]       => 0,
+        [references]    => Array (
+            [11] => News,
+            [12] => Tutorials,
+            [33] => Philosophy
+        )
+        [cmsPages]      => Array (
+            [0] => Cms\Classes\Page object,
+            [1] => Cms\Classes\Page object
+        )
     )
-    [cmsPages]      => Array (
-        [0] => Cms\Classes\Page object,
-        [1] => Cms\Classes\Page object
-    )
-)
-```
 
 All elements of the array are optional and depend on the menu item type. The default values for `dynamicItems` and `nesting` are `false` and these keys can be omitted.
 
@@ -277,46 +269,39 @@ The `nesting` element is a Boolean value indicating whether the item type suppor
 
 The `references` element is a list objects the menu item could refer to. For example, the **Blog category** menu item type returns a list of the blog categories. Some object supports nesting, for example static pages. Other objects don't support nesting, for example the blog categories. The format of the `references` value depends on whether the references have subitems or not. The format for references that don't support subitems is
 
-```
-['item-key' => 'Item title']
-```
+    ['item-key' => 'Item title']
 
 The format for references with subitems is 
 
-```
-['item-key' => ['title'=>'Item title', 'items'=>[...]]]
-```
+    ['item-key' => ['title'=>'Item title', 'items'=>[...]]]
 
 The reference keys should reflect the object identifier they represent. For blog categories keys match the category identifiers. A plugin should be able to load an object by its key in the `pages.menuitem.resolveItem` event handler. The references element is optional, it is required only if a menu item type supports the Reference drop-down, or, in other words, if the user should be able to select an object the menu item refers to.
-
 
 ###### cmsPages element
 
 The `cmsPages` is a list of CMS pages that can display objects supported by the menu item type. For example, for the **Blog category** item type the page list contains pages that host the `blogPosts` component. That component can display a blog category contents. The `cmsPages` element should be an array of the `Cms\Classes\Page` objects. The next code snippet shows how to return a list of pages hosting a specific component.
 
-```
-use Cms\Classes\Page as CmsPage;
-use Cms\Classes\Theme;
+    use Cms\Classes\Page as CmsPage;
+    use Cms\Classes\Theme;
 
-...
+    ...
 
-$result = [];
-...
-$theme = Theme::getActiveTheme();
-$pages = CmsPage::listInTheme($theme, true);
+    $result = [];
+    ...
+    $theme = Theme::getActiveTheme();
+    $pages = CmsPage::listInTheme($theme, true);
 
-$cmsPages = [];
-foreach ($pages as $page) {
-    if (!$page->hasComponent('blogPosts'))
-        continue;
+    $cmsPages = [];
+    foreach ($pages as $page) {
+        if (!$page->hasComponent('blogPosts'))
+            continue;
 
-    $cmsPages[] = $page;
-}
+        $cmsPages[] = $page;
+    }
 
-$result['cmsPages'] = $cmsPages;
-...
-return $result;
-```
+    $result['cmsPages'] = $cmsPages;
+    ...
+    return $result;
 
 ##### Resolving menu items
 
@@ -328,25 +313,24 @@ When the Static Pages plugin generates a menu on the front-end, every menu item 
 * `$theme` - the current theme object (`Cms\Classes\Theme`).
 
 The event handler should return an array. The array keys depend on whether the menu item contains subitems or not. Expected result format:
-```
-Array (
-    [url] => http://example.com/blog/category/another-category
-    [isActive] => 1,
-    [items] => Array (
-        [0] => Array  (
-            [title] => Another category
-            [url] => http://example.com/blog/category/another-category
-            [isActive] => 1
-        )
 
-        [1] => Array (
-                [title] => News
-                [url] => http://example.com/blog/category/news
-                [isActive] => 0
+    Array (
+        [url] => http://example.com/blog/category/another-category
+        [isActive] => 1,
+        [items] => Array (
+            [0] => Array  (
+                [title] => Another category
+                [url] => http://example.com/blog/category/another-category
+                [isActive] => 1
+            )
+
+            [1] => Array (
+                    [title] => News
+                    [url] => http://example.com/blog/category/news
+                    [isActive] => 0
+            )
         )
     )
-)
-```
 
 The `url` and `isActive` elements are required for menu items that point to a specific page, but it's not always the case. For example, the **All blog categories** menu item type doesn't have a specific page to point to. It generates multiple menu items. In this case the items should be listed in the `items` element. The `items` element should only be provided if the menu item's `nesting` property is `true`. 
 
@@ -354,26 +338,23 @@ As the resolving process occurs every time when the front-end page is rendered, 
 
 If your item type requires a CMS page to resolve item URLs, you might need to return the selected page's URL, and sometimes pass parameters to the page through the URL. The next code example shows how to load a blog category CMS page referred by a menu item and how to generate an URL to this page. The blog category page has the `blogPosts` component that can load the requested category slug from the URL. We assume that the URL parameter is called 'slug', although it can be edited manually. We skip the part that loads the real parameter name for the simplicity. Please refer to the [Blog plugin](http://octobercms.com/plugin/rainlab-blog) for the reference.
 
-```
-use Cms\Classes\Page as CmsPage;
-use October\Rain\Router\Helper as RouterHelper;
-use Str;
-use URL;
+    use Cms\Classes\Page as CmsPage;
+    use October\Rain\Router\Helper as RouterHelper;
+    use Str;
+    use URL;
 
-...
+    ...
 
-$page = CmsPage::loadCached($theme, $item->cmsPage);
+    $page = CmsPage::loadCached($theme, $item->cmsPage);
 
-// Always check if the page can be resolved
-if (!$page)
-    return; 
+    // Always check if the page can be resolved
+    if (!$page)
+        return; 
 
-// Generate the URL 
-$url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug]);
+    // Generate the URL 
+    $url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug]);
 
-$url = URL::to(Str::lower(RouterHelper::normalizeUrl($url)));
-
-```
+    $url = URL::to(Str::lower(RouterHelper::normalizeUrl($url)));
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
 
@@ -407,9 +388,7 @@ The snippet properties are optional and can be defined with the grid control on 
 
 Any property defined in the property list can be accessed within the partial markdown as a usual variable, for example: 
 
-```
-The country name is {{ country }}
-```
+    The country name is {{ country }}
 
 In addition, properties can be passed to the partial components using an [external property value](http://octobercms.com/docs/cms/components#external-property-values).
 
@@ -417,13 +396,11 @@ In addition, properties can be passed to the partial components using an [extern
 
 Any component can be registered as a snippet and be used in Static Pages. To register a snippet, add the `registerPageSnippets()` method to your plugin class in the [registration file](http://octobercms.com/docs/plugin/registration#registration-file). The API for registering a snippet is similar to the one for [registering  components](http://octobercms.com/docs/plugin/registration#component-registration) - the method should return an array with class names in keys and aliases in values:
 
-```
-public function registerPageSnippets()
-{
-    return [
-       '\RainLab\Weather\Components\Weather' => 'weather'
-    ];
-}
-```
+    public function registerPageSnippets()
+    {
+        return [
+           '\RainLab\Weather\Components\Weather' => 'weather'
+        ];
+    }
 
 A same component can be registered with registerPageSnippets() and  registerComponents() and used in CMS pages and Static Pages.

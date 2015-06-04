@@ -1,9 +1,9 @@
 <?php namespace RainLab\Pages\Components;
 
+use Request;
+use Cms\Classes\Theme;
 use Cms\Classes\ComponentBase;
 use RainLab\Pages\Classes\Router;
-use Cms\Classes\Theme;
-use Request;
 
 /**
  * The static page component.
@@ -36,15 +36,17 @@ class StaticPage extends ComponentBase
     public function onRun()
     {
         $url = Request::path();
-        
-        if (!strlen($url))
+
+        if (!strlen($url)) {
             $url = '/';
+        }
 
         $router = new Router(Theme::getActiveTheme());
         $this->page = $this->page['page'] = $router->findByUrl($url);
 
-        if ($this->page)
+        if ($this->page) {
             $this->title = $this->page['title'] = $this->page->getViewBag()->property('title');
+        }
     }
 
     public function content()
@@ -53,12 +55,14 @@ class StaticPage extends ComponentBase
         // render time. Calling the page's getProcessedMarkup() method in the
         // onRun() handler is too early as it triggers rendering component-based
         // snippets defined on the static page too early in the page life cycle. -ab
-        
-        if ($this->contentCached !== false)
-            return $this->contentCached;
 
-        if ($this->page)
+        if ($this->contentCached !== false) {
+            return $this->contentCached;
+        }
+
+        if ($this->page) {
             return $this->contentCached = $this->page->getProcessedMarkup();
+        }
 
         $this->contentCached = '';
     }

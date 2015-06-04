@@ -164,6 +164,19 @@ class Plugin extends PluginBase
         });
     }
 
+    /**
+     * Register new Twig variables
+     * @return array
+     */
+    public function registerMarkupTags()
+    {
+        return [
+            'filters' => [
+                'staticPage' => ['RainLab\Pages\Classes\Page', 'url'],
+            ]
+        ];
+    }
+
     public static function clearCache()
     {
         $theme = Theme::getEditTheme();
