@@ -73,6 +73,10 @@ class Page extends Content
         $this->placeholders = new PlaceholderList;
     }
 
+    //
+    // CMS Object
+    //
+
     /**
      * Returns the directory name corresponding to the object type.
      * For pages the directory name is "pages", for layouts - "layouts", etc.
@@ -81,6 +85,59 @@ class Page extends Content
     public static function getObjectTypeDirName()
     {
         return 'content/static-pages';
+    }
+
+    /**
+     * Determines if the content of the code section should be wrapped to PHP tags.
+     * @return boolean
+     */
+    protected function wrapCodeToPhpTags()
+    {
+        return false;
+    }
+
+    /**
+     * Sets the object attributes.
+     * @param array $attributes A list of attributes to set.
+     */
+    public function fill(array $attributes)
+    {
+        parent::fill($attributes);
+
+        /*
+         * When the page is saved, copy setting properties to the view bag.
+         * This is required for the back-end editors.
+         */
+        if (array_key_exists('settings', $attributes) && array_key_exists('viewBag', $attributes['settings'])) {
+            $this->getViewBag()->setProperties($attributes['settings']['viewBag']);
+            $this->fillViewBagArray();
+        }
+    }
+
+    /**
+     * Validates the object properties.
+     * Throws a ValidationException in case of an error.
+     */
+    protected function validate()
+    {
+        $pages = Page::listInTheme($this->theme, true);
+
+        Validator::extend('uniqueUrl', function($attribute, $value, $parameters) use ($pages) {
+            $value = trim(strtolower($value));
+
+            foreach ($pages as $existingPage) {
+                if (
+                    $existingPage->getBaseFileName() !== $this->getBaseFileName() &&
+                    strtolower($existingPage->getViewBag()->property('url')) == $value
+                ) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+
+        parent::validate();
     }
 
     /**
@@ -122,24 +179,6 @@ class Page extends Content
     }
 
     /**
-     * Sets the object attributes.
-     * @param array $attributes A list of attributes to set.
-     */
-    public function fill(array $attributes)
-    {
-        parent::fill($attributes);
-
-        /*
-         * When the page is saved, copy setting properties to the view bag.
-         * This is required for the back-end editors.
-         */
-        if (array_key_exists('settings', $attributes) && array_key_exists('viewBag', $attributes['settings'])) {
-            $this->getViewBag()->setProperties($attributes['settings']['viewBag']);
-            $this->fillViewBagArray();
-        }
-    }
-
-    /**
      * Deletes the object from the disk.
      * Recursively deletes subpages. Returns a list of file names of deleted pages.
      * @return array
@@ -176,6 +215,10 @@ class Page extends Content
         return $result;
     }
 
+    //
+    // Getters
+    //
+
     /**
      * Returns a list of layouts available in the theme. 
      * This method is used by the form widget.
@@ -209,6 +252,10 @@ class Page extends Content
     {
         return $this->code;
     }
+
+    //
+    // Placeholder processing
+    //
 
     /**
      * Returns information about placeholders defined in the page layout.
@@ -317,6 +364,10 @@ class Page extends Content
         return $this->processedBlockMarkupCache[$placeholderName] = $markup;
     }
 
+    //
+    // Snippets
+    //
+
     /**
      * Initializes CMS components associated with the page.
      */
@@ -334,7 +385,7 @@ class Page extends Content
             // if they're not defined yet. This is required because
             // not all snippet components are registered as components,
             // but it's safe to register them in render-time.
-            
+
             if (!$componentManager->hasComponent($componentInfo['class'])) {
                 $componentManager->registerComponent($componentInfo['class'], $componentInfo['alias']);
             }
@@ -347,66 +398,18 @@ class Page extends Content
         }
     }
 
-    /**
-     * Validates the object properties.
-     * Throws a ValidationException in case of an error.
-     */
-    protected function validate()
-    {
-        $pages = Page::listInTheme($this->theme, true);
-
-        Validator::extend('uniqueUrl', function($attribute, $value, $parameters) use ($pages) {
-            $value = trim(strtolower($value));
-
-            foreach ($pages as $existingPage) {
-                if (
-                    $existingPage->getBaseFileName() !== $this->getBaseFileName() &&
-                    strtolower($existingPage->getViewBag()->property('url')) == $value
-                ) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-
-        parent::validate();
-    }
+    //
+    // Static Menu API
+    //
 
     /**
-     * Returns a list of options for the Reference drop-down menu in the
-     * menu item configuration form, when the Static Page item type is selected.
-     * @return array Returns an array
+     * Clears the menu item cache
+     * @param \Cms\Classes\Theme $theme Specifies the current theme.
      */
-    protected static function listStaticPageMenuOptions()
+    public static function clearMenuCache($theme)
     {
-        $theme = Theme::getEditTheme();
-
-        $pageList = new PageList($theme);
-        $pageTree = $pageList->getPageTree(true);
-
-        $iterator = function($pages) use (&$iterator) {
-            $result = [];
-
-            foreach ($pages as $pageInfo) {
-                $pageName = $pageInfo->page->getViewBag()->property('title');
-                $fileName = $pageInfo->page->getBaseFileName();
-
-                if (!$pageInfo->subpages) {
-                    $result[$fileName] = $pageName;
-                }
-                else {
-                    $result[$fileName] = [
-                        'title' => $pageName,
-                        'items' => $iterator($pageInfo->subpages)
-                    ];
-                }
-            }
-
-            return $result;
-        };
-
-        return $iterator($pageTree);
+        $key = crc32($theme->getPath()).'static-page-menu-tree';
+        Cache::forget($key);
     }
 
     /**
@@ -513,7 +516,7 @@ class Page extends Content
 
     /**
      * Builds and caches a menu item tree.
-     * This method is used internally.
+     * This method is used internally for menu items and breadcrumbs.
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
      * @return array Returns an array containing the page information
      */
@@ -573,21 +576,38 @@ class Page extends Content
     }
 
     /**
-     * Clears the menu item cache
-     * @param \Cms\Classes\Theme $theme Specifies the current theme.
+     * Returns a list of options for the Reference drop-down menu in the
+     * menu item configuration form, when the Static Page item type is selected.
+     * @return array Returns an array
      */
-    public static function clearMenuCache($theme)
+    protected static function listStaticPageMenuOptions()
     {
-        $key = crc32($theme->getPath()).'static-page-menu-tree';
-        Cache::forget($key);
-    }
+        $theme = Theme::getEditTheme();
 
-    /**
-     * Determines if the content of the code section should be wrapped to PHP tags.
-     * @return boolean
-     */
-    protected function wrapCodeToPhpTags()
-    {
-        return false;
+        $pageList = new PageList($theme);
+        $pageTree = $pageList->getPageTree(true);
+
+        $iterator = function($pages) use (&$iterator) {
+            $result = [];
+
+            foreach ($pages as $pageInfo) {
+                $pageName = $pageInfo->page->getViewBag()->property('title');
+                $fileName = $pageInfo->page->getBaseFileName();
+
+                if (!$pageInfo->subpages) {
+                    $result[$fileName] = $pageName;
+                }
+                else {
+                    $result[$fileName] = [
+                        'title' => $pageName,
+                        'items' => $iterator($pageInfo->subpages)
+                    ];
+                }
+            }
+
+            return $result;
+        };
+
+        return $iterator($pageTree);
     }
 }

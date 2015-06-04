@@ -51,8 +51,14 @@ class Controller
         $cmsPage->title = $viewBag->property('title');
         $cmsPage->settings['url'] = $url;
         $cmsPage->settings['components'] = [];
-        $cmsPage->settings['hidden'] = $viewBag->property('hidden');
-        $cmsPage->settings['layout'] = $viewBag->property('layout');
+
+        /*
+         * Transfer specific values from the content view bag to the page settings object.
+         */
+        $viewBagToSettings = ['hidden', 'layout', 'meta_title', 'meta_description'];
+        foreach ($viewBagToSettings as $property) {
+            $cmsPage->settings[$property] = $viewBag->property($property);
+        }
 
         return $cmsPage;
     }

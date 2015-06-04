@@ -155,7 +155,7 @@
 
             if (componentClass)
                 $snippet.attr('data-inspector-class', componentClass)
-            
+
             this.contentEditable = false
         })
 

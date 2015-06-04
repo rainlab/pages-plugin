@@ -1,5 +1,5 @@
 {% for item in items %}
-    <li class="{{ item.isActive ? 'active' : '' }} {{ item.isChildActive ? 'child-active' : '' }}">
+    <li role="presentation" class="{{ item.isActive ? 'active' : '' }} {{ item.isChildActive ? 'child-active' : '' }}">
         <a href="{{ item.url }}">{{ item.title }}</a>
 
         {% if item.items %}
