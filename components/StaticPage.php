@@ -16,13 +16,21 @@ class StaticPage extends ComponentBase
     /**
      * @var \RainLab\Pages\Classes\Page A reference to the static page object
      */
-    public $page;
+    public $pageObject;
 
     /**
      * @var string The static page title
      */
     public $title;
 
+    /**
+     * @var array Extra data added by syntax fields.
+     */
+    public $extraData = [];
+
+    /**
+     * @var string Content cache.
+     */
     protected $contentCached = false;
 
     public function componentDetails()
@@ -42,11 +50,17 @@ class StaticPage extends ComponentBase
         }
 
         $router = new Router(Theme::getActiveTheme());
-        $this->page = $this->page['page'] = $router->findByUrl($url);
+        $this->pageObject = $this->page['page'] = $router->findByUrl($url);
 
-        if ($this->page) {
-            $this->title = $this->page['title'] = $this->page->getViewBag()->property('title');
+        if ($this->pageObject) {
+            $this->title = $this->page['title'] = $this->pageObject->getViewBag()->property('title');
+            $this->extraData = $this->page['extraData'] = $this->pageObject->viewBag;
         }
+    }
+
+    public function page()
+    {
+        return $this->pageObject;
     }
 
     public function content()

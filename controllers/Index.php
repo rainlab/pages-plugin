@@ -150,8 +150,9 @@ class Index extends Controller
         $parent = Request::input('parent');
         $parentPage = null;
 
-        if ($type == 'page' && strlen($parent))
+        if ($type == 'page' && strlen($parent)) {
             $parentPage = StaticPage::load($this->theme, $parent);
+        }
 
         $widget = $this->makeObjectFormWidget($type, $object);
         $this->vars['objectPath'] = '';
@@ -193,8 +194,9 @@ class Index extends Controller
 
         $type = Request::input('type');
         $objects = Request::input('object');
-        if (!$objects)
+        if (!$objects) {
             $objects = Request::input('template');
+        }
 
         $error = null;
         $deleted = [];
@@ -377,17 +379,27 @@ class Index extends Controller
         if ($type == 'page') {
             $widget->bindEvent('form.extendFieldsBefore', function() use ($widget, $object) {
                 $this->addPagePlaceholders($widget, $object);
+                $this->addPageSyntaxFields($widget, $object);
             });
         }
 
         return $widget;
     }
 
+    protected function addPageSyntaxFields($formWidget, $page)
+    {
+        $fields = $page->listLayoutSyntaxFields();
+
+        foreach ($fields as $fieldCode => $fieldConfig) {
+            $formWidget->tabs['fields']['viewBag['.$fieldCode.']'] = $fieldConfig;
+        }
+    }
+
     protected function addPagePlaceholders($formWidget, $page)
     {
         $placeholders = $page->listLayoutPlaceholders();
 
-        foreach ($placeholders as $placeholderCode=>$info) {
+        foreach ($placeholders as $placeholderCode => $info) {
             $placeholderTitle = $info['title'];
             $fieldConfig = [
                 'tab' => $placeholderTitle,

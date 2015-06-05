@@ -16,6 +16,7 @@ use Cms\Classes\Content;
 use Cms\Classes\ComponentManager;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
+use October\Rain\Parse\Syntax\Parser as SyntaxParser;
 use ApplicationException;
 
 /**
@@ -26,19 +27,15 @@ use ApplicationException;
  */
 class Page extends Content
 {
-    protected $viewBagValidationRules = [
-        'title' => 'required',
-        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-]*$/i', 'uniqueUrl']
-    ];
-
     /**
-     * @var array These view bag properties will be available as regular properties.
+     * @var array These properties will be available as regular properties,
+     * by looking the settings and viewBag values.
      */
-    protected $viewBagVisible = [
+    protected $visible = [
         'title',
         'url',
         'layout',
-        'hidden',
+        'is_hidden',
         'navigation_hidden',
         'meta_title',
         'meta_description'
@@ -50,6 +47,11 @@ class Page extends Content
         'code',
         'fileName',
         'parent'
+    ];
+
+    protected $viewBagValidationRules = [
+        'title' => 'required',
+        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-]*$/i', 'uniqueUrl']
     ];
 
     /**
@@ -65,6 +67,8 @@ class Page extends Content
     public $placeholders;
 
     protected static $menuTreeCache = null;
+
+    protected static $layoutCache = null;
 
     protected $processedMarkupCache = false;
 
@@ -262,6 +266,14 @@ class Page extends Content
     //
 
     /**
+     * Returns the Twig content string
+     */
+    public function getTwigContent()
+    {
+        return $this->code;
+    }
+
+    /**
      * Returns all the child pages that belong to this one.
      * @return array
      */
@@ -308,11 +320,52 @@ class Page extends Content
     }
 
     /**
-     * Returns the Twig content string
+     * Looks up the Layout Cms object for this page.
+     * @return Cms\Classes\Layout
      */
-    public function getTwigContent()
+    public function getLayoutObject()
     {
-        return $this->code;
+        if (self::$layoutCache !== null) {
+            return self::$layoutCache;
+        }
+
+        $viewBag = $this->getViewBag();
+        $layout = $viewBag->property('layout');
+
+        if (!$layout) {
+            $layouts = $this->getLayoutOptions();
+            $layout = count($layouts) ? array_keys($layouts)[0] : null;
+        }
+
+        if (!$layout) {
+            return null;
+        }
+
+        $layout = Layout::load($this->theme, $layout);
+        if (!$layout) {
+            return null;
+        }
+
+        self::$layoutCache = $layout;
+    }
+
+    //
+    // Syntax field processing
+    //
+
+    public function listLayoutSyntaxFields()
+    {
+        if (!$layout = $this->getLayoutObject()) {
+            return [];
+        }
+
+        $syntax = SyntaxParser::parse($layout->markup, ['tagPrefix' => 'page:']);
+        $result = $syntax->toEditor();
+
+        // Field names cannot clash with conflicting visible names
+        $result = array_diff_key($result, array_flip($this->visible));
+
+        return $result;
     }
 
     //
@@ -325,20 +378,7 @@ class Page extends Content
      */
     public function listLayoutPlaceholders()
     {
-        $viewBag = $this->getViewBag();
-        $layout = $viewBag->property('layout');
-
-        if (!$layout) {
-            $layouts = $this->getLayoutOptions();
-            $layout = count($layouts) ? array_keys($layouts)[0] : null;
-        }
-
-        if (!$layout) {
-            return [];
-        }
-
-        $layout = Layout::load($this->theme, $layout);
-        if (!$layout) {
+        if (!$layout = $this->getLayoutObject()) {
             return [];
         }
 

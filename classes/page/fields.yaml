@@ -32,7 +32,7 @@ tabs:
             type: dropdown
             options: getLayoutOptions
 
-        viewBag[hidden]:
+        viewBag[is_hidden]:
             tab: cms::lang.editor.settings
             span: left
             label: rainlab.pages::lang.editor.hidden

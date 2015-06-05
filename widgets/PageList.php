@@ -108,7 +108,7 @@ class PageList extends WidgetBase
 
                 foreach ($pages as $page) {
                     if ($this->textMatchesSearch($words, $this->subtreeToText($page))) {
-                        $result[] = (object)[
+                        $result[] = (object) [
                             'page' => $page->page,
                             'subpages' => $iterator($page->subpages)
                         ];

@@ -1,15 +1,15 @@
 <?php namespace RainLab\Pages;
 
-use Backend;
 use Event;
-use System\Classes\PluginBase;
+use Backend;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
+use RainLab\Pages\Classes\SnippetManager;
 use Cms\Classes\Theme;
 use Cms\Classes\Controller as CmsController;
-use RainLab\Pages\Classes\SnippetManager;
+use System\Classes\PluginBase;
 
 class Plugin extends PluginBase
 {
@@ -118,12 +118,14 @@ class Plugin extends PluginBase
         Event::listen('cms.block.render', function($blockName, $blockContents) {
             $page = CmsController::getController()->getPage();
 
-            if (!isset($page->apiBag['staticPage']))
+            if (!isset($page->apiBag['staticPage'])) {
                 return;
+            }
 
             $contents = Controller::instance()->getPlaceholderContents($page, $blockName, $blockContents);
-            if (strlen($contents))
+            if (strlen($contents)) {
                 return $contents;
+            }
         });
 
         Event::listen('pages.menuitem.listTypes', function() {
@@ -147,8 +149,9 @@ class Plugin extends PluginBase
         });
 
         Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
-            if ($formWidget->model instanceof \Cms\Classes\Partial)
+            if ($formWidget->model instanceof \Cms\Classes\Partial) {
                 Snippet::extendPartialForm($formWidget);
+            }
         });
 
         Event::listen('cms.template.save', function($controller, $template, $type) {
@@ -161,6 +164,12 @@ class Plugin extends PluginBase
 
         Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template) {
             Snippet::processTemplateSettings($template);
+        });
+
+        Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
+            if ($template instanceof \Cms\Classes\Layout) {
+                $dataHolder->content = Controller::instance()->parseSyntaxFields($dataHolder->content);
+            }
         });
     }
 

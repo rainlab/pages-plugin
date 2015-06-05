@@ -5,6 +5,8 @@ use Cms\Classes\Page;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\CmsException;
+use October\Rain\Parse\Syntax\Parser as SyntaxParser;
+use Exception;
 
 /**
  * Represents a static page controller.
@@ -55,7 +57,7 @@ class Controller
         /*
          * Transfer specific values from the content view bag to the page settings object.
          */
-        $viewBagToSettings = ['hidden', 'layout', 'meta_title', 'meta_description'];
+        $viewBagToSettings = ['is_hidden', 'layout', 'meta_title', 'meta_description'];
         foreach ($viewBagToSettings as $property) {
             $cmsPage->settings[$property] = $viewBag->property($property);
         }
@@ -103,5 +105,18 @@ class Controller
         }
 
         $page->apiBag['staticPage']->initCmsComponents($cmsController);
+    }
+
+    public function parseSyntaxFields($content)
+    {
+        try {
+            return SyntaxParser::parse($content, [
+                'varPrefix' => 'extraData.',
+                'tagPrefix' => 'page:'
+            ])->toTwig();
+        }
+        catch (Exception $ex) {
+            return $content;
+        }
     }
 }
