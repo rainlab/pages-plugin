@@ -67,10 +67,10 @@ class Snippet
     {
         $viewBag = $partial->getViewBag();
 
-        $this->code = $viewBag->property('staticPageSnippetCode');
+        $this->code = $viewBag->property('snippetCode');
         $this->description = $partial->description;
-        $this->name = $viewBag->property('staticPageSnippetName');
-        $this->properties = $viewBag->property('staticPageSnippetProperties', []);
+        $this->name = $viewBag->property('snippetName');
+        $this->properties = $viewBag->property('snippetProperties', []);
     }
 
     /**
@@ -250,8 +250,8 @@ class Snippet
 
     public static function processTemplateSettingsArray($settingsArray)
     {
-        if (isset($settingsArray['viewBag']['staticPageSnippetProperties']['TableData'])) {
-            $rows = $settingsArray['viewBag']['staticPageSnippetProperties']['TableData'];
+        if (isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+            $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
 
             $columns = ['title', 'property', 'type', 'default', 'options'];
 
@@ -270,23 +270,23 @@ class Snippet
                     continue;
                 }
 
-                $properties['staticPageSnippetProperties['.$row['property'].'|type]'] = $row['type'];
-                $properties['staticPageSnippetProperties['.$row['property'].'|title]'] = $row['title'];
+                $properties['snippetProperties['.$row['property'].'|type]'] = $row['type'];
+                $properties['snippetProperties['.$row['property'].'|title]'] = $row['title'];
 
                 if (isset($row['default']) && strlen($row['default'])) {
-                    $properties['staticPageSnippetProperties[' . $row['property'] . '|default]'] = $row['default'];
+                    $properties['snippetProperties[' . $row['property'] . '|default]'] = $row['default'];
                 }
 
                 if (isset($row['options']) && strlen($row['options'])) {
                     $options = self::dropDownOptionsToArray($row['options']);
 
                     foreach ($options as $index => $option) {
-                        $properties['staticPageSnippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
+                        $properties['snippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
                     }
                 }
             }
 
-            unset($settingsArray['viewBag']['staticPageSnippetProperties']);
+            unset($settingsArray['viewBag']['snippetProperties']);
 
             foreach ($properties as $name => $value) {
                 $settingsArray['viewBag'][$name] = $value;
@@ -298,11 +298,11 @@ class Snippet
 
     public static function processTemplateSettings($template)
     {
-        if (!isset($template->viewBag['staticPageSnippetProperties'])) {
+        if (!isset($template->viewBag['snippetProperties'])) {
             return;
         }
 
-        $parsedProperties = self::parseIniProperties($template->viewBag['staticPageSnippetProperties'], false);
+        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties'], false);
 
         foreach ($parsedProperties as $index=>&$property) {
             $property['id'] = $index;
@@ -312,7 +312,7 @@ class Snippet
             }
         }
 
-        $template->viewBag['staticPageSnippetProperties'] = $parsedProperties;
+        $template->viewBag['snippetProperties'] = $parsedProperties;
     }
 
     protected static function dropDownOptionsToArray($optionsString)
@@ -328,7 +328,7 @@ class Snippet
 
                 if (strlen($key)) {
                     if (!preg_match('/^[0-9a-z-_]+$/i', $key)) {
-                        throw new ValidationException(['staticPageSnippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                        throw new ValidationException(['snippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
                     }
 
                     $result[$key] = trim($parts[1]);
@@ -370,7 +370,7 @@ class Snippet
             'span' => 'left'
         ];
 
-        $formWidget->tabs['fields']['viewBag[staticPageSnippetCode]'] = $fieldConfig;
+        $formWidget->tabs['fields']['viewBag[snippetCode]'] = $fieldConfig;
 
         /*
          * Snippet description field
@@ -384,7 +384,7 @@ class Snippet
             'span' => 'right'
         ];
 
-        $formWidget->tabs['fields']['viewBag[staticPageSnippetName]'] = $fieldConfig;
+        $formWidget->tabs['fields']['viewBag[snippetName]'] = $fieldConfig;
 
         /*
          * Snippet properties field
@@ -442,7 +442,7 @@ class Snippet
             ]
         ];
 
-       $formWidget->tabs['fields']['viewBag[staticPageSnippetProperties]'] = $fieldConfig;
+       $formWidget->tabs['fields']['viewBag[snippetProperties]'] = $fieldConfig;
     }
 
     protected static function extractSnippetsFromMarkup($markup, $theme)
