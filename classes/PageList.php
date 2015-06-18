@@ -83,6 +83,66 @@ class PageList
     }
 
     /**
+     * Returns the parent name of the specified page.
+     * @param \Cms\Classes\Page $page Specifies a page object.
+     * @param string Returns the parent page name.
+     */
+    public function getPageParent($page)
+    {
+        $pagesConfig = $this->getPagesConfig();
+        $requestedFileName = $page->getBaseFileName();
+
+        $parent = null;
+
+        $iterator = function($configPages) use (&$iterator, &$parent, $requestedFileName) {
+            foreach ($configPages as $fileName => $subpages) {
+                if ($fileName == $requestedFileName) {
+                    return true;
+                }
+
+                if ($iterator($subpages) == true) {
+                    $parent = $fileName;
+                    return true;
+                }
+            }
+        };
+
+        $iterator($pagesConfig['static-pages']);
+
+        return $parent;
+    }
+
+    /**
+     * Returns a part of the page hierarchy starting from the specified page.
+     * @param \Cms\Classes\Page $page Specifies a page object.
+     * @param array Returns a nested array of page names.
+     */
+    public function getPageSubTree($page)
+    {
+        $pagesConfig = $this->getPagesConfig();
+        $requestedFileName = $page->getBaseFileName();
+
+        $subTree = [];
+
+        $iterator = function($configPages) use (&$iterator, &$subTree, $requestedFileName) {
+            foreach ($configPages as $fileName => $subpages) {
+                if ($fileName == $requestedFileName) {
+                    $subTree = $subpages;
+                    return true;
+                }
+
+                if ($iterator($subpages) == true) {
+                    return true;
+                }
+            }
+        };
+
+        $iterator($pagesConfig['static-pages']);
+
+        return $subTree;
+    }
+
+    /**
      * Updates the page hierarchy structure in the theme's meta/static-pages.yaml file.
      * @param array $structure A nested associative array representing the page structure
      */
@@ -114,7 +174,7 @@ class PageList
      */
     public function appendPage($page)
     {
-        $parent = $page->parent;
+        $parent = $page->parentFileName;
 
         $originalData = $this->getPagesConfig();
         $structure = $originalData['static-pages'];
@@ -142,36 +202,6 @@ class PageList
     }
 
     /**
-     * Returns a part of the page hierarchy starting from the specified page.
-     * @param \Cms\Classes\Page $page Specifies a page object.
-     * @param array Returns a nested array of page names.
-     */
-    public function getPageSubTree($page)
-    {
-        $pagesConfig = $this->getPagesConfig();
-        $requestedFileName = $page->getBaseFileName();
-
-        $subTree = [];
-
-        $iterator = function($configPages) use (&$iterator, &$pages, &$subTree, $requestedFileName) {
-            foreach ($configPages as $fileName=>$subpages) {
-                if ($fileName == $requestedFileName) {
-                    $subTree = $subpages;
-                    return true;
-                }
-
-                if ($iterator($subpages) == true) {
-                    return true;
-                }
-            }
-        };
-
-        $iterator($pagesConfig['static-pages']);
-
-        return $subTree;
-    }
-
-    /**
      * Removes a part of the page hierarchy starting from the specified page.
      * @param \Cms\Classes\Page $page Specifies a page object.
      */
@@ -185,7 +215,7 @@ class PageList
         $iterator = function($configPages) use (&$iterator, &$pages, $requestedFileName) {
             $result = [];
 
-            foreach ($configPages as $fileName=>$subpages) {
+            foreach ($configPages as $fileName => $subpages) {
                 if ($requestedFileName != $fileName) {
                     $result[$fileName] = $iterator($subpages);
                 }

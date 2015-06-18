@@ -46,7 +46,7 @@ class Page extends Content
         'settings',
         'code',
         'fileName',
-        'parent'
+        'parentFileName'
     ];
 
     protected $viewBagValidationRules = [
@@ -58,7 +58,7 @@ class Page extends Content
      * @var string Contains the page parent file name.
      * This property is used by the page editor internally.
      */
-    public $parent;
+    public $parentFileName;
 
     /**
      * @var RainLab\Pages\Classes\PlaceholderList Contains the page placeholder values.
@@ -69,6 +69,10 @@ class Page extends Content
     protected static $menuTreeCache = null;
 
     protected static $layoutCache = null;
+
+    protected $parentCache = null;
+
+    protected $childrenCache = null;
 
     protected $processedMarkupCache = false;
 
@@ -266,11 +270,23 @@ class Page extends Content
     //
 
     /**
-     * Returns the Twig content string
+     * Returns the parent page that belongs to this one, or null.
+     * @return mixed
      */
-    public function getTwigContent()
+    public function getParent()
     {
-        return $this->code;
+        if ($this->parentCache !== null) {
+            return $this->parentCache;
+        }
+
+        $pageList = new PageList($this->theme);
+
+        $parent = null;
+        if ($fileName = $pageList->getPageParent($this)) {
+            $parent = static::load($this->theme, $fileName);
+        }
+
+        return $this->parentCache = $parent;
     }
 
     /**
@@ -279,6 +295,10 @@ class Page extends Content
      */
     public function getChildren()
     {
+        if ($this->childrenCache !== null) {
+            return $this->childrenCache;
+        }
+
         $children = [];
         $pageList = new PageList($this->theme);
 
@@ -290,7 +310,7 @@ class Page extends Content
             }
         }
 
-        return $children;
+        return $this->childrenCache = $children;
     }
 
     /**
@@ -347,6 +367,14 @@ class Page extends Content
         }
 
         self::$layoutCache = $layout;
+    }
+
+    /**
+     * Returns the Twig content string
+     */
+    public function getTwigContent()
+    {
+        return $this->code;
     }
 
     //

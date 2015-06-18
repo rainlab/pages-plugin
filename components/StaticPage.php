@@ -54,13 +54,23 @@ class StaticPage extends ComponentBase
 
         if ($this->pageObject) {
             $this->title = $this->page['title'] = $this->pageObject->getViewBag()->property('title');
-            $this->extraData = $this->page['extraData'] = $this->pageObject->viewBag;
+            $this->extraData = $this->page['extraData'] = $this->defineExtraData();
         }
     }
 
     public function page()
     {
         return $this->pageObject;
+    }
+
+    public function parent()
+    {
+        return $this->pageObject ? $this->pageObject->getParent() : null;
+    }
+
+    public function children()
+    {
+        return $this->pageObject ? $this->pageObject->getChildren() : null;
     }
 
     public function content()
@@ -74,10 +84,56 @@ class StaticPage extends ComponentBase
             return $this->contentCached;
         }
 
-        if ($this->page) {
-            return $this->contentCached = $this->page->getProcessedMarkup();
+        if ($this->pageObject) {
+            return $this->contentCached = $this->pageObject->getProcessedMarkup();
         }
 
         $this->contentCached = '';
+    }
+
+    /**
+     * Find foreign view bag values and add them to 
+     * the component and page vars.
+     */
+    protected function defineExtraData()
+    {
+        $extraData = array_diff_key(
+            $this->pageObject->viewBag,
+            array_flip($this->pageObject->getVisible())
+        );
+
+        foreach ($extraData as $key => $value) {
+            $this->page[$key] = $value;
+        }
+
+        return $extraData;
+    }
+
+    /**
+     * Implements the getter functionality.
+     * @param  string  $name
+     * @return void
+     */
+    public function __get($name)
+    {
+        if (array_key_exists($name, $this->extraData)) {
+            return $this->extraData[$name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine if an attribute exists on the object.
+     * @param  string  $key
+     * @return void
+     */
+    public function __isset($key)
+    {
+        if (array_key_exists($key, $this->extraData)) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -519,7 +519,7 @@ class Index extends Controller
         $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
 
         if ($type != 'menu' && $type != 'content') {
-            $fields[] = 'parent';
+            $fields[] = 'parentFileName';
         }
 
         foreach ($fields as $field) {

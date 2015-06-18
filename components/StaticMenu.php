@@ -76,6 +76,28 @@ class StaticMenu extends ComponentBase
         return $this->menuItems;
     }
 
+    /**
+     * Counts the total menu items, including children.
+     */
+    public function totalItems()
+    {
+        $countAll = function($items) use (&$countAll) {
+            $count = count($items);
+            foreach ($items as $item) {
+                if (!isset($item->items)) continue;
+                $count += $countAll($item->items);
+            }
+            return $count;
+        };
+
+        return $countAll($this->menuItems());
+    }
+
+    /**
+     * Resets the menu code and rebuilds the menu.
+     * @param string $code
+     * @return array
+     */
     public function resetMenu($code)
     {
         $this->setProperty('code', $code);
