@@ -68,8 +68,6 @@ class Page extends Content
 
     protected static $menuTreeCache = null;
 
-    protected static $layoutCache = null;
-
     protected $parentCache = null;
 
     protected $childrenCache = null;
@@ -345,10 +343,6 @@ class Page extends Content
      */
     public function getLayoutObject()
     {
-        if (self::$layoutCache !== null) {
-            return self::$layoutCache;
-        }
-
         $viewBag = $this->getViewBag();
         $layout = $viewBag->property('layout');
 
@@ -366,7 +360,7 @@ class Page extends Content
             return null;
         }
 
-        self::$layoutCache = $layout;
+        return $layout;
     }
 
     /**
