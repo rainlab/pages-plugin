@@ -366,7 +366,7 @@ class Page extends Content
             return null;
         }
 
-        self::$layoutCache = $layout;
+        return self::$layoutCache = $layout;
     }
 
     /**
