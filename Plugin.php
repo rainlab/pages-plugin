@@ -171,6 +171,18 @@ class Plugin extends PluginBase
                 $dataHolder->content = Controller::instance()->parseSyntaxFields($dataHolder->content);
             }
         });
+
+        Event::listen('backend.richeditor.listTypes', function () {
+            return [
+                'static-page' => 'Static page',
+            ];
+        });
+
+        Event::listen('backend.richeditor.getTypeInfo', function ($type) {
+            if ($type == 'static-page') {
+                return StaticPage::getRichEditorTypeInfo($type);
+            }
+        });
     }
 
     /**

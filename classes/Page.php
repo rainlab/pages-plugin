@@ -555,17 +555,19 @@ class Page extends Content
      */
     public static function getMenuTypeInfo($type)
     {
-        if ($type == 'all-static-pages')
+        if ($type == 'all-static-pages') {
             return [
                 'dynamicItems' => true
             ];
+        }
 
-        if ($type == 'static-page')
+        if ($type == 'static-page') {
             return [
                 'references' => self::listStaticPageMenuOptions(),
                 'nesting' => true,
                 'dynamicItems' => true
             ];
+        }
     }
 
     /**
@@ -636,6 +638,42 @@ class Page extends Content
         }
 
         return $result;
+    }
+
+    /**
+     * Handler for the backend.richeditor.getTypeInfo event.
+     * Returns a menu item type information. The type information is returned as array
+     * @param string $type Specifies the page link type
+     * @return array
+     */
+    public static function getRichEditorTypeInfo($type)
+    {
+        if ($type == 'static-page') {
+
+            $pages = self::listStaticPageMenuOptions();
+
+            $iterator = function($pages) use (&$iterator) {
+                $result = [];
+                foreach ($pages as $pageFile => $page) {
+                    $url = self::url($pageFile);
+
+                    if (is_array($page)) {
+                        $result[$url] = [
+                            'title' => array_get($page, 'title', []),
+                            'links' => $iterator(array_get($page, 'items', []))
+                        ];
+                    }
+                    else {
+                        $result[$url] = $page;
+                    }
+                }
+                return $result;
+            };
+
+            return $iterator($pages);
+        }
+
+        return [];
     }
 
     /**

@@ -32,7 +32,7 @@ class StaticBreadcrumbs extends ComponentBase
     public function onRun()
     {
         $url = Request::path();
-        
+
         if (!strlen($url))
             $url = '/';
 

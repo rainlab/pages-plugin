@@ -157,13 +157,13 @@ class MenuItem
                     continue;
                 }
 
-                foreach ($typeInfo as $name=>$value) {
+                foreach ($typeInfo as $name => $value) {
                     if ($name == 'cmsPages') {
                         $cmsPages = [];
 
                         foreach ($value as $page) {
                             $baseName = $page->getBaseFileName();
-                            $pos = strrpos ($baseName, '/');
+                            $pos = strrpos($baseName, '/');
 
                             $dir = $pos !== false ? substr($baseName, 0, $pos).' / ' : null;
                             $cmsPages[$baseName] = strlen($page->title)

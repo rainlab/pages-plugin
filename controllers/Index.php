@@ -9,11 +9,7 @@ use Request;
 use Response;
 use Exception;
 use BackendMenu;
-use Cms\Classes\Theme;
-use Backend\Classes\Controller;
-use Backend\Classes\WidgetManager;
 use ApplicationException;
-use Backend\Traits\InspectableContainer;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
@@ -21,10 +17,13 @@ use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItem;
-use Cms\Classes\Content;
-use Cms\Widgets\TemplateList;
 use RainLab\Pages\Plugin as PagesPlugin;
 use RainLab\Pages\Classes\SnippetManager;
+use Backend\Classes\Controller;
+use Backend\Classes\WidgetManager;
+use Cms\Classes\Theme;
+use Cms\Classes\Content;
+use Cms\Widgets\TemplateList;
 
 /**
  * Pages and Menus index
@@ -34,7 +33,7 @@ use RainLab\Pages\Classes\SnippetManager;
  */
 class Index extends Controller
 {
-    use InspectableContainer;
+    use \Backend\Traits\InspectableContainer;
 
     protected $theme;
 
@@ -50,8 +49,9 @@ class Index extends Controller
         BackendMenu::setContext('RainLab.Pages', 'pages', 'pages');
 
         try {
-            if (!($this->theme = Theme::getEditTheme()))
+            if (!($this->theme = Theme::getEditTheme())) {
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
+            }
 
             new PageList($this, 'pageList');
             new MenuList($this, 'menuList');
@@ -65,19 +65,6 @@ class Index extends Controller
         catch (Exception $ex) {
             $this->handleError($ex);
         }
-
-        $this->addJs('/modules/backend/assets/js/october.treeview.js', 'core');
-        $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js');
-        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js');
-        $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
-
-        // Preload the code editor class as it could be needed
-        // before it loads dynamically.
-        $this->addJs('/modules/backend/formwidgets/codeeditor/assets/js/codeeditor.js', 'core');
-
-        $this->bodyClass = 'compact-container side-panel-not-fixed';
-        $this->pageTitle = 'rainlab.pages::lang.plugin.name';
-        $this->pageTitleTemplate = '%s Pages';
     }
 
     //
@@ -86,13 +73,21 @@ class Index extends Controller
 
     public function index()
     {
-        // Preload Ace editor modes explicitly, because they could be changed dynamically
-        // depending on a content block type
-        $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/ace.js', 'core');
+        $this->addJs('/modules/backend/assets/js/october.treeview.js', 'core');
+        $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js');
+        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js');
+        $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
 
-        $aceModes = ['markdown', 'plain_text', 'html', 'less', 'css', 'scss', 'sass', 'javascript'];
-        foreach ($aceModes as $mode) {
-            $this->addJs('/modules/backend/formwidgets/codeeditor/assets/vendor/ace/mode-'.$mode.'.js', 'core');
+        // Preload the code editor class as it could be needed
+        // before it loads dynamically.
+        $this->addJs('/modules/backend/formwidgets/codeeditor/assets/js/build-min.js', 'core');
+
+        $this->bodyClass = 'compact-container side-panel-not-fixed';
+        $this->pageTitle = 'rainlab.pages::lang.plugin.name';
+        $this->pageTitleTemplate = '%s Pages';
+
+        if (Request::ajax() && Request::input('formWidgetAlias')) {
+            $this->bindFormWidgetToController();
         }
     }
 
@@ -202,16 +197,17 @@ class Index extends Controller
         $deleted = [];
 
         try {
-            foreach ($objects as $path=>$selected) {
-                if ($selected) {
-                    $object = $this->loadObject($type, $path, true);
-                    if ($object) {
-                        $deletedObjects = $object->delete();
-                        if (is_array($deletedObjects))
-                            $deleted = array_merge($deleted, $deletedObjects);
-                        else
-                            $deleted[] = $path;
-                    }
+            foreach ($objects as $path => $selected) {
+                if (!$selected) continue;
+                $object = $this->loadObject($type, $path, true);
+                if (!$object) continue;
+
+                $deletedObjects = $object->delete();
+                if (is_array($deletedObjects)) {
+                    $deleted = array_merge($deleted, $deletedObjects);
+                }
+                else {
+                    $deleted[] = $path;
                 }
             }
         }
@@ -259,8 +255,9 @@ class Index extends Controller
 
         if (strlen($snippetCode)) {
             $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-            if (!$snippet)
+            if (!$snippet) {
                 throw new ApplicationException(sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode));
+            }
 
             $configuration = $snippet->getProperties();
         }
@@ -358,7 +355,7 @@ class Index extends Controller
         return $types[$type];
     }
 
-    protected function makeObjectFormWidget($type, $object)
+    protected function makeObjectFormWidget($type, $object, $alias = null)
     {
         $formConfigs = [
             'page' => '~/plugins/rainlab/pages/classes/page/fields.yaml',
@@ -372,7 +369,7 @@ class Index extends Controller
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
-        $widgetConfig->alias = 'form'.studly_case($type).md5($object->getFileName()).uniqid();
+        $widgetConfig->alias = $alias ?: 'form'.studly_case($type).md5($object->getFileName()).uniqid();
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
 
@@ -513,8 +510,9 @@ class Index extends Controller
         $settings = $this->formatSettings($this->formatSettings());
 
         $objectData = [];
-        if ($settings)
+        if ($settings) {
             $objectData['settings'] = $settings;
+        }
 
         $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
 
@@ -531,12 +529,14 @@ class Index extends Controller
         if ($type == 'page') {
             $objectData['code'] = $this->setPlaceholders($object);
 
-            if (!empty($objectData['code']) && Config::get('cms.convertLineEndings', false) === true)
+            if (!empty($objectData['code']) && Config::get('cms.convertLineEndings', false) === true) {
                 $objectData['code'] = $this->convertLineEndings($objectData['code']);
+            }
         }
 
-        if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true)
+        if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
+        }
 
         if (!Request::input('objectForceSave') && $object->mtime) {
             if (Request::input('objectMtime') != $object->mtime) {
@@ -575,6 +575,16 @@ class Index extends Controller
                 'objectMtime' => $object->mtime
             ])
         ];
+    }
+
+    protected function bindFormWidgetToController()
+    {
+        $alias = Request::input('formWidgetAlias');
+        $type = Request::input('objectType');
+        $object = $this->loadObject($type, Request::input('objectPath'));
+
+        $widget = $this->makeObjectFormWidget($type, $object, $alias);
+        $widget->bindToController();
     }
 
     /**
