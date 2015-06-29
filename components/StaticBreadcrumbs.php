@@ -47,10 +47,17 @@ class StaticBreadcrumbs extends ComponentBase
             $breadcrumbs = [];
 
             while ($code) {
-                if (!isset($tree[$code]))
+                if (!isset($tree[$code])) {
                     continue;
+                }
 
                 $pageInfo = $tree[$code];
+
+                if ($pageInfo['navigation_hidden']) {
+                    $code = $pageInfo['parent'];
+                    continue;
+                }
+
                 $reference = new MenuItemReference();
                 $reference->title = $pageInfo['title'];
                 $reference->url = URL::to($pageInfo['url']);

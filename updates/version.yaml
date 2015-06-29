@@ -14,3 +14,4 @@
   - Adds meta title and description to pages. Adds |staticPage filter.
   - snippets_rename_viewbag_properties.php
 1.1.1: Add support for Syntax Fields.
+1.1.2: Static Breadcrumbs component now respects the hide from navigation setting.

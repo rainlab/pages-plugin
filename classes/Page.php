@@ -174,11 +174,13 @@ class Page extends Content
             $dir = rtrim(static::getFilePath($this->theme, ''), '/');
 
             $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
-            if (strlen($fileName) > 200)
+            if (strlen($fileName) > 200) {
                 $fileName = substr($fileName, 0, 200);
+            }
 
-            if (!strlen($fileName))
+            if (!strlen($fileName)) {
                 $fileName = 'index';
+            }
 
             $curName = $fileName.'.htm';
             $counter = 2;
@@ -609,8 +611,9 @@ class Page extends Content
                 $branch = [];
 
                 foreach ($items as $itemName) {
-                    if (!isset($tree[$itemName]))
+                    if (!isset($tree[$itemName])) {
                         continue;
+                    }
 
                     $itemInfo = $tree[$itemName];
 
