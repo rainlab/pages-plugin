@@ -17,6 +17,7 @@ return [
         'layout' => 'Layout',
         'layouts_not_found' => 'Layouts not found',
         'saved' => 'The page has been successfully saved.',
+        'tab' => 'Pages',
         'manage_pages' => 'Manage static pages',
         'manage_menus' => 'Manage static menus',
         'access_snippets' => 'Access snippets',
