@@ -88,22 +88,6 @@
 .fancy-layout .pagesTextEditor .ace_scroller {
   padding: 20px;
 }
-.redactor-editor [data-snippet] {
-  display: block;
-  margin: 0 0 15px 0;
-  padding: 10px 10px 10px 36px;
-  border: 2px dotted #bdc3c7;
-  background: white;
-  position: relative;
-  cursor: pointer;
-  color: #6c7071;
-  font: 15px 'Open Sans', Arial, sans-serif;
-  font-weight: 500;
-  line-height: 150%;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
-}
 .redactor-editor [data-snippet]:before {
   content: attr(data-name);
 }
@@ -122,7 +106,7 @@
   top: 12px;
 }
 .redactor-editor [data-snippet].loading:after {
-  background-image: url(../../../../../modules/backend/assets/images/loading-indicator-transparent.svg);
+  background-image: url(../../../../../modules/system/assets/ui/images/loader-transparent.svg);
   background-size: 15px 15px;
   background-position: 50% 50%;
   position: absolute;
@@ -132,12 +116,6 @@
   content: ' ';
   -webkit-animation: spin 1s linear infinite;
   animation: spin 1s linear infinite;
-}
-.redactor-editor [data-snippet]:focus,
-.redactor-editor [data-snippet].inspector-open {
-  border-color: #2581b8;
-  border-style: solid;
-  outline: none;
 }
 @media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-devicepixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx) {
   .redactor-editor [data-snippet]:after {
