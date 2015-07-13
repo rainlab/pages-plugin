@@ -41,7 +41,7 @@
             return
         }
 
-        var $activeEditorTab = $('.control-tabs.secondary .tab-pane.active', $pageForm),
+        var $activeEditorTab = $('.control-tabs.secondary-tabs .tab-pane.active', $pageForm),
             $textarea = $activeEditorTab.find('[data-control="richeditor"] textarea'),
             $richeditorNode = $textarea.closest('[data-control="richeditor"]'),
             $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />'),
