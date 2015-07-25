@@ -97,9 +97,19 @@ class StaticPage extends ComponentBase
      */
     protected function defineExtraData()
     {
+        $standardProperties = [
+            'title',
+            'url',
+            'layout',
+            'is_hidden',
+            'navigation_hidden',
+            'meta_title',
+            'meta_description'
+        ];
+
         $extraData = array_diff_key(
             $this->pageObject->viewBag,
-            array_flip($this->pageObject->getVisible())
+            array_flip($standardProperties)
         );
 
         foreach ($extraData as $key => $value) {

@@ -28,19 +28,8 @@ use ApplicationException;
 class Page extends Content
 {
     /**
-     * @var array These properties will be available as regular properties,
-     * by looking the settings and viewBag values.
+     * @var array Properties that can be set with fill()
      */
-    protected $visible = [
-        'title',
-        'url',
-        'layout',
-        'is_hidden',
-        'navigation_hidden',
-        'meta_title',
-        'meta_description'
-    ];
-
     protected static $fillable = [
         'markup',
         'settings',
