@@ -375,9 +375,6 @@ class Page extends Content
         $syntax = SyntaxParser::parse($layout->markup, ['tagPrefix' => 'page:']);
         $result = $syntax->toEditor();
 
-        // Field names cannot clash with conflicting visible names
-        $result = array_diff_key($result, array_flip($this->visible));
-
         return $result;
     }
 
