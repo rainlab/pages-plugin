@@ -36,7 +36,6 @@ return [
         'code' => 'Code',
         'items' => 'Eléments du menu',
         'add_subitem' => 'Ajouter un élement',
-        'no_records' => 'Aucun élement trouvé',
         'code_required' => 'Le Code est requis',
         'invalid_code' => 'Le format du Code est invalide. Le Code peut contenir des chiffres, des lettres et les symboles suivants : _-'
     ],
