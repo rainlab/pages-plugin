@@ -404,3 +404,16 @@ Any component can be registered as a snippet and be used in Static Pages. To reg
     }
 
 A same component can be registered with registerPageSnippets() and  registerComponents() and used in CMS pages and Static Pages.
+
+##### Custom page fields
+
+There is a special syntax you can use inside your layout to add custom fields to the page editor form, called *Syntax Fields*. For example, if you add the following markup to a Layout that uses Static Pages:
+
+    {variable name="tagline" label="Tagline" tab="Header" type="text"}{/variable}
+    {variable name="banner" label="Banner" tab="Header" type="mediafinder" mode="image"}{/variable}
+
+These act just like regular form field definitions. Accessing the variables inside the markup is just as easy:
+
+    <h1>{{ tagline }}</h1>
+    <img src="{{ banner|media }}" alt="" />
+

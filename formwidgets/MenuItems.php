@@ -75,7 +75,7 @@ class MenuItems extends FormWidgetBase
     /**
      * {@inheritDoc}
      */
-    public function loadAssets()
+    protected function loadAssets()
     {
         $this->addJs('js/menu-items-editor.js', 'core');
     }
