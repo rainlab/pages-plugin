@@ -53,8 +53,8 @@ class Router
         }
 
         $urlMap = $this->getUrlMap();
-
         $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
+
         if (!array_key_exists($url, $urlMap)) {
             return null;
         }
@@ -67,6 +67,7 @@ class Router
              * and try again.
              */
             $this->clearCache();
+
             return self::$cache[$url] = Page::loadCached($this->theme, $fileName);
         }
 
@@ -79,8 +80,9 @@ class Router
      */
     protected function getUrlMap()
     {
-        if (!count(self::$urlMap))
+        if (!count(self::$urlMap)) {
             $this->loadUrlMap();
+        }
 
         return self::$urlMap;
     }
@@ -107,14 +109,15 @@ class Router
 
             $pages = $pageList->listPages();
             $map = [
-                'urls' => [],
-                'files' => [],
+                'urls'   => [],
+                'files'  => [],
                 'titles' => []
             ];
             foreach ($pages as $page) {
                 $url = $page->getViewBag()->property('url');
-                if (!$url)
+                if (!$url) {
                     continue;
+                }
 
                 $url = Str::lower(RouterHelper::normalizeUrl($url));
                 $file = $page->getBaseFileName();
@@ -125,6 +128,7 @@ class Router
             }
 
             self::$urlMap = $map;
+
             if ($cacheable) {
                 Cache::put($key, serialize($map), Config::get('cms.urlCacheTtl', 1));
             }
@@ -133,6 +137,7 @@ class Router
         }
 
         self::$urlMap = $unserialized;
+
         return true;
     }
 

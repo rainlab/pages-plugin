@@ -32,9 +32,9 @@ class StaticMenu extends ComponentBase
     {
         return [
             'code' => [
-                'title'          => 'Menu',
-                'description'    => 'Specify a code of the menu the component should output',
-                'type'           => 'dropdown'
+                'title'       => 'Menu',
+                'description' => 'Specify a code of the menu the component should output',
+                'type'        => 'dropdown'
             ]
         ];
     }
@@ -60,11 +60,13 @@ class StaticMenu extends ComponentBase
 
     public function menuItems()
     {
-        if ($this->menuItems !== null)
+        if ($this->menuItems !== null) {
             return $this->menuItems;
+        }
 
-        if (!strlen($this->property('code')))
+        if (!strlen($this->property('code'))) {
             return;
+        }
 
         $theme = Theme::getActiveTheme();
         $menu = PagesMenu::loadCached($theme, $this->property('code'));
@@ -83,10 +85,15 @@ class StaticMenu extends ComponentBase
     {
         $countAll = function($items) use (&$countAll) {
             $count = count($items);
+
             foreach ($items as $item) {
-                if (!isset($item->items)) continue;
+                if (!isset($item->items)) {
+                    continue;
+                }
+
                 $count += $countAll($item->items);
             }
+
             return $count;
         };
 

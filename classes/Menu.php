@@ -74,6 +74,7 @@ class Menu extends CmsObject
     public function getCode()
     {
         $place = strrpos($this->fileName, '.');
+
         if ($place !== false) {
             return substr($this->fileName, 0, $place);
         }
@@ -91,14 +92,14 @@ class Menu extends CmsObject
         $code = trim($code);
 
         if (!strlen($code)) {
-            throw new ValidationException(['code' =>
-                Lang::get('rainlab.pages::lang.menu.code_required')
+            throw new ValidationException([
+                'code' => Lang::get('rainlab.pages::lang.menu.code_required')
             ]);
         }
 
         if (!preg_match('/^[0-9a-z\-\_]+$/i', $code)) {
-            throw new ValidationException(['code' =>
-                Lang::get('rainlab.pages::lang.menu.invalid_code')
+            throw new ValidationException([
+                'code' => Lang::get('rainlab.pages::lang.menu.invalid_code')
             ]);
         }
 
@@ -257,20 +258,24 @@ class Menu extends CmsObject
      */
     public static function load($theme, $fileName)
     {
-        if (!strlen(File::extension($fileName)))
+        if (!strlen(File::extension($fileName))) {
             $fileName .= '.yaml';
+        }
 
-        if (($obj = parent::load($theme, $fileName)) === null)
+        if (($obj = parent::load($theme, $fileName)) === null) {
             return null;
+        }
 
         $parsedData = Yaml::parse($obj->content);
-        if (!array_key_exists('name', $parsedData))
+        if (!array_key_exists('name', $parsedData)) {
             throw new SystemException(sprintf('The content of the %s file is invalid: the name element is not found.', $fileName));
+        }
 
         $obj->name = $parsedData['name'];
 
-        if (isset($parsedData['items']))
+        if (isset($parsedData['items'])) {
             $obj->items = MenuItem::initFromArray($parsedData['items']);
+        }
 
         return $obj;
     }
@@ -280,11 +285,12 @@ class Menu extends CmsObject
      */
     public function save()
     {
-        if ($this->itemData !== false)
+        if ($this->itemData !== false) {
             $this->items = MenuItem::initFromArray($this->itemData);
+        }
 
         $contentData = [
-            'name' => $this->name,
+            'name'  => $this->name,
             'items' => $this->itemData ? $this->itemData : []
         ];
 

@@ -154,7 +154,7 @@ class Index extends Controller
 
         $result = [
             'tabTitle' => $this->getTabTitle($type, $object),
-            'tab' => $this->makePartial('form_page', [
+            'tab'      => $this->makePartial('form_page', [
                 'form'         => $widget,
                 'objectType'   => $type,
                 'objectTheme'  => $this->theme->getDirName(),
@@ -189,6 +189,7 @@ class Index extends Controller
 
         $type = Request::input('type');
         $objects = Request::input('object');
+
         if (!$objects) {
             $objects = Request::input('template');
         }
@@ -198,9 +199,13 @@ class Index extends Controller
 
         try {
             foreach ($objects as $path => $selected) {
-                if (!$selected) continue;
+                if (!$selected) {
+                    continue;
+                }
                 $object = $this->loadObject($type, $path, true);
-                if (!$object) continue;
+                if (!$object) {
+                    continue;
+                }
 
                 $deletedObjects = $object->delete();
                 if (is_array($deletedObjects)) {
@@ -264,8 +269,8 @@ class Index extends Controller
 
         return [
             'configuration' => [
-                'properties'=>$configuration,
-                'title' => $snippet->getName(),
+                'properties'  => $configuration,
+                'title'       => $snippet->getName(),
                 'description' => $snippet->getDescription()
             ]
         ];
@@ -275,6 +280,7 @@ class Index extends Controller
     {
         $codes = array_unique(Request::input('codes'));
         $result = [];
+
         foreach ($codes as $snippetCode) {
             $parts = explode('|', $snippetCode);
             $componentClass = null;
@@ -285,10 +291,13 @@ class Index extends Controller
             }
 
             $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-            if (!$snippet)
+
+            if (!$snippet) {
                 $result[$snippetCode] = sprintf(trans('rainlab.pages::lang.snippet.not_found'), $snippetCode);
-            else
+            }
+            else {
                 $result[$snippetCode] =$snippet->getName();
+            }
         }
 
         return [
@@ -302,13 +311,15 @@ class Index extends Controller
 
     protected function validateRequestTheme()
     {
-        if ($this->theme->getDirName() != Request::input('theme'))
+        if ($this->theme->getDirName() != Request::input('theme')) {
             throw new ApplicationException(trans('cms::lang.theme.edit.not_match'));
+        }
     }
 
     protected function loadObject($type, $path, $ignoreNotFound = false)
     {
         $class = $this->resolveTypeClassName($type);
+
         if (!($object = call_user_func(array($class, 'load'), $this->theme, $path))) {
             if (!$ignoreNotFound) {
                 throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
@@ -343,8 +354,8 @@ class Index extends Controller
     protected function resolveTypeClassName($type)
     {
         $types = [
-            'page' => 'RainLab\Pages\Classes\Page',
-            'menu' => 'RainLab\Pages\Classes\Menu',
+            'page'    => 'RainLab\Pages\Classes\Page',
+            'menu'    => 'RainLab\Pages\Classes\Menu',
             'content' => 'Cms\Classes\Content'
         ];
 
@@ -358,8 +369,8 @@ class Index extends Controller
     protected function makeObjectFormWidget($type, $object, $alias = null)
     {
         $formConfigs = [
-            'page' => '~/plugins/rainlab/pages/classes/page/fields.yaml',
-            'menu' => '~/plugins/rainlab/pages/classes/menu/fields.yaml',
+            'page'    => '~/plugins/rainlab/pages/classes/page/fields.yaml',
+            'menu'    => '~/plugins/rainlab/pages/classes/menu/fields.yaml',
             'content' => '~/plugins/rainlab/pages/classes/content/fields.yaml'
         ];
 
@@ -399,9 +410,9 @@ class Index extends Controller
         foreach ($placeholders as $placeholderCode => $info) {
             $placeholderTitle = $info['title'];
             $fieldConfig = [
-                'tab' => $placeholderTitle,
+                'tab'     => $placeholderTitle,
                 'stretch' => '1',
-                'size' => 'huge'
+                'size'    => 'huge'
             ];
 
             if ($info['type'] != 'text') {
@@ -466,8 +477,9 @@ class Index extends Controller
     {
         $settings = [];
 
-        if (!array_key_exists('viewBag', $_POST))
+        if (!array_key_exists('viewBag', $_POST)) {
             return $settings;
+        }
 
         $settings['viewBag'] = $_POST['viewBag'];
 
@@ -477,16 +489,20 @@ class Index extends Controller
     protected function setPlaceholders($page)
     {
         $data = post();
-        if (!array_key_exists('placeholders', $data))
+
+        if (!array_key_exists('placeholders', $data)) {
             return null;
+        }
 
         $placeholderData = $data['placeholders'];
         $placeholders = $page->listLayoutPlaceholders();
 
         $result = null;
-        foreach ($placeholders as $placeholderCode=>$info) {
-            if (!array_key_exists($placeholderCode, $placeholderData))
+
+        foreach ($placeholders as $placeholderCode => $info) {
+            if (!array_key_exists($placeholderCode, $placeholderData)) {
                 continue;
+            }
 
             $placeholderValue = trim($placeholderData[$placeholderCode]);
 
@@ -553,6 +569,7 @@ class Index extends Controller
         }
 
         $object->fill($objectData);
+
         return $object;
     }
 
@@ -568,7 +585,7 @@ class Index extends Controller
 
         return [
             'tabTitle' => $this->getTabTitle($type, $object),
-            'tab' => $this->makePartial('form_page', [
+            'tab'      => $this->makePartial('form_page', [
                 'form'        => $widget,
                 'objectType'  => $type,
                 'objectTheme' => $this->theme->getDirName(),
@@ -597,6 +614,7 @@ class Index extends Controller
     {
         $markup = str_replace("\r\n", "\n", $markup);
         $markup = str_replace("\r", "\n", $markup);
+
         return $markup;
     }
 }
