@@ -73,12 +73,14 @@ class SnippetManager
 
         if (!strlen($componentClass)) {
             $map = $this->getPartialSnippetMap($theme);
+
             if (!array_key_exists($code, $map)) {
                 return null;
             }
 
             $partialName = $map[$code];
             $partial = Partial::loadCached($theme, $partialName);
+
             if (!$partial) {
                 return null;
             }
@@ -128,11 +130,13 @@ class SnippetManager
 
         $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
         $cached = Cache::get($key, false);
+
         if ($cached !== false && ($cached = @unserialize($cached)) !== false) {
             return $cached;
         }
 
         $partials = Partial::listInTheme($theme);
+
         foreach ($partials as $partial) {
             $viewBag = $partial->getViewBag();
 
@@ -159,6 +163,7 @@ class SnippetManager
         $result = [];
 
         $partials = Partial::listInTheme($theme, true);
+
         foreach ($partials as $partial) {
             $viewBag = $partial->getViewBag();
 
@@ -193,7 +198,7 @@ class SnippetManager
                 continue;
             }
 
-            foreach ($snippets as $componentClass=>$componentCode) {
+            foreach ($snippets as $componentClass => $componentCode) {
                 // TODO: register snippet components later, during 
                 // the page life cycle.
                 $snippet = new Snippet;

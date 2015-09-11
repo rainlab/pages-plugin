@@ -52,7 +52,7 @@ class PageList extends WidgetBase
     public function render()
     {
         return $this->makePartial('body', [
-            'data'=>$this->getData()
+            'data' => $this->getData()
         ]);
     }
 
@@ -68,8 +68,9 @@ class PageList extends WidgetBase
     public function onReorder()
     {
         $structure = json_decode(Input::get('structure'), true);
-        if (!$structure)
+        if (!$structure) {
             throw new SystemException('Invalid structure data posted.');
+        }
 
         $pageList = new StaticPageList($this->theme);
         $pageList->updateStructure($structure);
@@ -86,6 +87,7 @@ class PageList extends WidgetBase
     {
         $this->setSearchTerm(Input::get('search'));
         $this->extendSelection();
+
         return $this->updateList();
     }
 
@@ -109,7 +111,7 @@ class PageList extends WidgetBase
                 foreach ($pages as $page) {
                     if ($this->textMatchesSearch($words, $this->subtreeToText($page))) {
                         $result[] = (object) [
-                            'page' => $page->page,
+                            'page'     => $page->page,
                             'subpages' => $iterator($page->subpages)
                         ];
                     }
@@ -131,7 +133,7 @@ class PageList extends WidgetBase
 
     protected function updateList()
     {
-        return ['#'.$this->getId('page-list') => $this->makePartial('items', ['items'=>$this->getData()])];
+        return ['#'.$this->getId('page-list') => $this->makePartial('items', ['items' => $this->getData()])];
     }
 
     protected function subtreeToText($page)
@@ -164,7 +166,7 @@ class PageList extends WidgetBase
         return parent::getSession($key, $default);
     }
 
-    protected function putSession($key, $value) 
+    protected function putSession($key, $value)
     {
         return parent::putSession($this->getThemeSessionKey($key), $value);
     }

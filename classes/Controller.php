@@ -39,8 +39,8 @@ class Controller
     public function initCmsPage($url)
     {
         $router = new Router($this->theme);
-
         $page = $router->findByUrl($url);
+
         if (!$page) {
             return null;
         }
@@ -58,6 +58,7 @@ class Controller
          * Transfer specific values from the content view bag to the page settings object.
          */
         $viewBagToSettings = ['is_hidden', 'layout', 'meta_title', 'meta_description'];
+
         foreach ($viewBagToSettings as $property) {
             $cmsPage->settings[$property] = $viewBag->property($property);
         }

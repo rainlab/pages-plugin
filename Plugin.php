@@ -36,10 +36,26 @@ class Plugin extends PluginBase
     public function registerPermissions()
     {
         return [
-            'rainlab.pages.manage_pages'    => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_pages'],
-            'rainlab.pages.manage_menus'    => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_menus'],
-            'rainlab.pages.manage_content'  => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_content'],
-            'rainlab.pages.access_snippets' => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.access_snippets']
+            'rainlab.pages.manage_pages' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_pages'
+            ],
+            'rainlab.pages.manage_menus' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_menus'
+                ],
+            'rainlab.pages.manage_content' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_content'
+            ],
+            'rainlab.pages.access_snippets' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.access_snippets'
+            ]
         ];
     }
 
@@ -83,7 +99,6 @@ class Plugin extends PluginBase
                         'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
-
             ]
         ];
     }
@@ -136,16 +151,19 @@ class Plugin extends PluginBase
         });
 
         Event::listen('pages.menuitem.getTypeInfo', function($type) {
-            if ($type == 'url')
+            if ($type == 'url') {
                 return [];
+            }
 
-            if ($type == 'static-page'|| $type == 'all-static-pages')
+            if ($type == 'static-page'|| $type == 'all-static-pages') {
                 return StaticPage::getMenuTypeInfo($type);
+            }
         });
 
         Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
-            if ($type == 'static-page' || $type == 'all-static-pages')
+            if ($type == 'static-page' || $type == 'all-static-pages') {
                 return StaticPage::resolveMenuItem($item, $url, $theme);
+            }
         });
 
         Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
@@ -193,7 +211,7 @@ class Plugin extends PluginBase
     {
         return [
             'filters' => [
-                'staticPage' => ['RainLab\Pages\Classes\Page', 'url'],
+                'staticPage' => ['RainLab\Pages\Classes\Page', 'url']
             ]
         ];
     }
