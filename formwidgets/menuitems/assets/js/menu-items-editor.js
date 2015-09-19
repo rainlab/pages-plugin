@@ -126,13 +126,7 @@
         })
 
         $container.popup({
-            content: $('script[data-editor-template]', this.$el).html(),
-            placement: 'center',
-            modal: true,
-            closeOnPageClick: true,
-            highlightModalTarget: true,
-            width: 600,
-            useAnimation: true
+            content: $('script[data-editor-template]', this.$el).html()
         })
 
         /*
@@ -346,7 +340,8 @@
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
-        }  else {
+        }
+        else {
             $.each(propertyNames, function(){
                 if (this != 'url' && basicProperties[this] === undefined)
                     delete data[this]
