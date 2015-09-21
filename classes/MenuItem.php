@@ -84,6 +84,19 @@ class MenuItem
         'replace'
     ];
 
+    public $basicProperties = [
+        'title',
+        'type',
+        'code'
+    ];
+
+    /**
+     * Extensible constructor
+     */
+    public function __construct() {
+        Event::fire('rainlab.pages.menuitem.create', [$this]);
+    }
+
     /**
      * Initializes a menu item from a data array. 
      * @param array $items Specifies the menu item data.

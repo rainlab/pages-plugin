@@ -394,10 +394,37 @@ class Page extends Content
             return [];
         }
 
-        $result = [];
         $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
+        $nodes = $this->flattenTwigNode($bodyNode);
+        return $this->extractPlaceholderNodes($nodes);
+    }
 
-        foreach ($bodyNode as $node) {
+    /**
+     * Recursively flattens a twig node and children
+     * @param $node
+     * @return array A flat array of twig nodes
+     */
+    public function flattenTwigNode($node) {
+        $result = [];
+        if (!$node instanceof \Twig_Node) {
+            return $result;
+        }
+        foreach ($node as $subNode) {
+            $flatNodes = $this->flattenTwigNode($subNode);
+            $result = array_merge($result, [$subNode], $flatNodes);
+        }
+        return $result;
+    }
+
+    /**
+     * Extracts placeholder nodes from a flat list of nodes.
+     * @param $nodes
+     * @return array Returns an associative array of placeholder names, titles and types.
+     */
+    public function extractPlaceholderNodes($nodes)
+    {
+        $result = [];
+        foreach ($nodes as $node) {
             if (!$node instanceof \Cms\Twig\PlaceholderNode) {
                 continue;
             }

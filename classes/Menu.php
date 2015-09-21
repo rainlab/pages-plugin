@@ -141,8 +141,9 @@ class Menu extends CmsObject
 
             foreach ($items as $item) {
                 $parentReference = new MenuItemReference;
-                $parentReference->title = $item->title;
-                $parentReference->code = $item->code;
+                foreach ($item->basicProperties as $key) {
+                    $parentReference->{$key} = $item->{$key};
+                }
 
                 /*
                  * If the item type is URL, assign the reference the item's URL and compare the current URL with the item URL

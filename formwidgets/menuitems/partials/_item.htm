@@ -5,6 +5,7 @@
     class="<?= $item->items ? 'has-subitems' : null ?>"
     data-status="<?= $groupStatus || !$item->items ? 'expanded' : 'collapsed' ?>"
     data-menu-item="<?= e(json_encode($item->toArray())) ?>"
+    data-basic-properties="<?= e(json_encode(array_combine($item->basicProperties, $item->basicProperties))) ?>"
 >
     <div>
         <a href="#" data-menu-item-link>

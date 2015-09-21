@@ -277,11 +277,7 @@
         var self = this,
             data = {},
             propertyNames = this.$el.data('item-properties'),
-            basicProperties = {
-                'title': 1,
-                'type': 1,
-                'code': 1
-            },
+            basicProperties = this.$itemDataContainer.data('basic-properties'),
             typeInfoPropertyMap = {
                 reference: 'references',
                 replace: 'dynamicItems',
