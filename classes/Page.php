@@ -396,8 +396,9 @@ class Page extends Content
 
         $result = [];
         $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
+        $nodes = $this->flattenTwigNode($bodyNode);
 
-        foreach ($bodyNode as $node) {
+        foreach ($nodes as $node) {
             if (!$node instanceof \Cms\Twig\PlaceholderNode) {
                 continue;
             }
@@ -415,6 +416,26 @@ class Page extends Content
             ];
 
             $result[$node->getAttribute('name')] = $placeholderInfo;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Recursively flattens a twig node and children
+     * @param $node
+     * @return array A flat array of twig nodes
+     */
+    protected function flattenTwigNode($node)
+    {
+        $result = [];
+        if (!$node instanceof \Twig_Node) {
+            return $result;
+        }
+
+        foreach ($node as $subNode) {
+            $flatNodes = $this->flattenTwigNode($subNode);
+            $result = array_merge($result, [$subNode], $flatNodes);
         }
 
         return $result;
