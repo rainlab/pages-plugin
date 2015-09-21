@@ -69,7 +69,7 @@
             $container = $('> div', $item),
             self = this
 
-        $container.one('show.oc.popover', function(e){
+        $container.one('show.oc.popup', function(e){
             $(document).trigger('render')
 
             self.$popupContainer = $(e.relatedTarget);
@@ -115,23 +115,25 @@
             self.loadTypeInfo()
         })
 
-        $container.one('hide.oc.popover', function(e) {
+        $container.one('hide.oc.popup', function(e) {
             if (!self.itemSaved && newItemMode)
                 $item.remove()
 
             self.$treeView.treeView('update')
             self.$treeView.treeView('fixSubItems')
+
+            $container.removeClass('popover-highlight')
         })
 
-        $container.ocPopover({
-            content: $('script[data-editor-template]', this.$el).html(),
-            placement: 'center',
-            modal: true,
-            closeOnPageClick: true,
-            highlightModalTarget: true,
-            width: 600,
-            useAnimation: true
+        $container.popup({
+            content: $('script[data-editor-template]', this.$el).html()
         })
+
+        /*
+         * Highlight modal target
+         */
+        $container.addClass('popover-highlight')
+        $container.blur()
 
         return false
     }
@@ -334,7 +336,8 @@
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
-        }  else {
+        }
+        else {
             $.each(propertyNames, function(){
                 if (this != 'url' && basicProperties[this] === undefined)
                     delete data[this]
@@ -378,7 +381,7 @@
 
         this.$itemDataContainer.data('menu-item', data)
         this.itemSaved = true
-        this.$popupContainer.trigger('close.oc.popover')
+        this.$popupContainer.trigger('close.oc.popup')
         this.$el.trigger('change')
     }
 
