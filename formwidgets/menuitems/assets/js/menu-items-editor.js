@@ -219,7 +219,9 @@
 
             iterator(typeInfo.references, 0, '')
 
-            $optionSelector.val(prevSelectedReference ? prevSelectedReference : this.properties.reference)
+            $optionSelector
+                .val(prevSelectedReference ? prevSelectedReference : this.properties.reference)
+                .triggerHandler('change')
         }
         else {
             $referenceFormGroup.hide()
@@ -236,7 +238,9 @@
                 $cmsPageSelector.append($option)
             })
 
-            $cmsPageSelector.val(prevSelectedPage ? prevSelectedPage : this.properties.cmsPage)
+            $cmsPageSelector
+                .val(prevSelectedPage ? prevSelectedPage : this.properties.cmsPage)
+                .triggerHandler('change')
         }
         else {
             $cmsPageFormGroup.hide()
