@@ -141,19 +141,27 @@
     MenuItemsEditor.prototype.loadProperties = function($popupContainer, properties) {
         this.properties = properties
 
-        var self = this
-
-        $.each(properties, function(property) {
-            var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
-
+        var setPropertyOnElement = function($input, val) {
             if ($input.prop('type') !== 'checkbox' ) {
-                $input.val(this)
+                $input.val(val)
                 $input.change()
             }
             else {
-                var checked = !(this == '0' || this == 'false' || this == 0 || this == undefined || this == null)
-
+                var checked = !(val == '0' || val == 'false' || val == 0 || val == undefined || val == null)
                 checked ? $input.prop('checked', 'checked') : $input.removeAttr('checked')
+            }
+        }
+
+        $.each(properties, function(property, val) {
+            if (property == 'viewBag') {
+                $.each(val, function(vbProperty, vbVal) {
+                    var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
+                    setPropertyOnElement($input, vbVal)
+                })
+            }
+            else {
+                var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
+                setPropertyOnElement($input, val)
             }
         })
     }
@@ -324,7 +332,8 @@
                         return false
                     }
                 }
-            } else {
+            }
+            else {
                 data[propertyName] = $input.prop('checked') ? 1 : 0
             }
         })
@@ -387,10 +396,57 @@
 
         $('> div span.comment', self.$itemDataContainer).text(referenceDescription)
 
+        this.attachViewBagData(data)
+
         this.$itemDataContainer.data('menu-item', data)
         this.itemSaved = true
         this.$popupContainer.trigger('close.oc.popup')
         this.$el.trigger('change')
+    }
+
+    MenuItemsEditor.prototype.attachViewBagData = function(data) {
+        var $viewBagElements = $('[name^="viewBag["]', this.$popupContainer),
+            $input,
+            fieldName,
+            fieldValue
+
+        if (!$viewBagElements.length)
+            return
+
+        $viewBagElements.each(function() {
+            $input = $(this),
+            fieldName = $input.attr('name'),
+            fieldValue = $input.val()
+
+            /*
+             * Break field name in to elements
+             */
+            var elements = [],
+                searchResult,
+                expression = /([^\]\[]+)/g
+
+            while ((searchResult = expression.exec(fieldName))) {
+                elements.push(searchResult[0])
+            }
+
+            /*
+             * Attach elements to data with value
+             */
+            var currentData = data,
+                elementsNum = elements.length,
+                lastIndex = elementsNum - 1,
+                currentProperty
+
+            for (var i = 0; i < elementsNum; ++i) {
+                currentProperty = elements[i]
+
+                if (currentData[currentProperty] === undefined) {
+                    currentData[currentProperty] = (i === lastIndex) ? fieldValue : {}
+                }
+
+                currentData = currentData[currentProperty]
+            }
+        })
     }
 
     MenuItemsEditor.prototype.onCreateItem = function(target) {

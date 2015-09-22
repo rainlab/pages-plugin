@@ -143,6 +143,7 @@ class Menu extends CmsObject
                 $parentReference = new MenuItemReference;
                 $parentReference->title = $item->title;
                 $parentReference->code = $item->code;
+                $parentReference->viewBag = $item->viewBag;
 
                 /*
                  * If the item type is URL, assign the reference the item's URL and compare the current URL with the item URL

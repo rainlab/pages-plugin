@@ -45,4 +45,9 @@ class MenuItemReference
      * @var array Specifies the item subitems
      */
     public $items = [];
+
+    /**
+     * @var array Specifies the item custom view bag properties.
+     */
+    public $viewBag = [];
 }

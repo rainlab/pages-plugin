@@ -81,8 +81,15 @@ class MenuItem
         'code',
         'reference',
         'cmsPage',
-        'replace'
+        'replace',
+        'viewBag'
     ];
+
+    /**
+     * @var array Contains the view bag properties.
+     * This property is used by the menu editor internally.
+     */
+    public $viewBag = [];
 
     /**
      * Initializes a menu item from a data array. 

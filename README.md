@@ -417,3 +417,35 @@ These act just like regular form field definitions. Accessing the variables insi
     <h1>{{ tagline }}</h1>
     <img src="{{ banner|media }}" alt="" />
 
+##### Custom menu item form fields
+
+Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
+
+    Event::listen('backend.form.extendFields', function ($widget) {
+
+        if (
+            !$widget->getController() instanceof \RainLab\Pages\Controllers\Index ||
+            !$widget->model instanceof \RainLab\Pages\Classes\MenuItem
+        ) {
+            return;
+        }
+
+        $widget->addTabFields([
+            'viewBag[featured]' => [
+                'tab' => 'Display',
+                'label' => 'Featured',
+                'comment' => 'Mark this menu item as featured',
+                'type' => 'checkbox'
+            ]
+        ]);
+    });
+
+This value can then be accessed in Twig using the `{{ item.viewBag }}` property on the menu item. For example:
+
+    {% for item in items %}
+        <li class="{{ item.viewBag.featured ? 'featured' }}">
+            <a href="{{ item.url }}">
+                {{ item.title }}
+            </a>
+        </li>
+    {% endfor %}
