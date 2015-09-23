@@ -100,7 +100,8 @@ class PageList
                     return true;
                 }
 
-                if ($iterator($subpages) == true) {
+                if ($iterator($subpages) == true && is_null($parent)) {
+
                     $parent = $fileName;
 
                     return true;
