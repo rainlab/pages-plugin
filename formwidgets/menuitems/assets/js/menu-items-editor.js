@@ -142,13 +142,16 @@
         this.properties = properties
 
         var setPropertyOnElement = function($input, val) {
-            if ($input.prop('type') !== 'checkbox' ) {
-                $input.val(val)
-                $input.change()
-            }
-            else {
+            if ($input.prop('type') == 'checkbox') {
                 var checked = !(val == '0' || val == 'false' || val == 0 || val == undefined || val == null)
                 checked ? $input.prop('checked', 'checked') : $input.removeAttr('checked')
+            }
+            else if ($input.prop('type') == 'radio') {
+                $input.filter('[value="'+val+'"]').prop('checked', true)
+            }
+            else {
+                $input.val(val)
+                $input.change()
             }
         }
 
@@ -405,18 +408,17 @@
     }
 
     MenuItemsEditor.prototype.attachViewBagData = function(data) {
-        var $viewBagElements = $('[name^="viewBag["]', this.$popupContainer),
-            $input,
+        var fields = this.$popupForm.serializeArray(),
             fieldName,
             fieldValue
 
-        if (!$viewBagElements.length)
-            return
+        $.each(fields, function(index, field) {
+            fieldName = field.name
+            fieldValue = field.value
 
-        $viewBagElements.each(function() {
-            $input = $(this),
-            fieldName = $input.attr('name'),
-            fieldValue = $input.val()
+            if (fieldName.indexOf('viewBag[') != 0) {
+                return true // Continue
+            }
 
             /*
              * Break field name in to elements
@@ -440,8 +442,11 @@
             for (var i = 0; i < elementsNum; ++i) {
                 currentProperty = elements[i]
 
-                if (currentData[currentProperty] === undefined) {
-                    currentData[currentProperty] = (i === lastIndex) ? fieldValue : {}
+                if (i === lastIndex) {
+                    currentData[currentProperty] = fieldValue
+                }
+                else if (currentData[currentProperty] === undefined) {
+                    currentData[currentProperty] = {}
                 }
 
                 currentData = currentData[currentProperty]
