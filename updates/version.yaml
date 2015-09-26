@@ -19,3 +19,4 @@
 1.1.4: Minor fix to the StaticPage component API.
 1.1.5: Fixes bug when using syntax fields.
 1.1.6: Minor styling fix to the back-end UI.
+1.1.7: Improved menu item form to include css class, open in a new window and hidden flag.
