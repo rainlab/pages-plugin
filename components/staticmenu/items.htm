@@ -1,6 +1,8 @@
-{% for item in items %}
-    <li role="presentation" class="{{ item.isActive ? 'active' : '' }} {{ item.isChildActive ? 'child-active' : '' }}">
-        <a href="{{ item.url }}">{{ item.title }}</a>
+{% for item in items if not item.viewBag.isHidden %}
+    <li role="presentation" class="{{ item.isActive ? 'active' : '' }} {{ item.isChildActive ? 'child-active' : '' }} {{ item.viewBag.cssClass }}">
+        <a href="{{ item.url }}" {{ item.viewBag.isExternal ? 'target="_blank"' }}>
+            {{ item.title }}
+        </a>
 
         {% if item.items %}
             <ul>{% partial __SELF__ ~ "::items" items=item.items %}</ul>
