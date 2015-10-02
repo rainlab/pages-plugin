@@ -150,43 +150,13 @@ class Snippet
     /**
      * Parses properties stored in a template in the INI format and converts them to an array.
      */
-    protected static function parseIniProperties($properties, $inspectorCompatible = true)
+    protected static function parseIniProperties($properties)
     {
-        $result = [];
-
-        foreach ($properties as $propertyInfo => $value) {
-            $qualifiers = explode('|', $propertyInfo);
-
-            if (($cnt = count($qualifiers)) < 2) {
-                // Ignore lines with invalid format
-                continue;
-            }
-
-            $propertyCode = trim($qualifiers[0]);
-            if (!array_key_exists($propertyCode, $result)) {
-                $result[$propertyCode] = [
-                    'property' => $propertyCode
-                ];
-            }
-
-            $paramName = trim($qualifiers[1]);
-
-            // Handling the "[viewMode|options|list] => Display as a list" case
-            if ($qualifiers[1] == 'options') {
-                if ($cnt > 2) {
-                    if (!array_key_exists('options', $result[$propertyCode])) {
-                        $result[$propertyCode]['options'] = [];
-                    }
-
-                    $result[$propertyCode]['options'][$qualifiers[2]] = $value;
-                }
-            }
-            else {
-                $result[$propertyCode][$paramName] = $value;
-            }
+        foreach ($properties as $index => $value) {
+            $properties[$index]['property'] = $index;
         }
 
-        return array_values($result);
+        return array_values($properties);
     }
 
     /**
@@ -201,9 +171,7 @@ class Snippet
         $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
 
         $controller = CmsController::getController();
-
         $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
-        $controller = CmsController::getController();
 
         foreach ($map as $snippetDeclaration => $snippetInfo) {
             $snippetCode = $snippetInfo['code'];
@@ -256,48 +224,28 @@ class Snippet
 
     public static function processTemplateSettingsArray($settingsArray)
     {
-        if (isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
-            $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
+        if (!isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+            return $settingsArray;
+        }
 
-            $columns = ['title', 'property', 'type', 'default', 'options'];
+        $properties = [];
+        $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
 
-            $properties = [];
+        foreach ($rows as $row) {
+            $property = array_get($row, 'property');
+            $settings = array_only($row, ['title', 'type', 'default', 'options']);
 
-            foreach ($rows as $row) {
-                $rowHasData = false;
-
-                foreach ($columns as $column) {
-                    if (isset($row[$column]) && strlen(trim($row[$column]))) {
-                        $rowHasData = true;
-                        $row[$column] = trim($row[$column]);
-                    }
-                }
-
-                if (!$rowHasData) {
-                    continue;
-                }
-
-                $properties['snippetProperties['.$row['property'].'|type]'] = $row['type'];
-                $properties['snippetProperties['.$row['property'].'|title]'] = $row['title'];
-
-                if (isset($row['default']) && strlen($row['default'])) {
-                    $properties['snippetProperties[' . $row['property'] . '|default]'] = $row['default'];
-                }
-
-                if (isset($row['options']) && strlen($row['options'])) {
-                    $options = self::dropDownOptionsToArray($row['options']);
-
-                    foreach ($options as $index => $option) {
-                        $properties['snippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
-                    }
-                }
+            if (isset($settings['options'])) {
+                $settings['options'] = self::dropDownOptionsToArray($settings['options']);
             }
 
-            unset($settingsArray['viewBag']['snippetProperties']);
+            $properties[$property] = $settings;
+        }
 
-            foreach ($properties as $name => $value) {
-                $settingsArray['viewBag'][$name] = $value;
-            }
+        $settingsArray['viewBag']['snippetProperties'] = [];
+
+        foreach ($properties as $name => $value) {
+            $settingsArray['viewBag']['snippetProperties'][$name] = $value;
         }
 
         return $settingsArray;
@@ -309,7 +257,7 @@ class Snippet
             return;
         }
 
-        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties'], false);
+        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties']);
 
         foreach ($parsedProperties as $index => &$property) {
             $property['id'] = $index;
@@ -355,9 +303,12 @@ class Snippet
     protected static function dropDownOptionsToString($optionsArray)
     {
         $result = [];
+        $isAssoc = (bool) count(array_filter(array_keys($optionsArray), 'is_string'));
 
         foreach ($optionsArray as $optionIndex => $optionValue) {
-            $result[] = $optionIndex.':'.$optionValue;
+            $result[] = $isAssoc
+                ? $optionIndex.':'.$optionValue
+                : $optionValue;
         }
 
         return implode(' | ', $result);
