@@ -148,54 +148,6 @@ class Snippet
     }
 
     /**
-     * Parses properties stored in a template in the INI format and converts them to an array.
-     */
-    protected static function parseIniProperties($properties)
-    {
-        foreach ($properties as $index => $value) {
-            $properties[$index]['property'] = $index;
-        }
-
-        return array_values($properties);
-    }
-
-    /**
-     * Parses the static page markup and renders snippets defined on the page.
-     * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
-     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
-     * @param string $markup Specifies the markup string to process.
-     * @return string Returns the processed string.
-     */
-    public static function processPageMarkup($pageName, $theme, $markup)
-    {
-        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
-
-        $controller = CmsController::getController();
-        $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
-
-        foreach ($map as $snippetDeclaration => $snippetInfo) {
-            $snippetCode = $snippetInfo['code'];
-
-            if (!isset($snippetInfo['component'])) {
-                if (!array_key_exists($snippetCode, $partialSnippetMap)) {
-                    throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
-                }
-
-                $partialName = $partialSnippetMap[$snippetCode];
-                $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
-            }
-            else {
-                $generatedMarkup = $controller->renderComponent($snippetCode);
-            }
-
-            $pattern = preg_quote($snippetDeclaration);
-            $markup = mb_ereg_replace($pattern, $generatedMarkup, $markup);
-        }
-
-        return $markup;
-    }
-
-    /**
      * Returns a list of component definitions declared on the page.
      * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
      * @param \Cms\Classes\Theme $theme Specifies a parent theme.
@@ -220,98 +172,6 @@ class Snippet
         }
 
         return $result;
-    }
-
-    public static function processTemplateSettingsArray($settingsArray)
-    {
-        if (!isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
-            return $settingsArray;
-        }
-
-        $properties = [];
-        $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
-
-        foreach ($rows as $row) {
-            $property = array_get($row, 'property');
-            $settings = array_only($row, ['title', 'type', 'default', 'options']);
-
-            if (isset($settings['options'])) {
-                $settings['options'] = self::dropDownOptionsToArray($settings['options']);
-            }
-
-            $properties[$property] = $settings;
-        }
-
-        $settingsArray['viewBag']['snippetProperties'] = [];
-
-        foreach ($properties as $name => $value) {
-            $settingsArray['viewBag']['snippetProperties'][$name] = $value;
-        }
-
-        return $settingsArray;
-    }
-
-    public static function processTemplateSettings($template)
-    {
-        if (!isset($template->viewBag['snippetProperties'])) {
-            return;
-        }
-
-        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties']);
-
-        foreach ($parsedProperties as $index => &$property) {
-            $property['id'] = $index;
-
-            if (isset($property['options'])) {
-                $property['options'] = self::dropDownOptionsToString($property['options']);
-            }
-        }
-
-        $template->viewBag['snippetProperties'] = $parsedProperties;
-    }
-
-    protected static function dropDownOptionsToArray($optionsString)
-    {
-        $options = explode('|', $optionsString);
-
-        $result = [];
-        foreach ($options as $index => $optionStr) {
-            $parts = explode(':', $optionStr, 2);
-
-            if (count($parts) > 1 ) {
-                $key = trim($parts[0]);
-
-                if (strlen($key)) {
-                    if (!preg_match('/^[0-9a-z-_]+$/i', $key)) {
-                        throw new ValidationException(['snippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
-                    }
-
-                    $result[$key] = trim($parts[1]);
-                }
-                else {
-                    $result[$index] = trim($optionStr);
-                }
-            }
-            else {
-                $result[$index] = trim($optionStr);
-            }
-        }
-
-        return $result;
-    }
-
-    protected static function dropDownOptionsToString($optionsArray)
-    {
-        $result = [];
-        $isAssoc = (bool) count(array_filter(array_keys($optionsArray), 'is_string'));
-
-        foreach ($optionsArray as $optionIndex => $optionValue) {
-            $result[] = $isAssoc
-                ? $optionIndex.':'.$optionValue
-                : $optionValue;
-        }
-
-        return implode(' | ', $result);
     }
 
     /**
@@ -406,6 +266,207 @@ class Snippet
        $formWidget->tabs['fields']['viewBag[snippetProperties]'] = $fieldConfig;
     }
 
+    /**
+     * Returns a component corresponding to the snippet.
+     * This method should not be used in the front-end request handling code.
+     * @return \Cms\Classes\ComponentBase
+     */
+    protected function getComponent()
+    {
+        if ($this->componentClass === null) {
+            return null;
+        }
+
+        if ($this->componentObj !== null) {
+            return $this->componentObj;
+        }
+
+        $componentClass = $this->componentClass;
+
+        return $this->componentObj = new $componentClass();
+    }
+
+    //
+    // Parsing
+    //
+
+    /**
+     * Parses the static page markup and renders snippets defined on the page.
+     * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
+     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
+     * @param string $markup Specifies the markup string to process.
+     * @return string Returns the processed string.
+     */
+    public static function processPageMarkup($pageName, $theme, $markup)
+    {
+        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
+
+        $controller = CmsController::getController();
+        $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
+
+        foreach ($map as $snippetDeclaration => $snippetInfo) {
+            $snippetCode = $snippetInfo['code'];
+
+            if (!isset($snippetInfo['component'])) {
+                if (!array_key_exists($snippetCode, $partialSnippetMap)) {
+                    throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
+                }
+
+                $partialName = $partialSnippetMap[$snippetCode];
+                $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
+            }
+            else {
+                $generatedMarkup = $controller->renderComponent($snippetCode);
+            }
+
+            $pattern = preg_quote($snippetDeclaration);
+            $markup = mb_ereg_replace($pattern, $generatedMarkup, $markup);
+        }
+
+        return $markup;
+    }
+
+    public static function processTemplateSettingsArray($settingsArray)
+    {
+        if (!isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+            return $settingsArray;
+        }
+
+        $properties = [];
+        $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
+
+        foreach ($rows as $row) {
+            $property = array_get($row, 'property');
+            $settings = array_only($row, ['title', 'type', 'default', 'options']);
+
+            if (isset($settings['options'])) {
+                $settings['options'] = self::dropDownOptionsToArray($settings['options']);
+            }
+
+            $properties[$property] = $settings;
+        }
+
+        $settingsArray['viewBag']['snippetProperties'] = [];
+
+        foreach ($properties as $name => $value) {
+            $settingsArray['viewBag']['snippetProperties'][$name] = $value;
+        }
+
+        return $settingsArray;
+    }
+
+    public static function processTemplateSettings($template)
+    {
+        if (!isset($template->viewBag['snippetProperties'])) {
+            return;
+        }
+
+        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties']);
+
+        foreach ($parsedProperties as $index => &$property) {
+            $property['id'] = $index;
+
+            if (isset($property['options'])) {
+                $property['options'] = self::dropDownOptionsToString($property['options']);
+            }
+        }
+
+        $template->viewBag['snippetProperties'] = $parsedProperties;
+    }
+
+    /**
+     * Apples default property values and fixes property names.
+     *
+     * As snippet properties are defined with data attributes, they are lower case, whereas
+     * real property names are case sensitive. This method finds original property names defined
+     * in snippet classes or partials and replaces property names defined in the static page markup.
+     */
+    protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
+    {
+        $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
+        if (!$snippet) {
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]));
+        }
+
+        $properties = array_change_key_case($properties);
+        $snippetProperties = $snippet->getProperties();
+
+        foreach ($snippetProperties as $propertyInfo) {
+            $propertyCode = $propertyInfo['property'];
+            $lowercaseCode = strtolower($propertyCode);
+
+            if (!array_key_exists($lowercaseCode, $properties)) {
+                if (array_key_exists('default', $propertyInfo)) {
+                    $properties[$propertyCode] = $propertyInfo['default'];
+                }
+            }
+            else {
+                $markupPropertyInfo = $properties[$lowercaseCode];
+                unset($properties[$lowercaseCode]);
+                $properties[$propertyCode] = $markupPropertyInfo;
+            }
+        }
+
+        return $properties;
+    }
+
+    /**
+     * Converts a keyed object to an array, converting the index to the "property" value.
+     * @return array
+     */
+    protected static function parseIniProperties($properties)
+    {
+        foreach ($properties as $index => $value) {
+            $properties[$index]['property'] = $index;
+        }
+
+        return array_values($properties);
+    }
+
+    protected static function dropDownOptionsToArray($optionsString)
+    {
+        $options = explode('|', $optionsString);
+
+        $result = [];
+        foreach ($options as $index => $optionStr) {
+            $parts = explode(':', $optionStr, 2);
+
+            if (count($parts) > 1 ) {
+                $key = trim($parts[0]);
+
+                if (strlen($key)) {
+                    if (!preg_match('/^[0-9a-z-_]+$/i', $key)) {
+                        throw new ValidationException(['snippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                    }
+
+                    $result[$key] = trim($parts[1]);
+                }
+                else {
+                    $result[$index] = trim($optionStr);
+                }
+            }
+            else {
+                $result[$index] = trim($optionStr);
+            }
+        }
+
+        return $result;
+    }
+
+    protected static function dropDownOptionsToString($optionsArray)
+    {
+        $result = [];
+        $isAssoc = (bool) count(array_filter(array_keys($optionsArray), 'is_string'));
+
+        foreach ($optionsArray as $optionIndex => $optionValue) {
+            $result[] = $isAssoc
+                ? $optionIndex.':'.$optionValue
+                : $optionValue;
+        }
+
+        return implode(' | ', $result);
+    }
+
     protected static function extractSnippetsFromMarkup($markup, $theme)
     {
         $map = [];
@@ -483,61 +544,5 @@ class Snippet
         self::$pageSnippetMap[$pageName] = $map;
 
         return $map;
-    }
-
-    /**
-     * Apples default property values and fixes property names.
-     *
-     * As snippet properties are defined with data attributes, they are lower case, whereas
-     * real property names are case sensitive. This method finds original property names defined
-     * in snippet classes or partials and replaces property names defined in the static page markup.
-     */
-    protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
-    {
-        $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
-        if (!$snippet) {
-            throw new ApplicationException(Lang::get('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]));
-        }
-
-        $properties = array_change_key_case($properties);
-        $snippetProperties = $snippet->getProperties();
-
-        foreach ($snippetProperties as $propertyInfo) {
-            $propertyCode = $propertyInfo['property'];
-            $lowercaseCode = strtolower($propertyCode);
-
-            if (!array_key_exists($lowercaseCode, $properties)) {
-                if (array_key_exists('default', $propertyInfo)) {
-                    $properties[$propertyCode] = $propertyInfo['default'];
-                }
-            }
-            else {
-                $markupPropertyInfo = $properties[$lowercaseCode];
-                unset($properties[$lowercaseCode]);
-                $properties[$propertyCode] = $markupPropertyInfo;
-            }
-        }
-
-        return $properties;
-    }
-
-    /**
-     * Returns a component corresponding to the snippet.
-     * This method should not be used in the front-end request handling code.
-     * @return \Cms\Classes\ComponentBase
-     */
-    protected function getComponent()
-    {
-        if ($this->componentClass === null) {
-            return null;
-        }
-
-        if ($this->componentObj !== null) {
-            return $this->componentObj;
-        }
-
-        $componentClass = $this->componentClass;
-
-        return $this->componentObj = new $componentClass();
     }
 }
