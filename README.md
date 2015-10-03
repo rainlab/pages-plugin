@@ -417,6 +417,14 @@ These act just like regular form field definitions. Accessing the variables insi
     <h1>{{ tagline }}</h1>
     <img src="{{ banner|media }}" alt="" />
 
+Alternatively you may use the field type as the tag name, here we use the `{text}` tag to directly render the `tagline` variable:
+
+    <h1>{text name="tagline" label="Tagline"}Our wonderful website{/text}</h1>
+
+For more details on syntax fields, see the [Parser section](octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
+
+> **Note**: The `repeater` field type is currently unsupported, however we hope to change this in the future.
+
 ##### Custom menu item form fields
 
 Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
