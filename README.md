@@ -6,7 +6,7 @@ This plugin allows end users to create and edit static pages and menus with a si
 
 Static pages are managed on the Pages tab of the Static Pages plugin. Static pages have three required parameters - **Title**, **URL** and **Layout**. The URL is generated automatically when the Title is entered, but it could be changed manually. URLs must start with the forward slash character. The Layout drop-down allows to select a layout created with the CMS. Only layouts that host the `staticPage` component are displayed in the drop-down.
 
-![image](http://oi57.tinypic.com/2le5qx2.jpg) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-page.png) {.img-responsive .frame}
 
 Pages are hierarchical. The page hierarchy is used when a new page URL is generated, but as URLs can be changed manually, the hierarchy doesn't really affect the routing process. The only place where the page hierarchy matters is the generated Menus. The generated menus reflect the page hierarchy. You can manage the page hierarchy by dragging pages in the page tree. The page drag handle ![http://s13.postimg.org/6kd6lwgar/hierarchy_drag_handle.png](http://s13.postimg.org/6kd6lwgar/hierarchy_drag_handle.png) appears when you move the mouse cursor over page item in the tree.
 
@@ -26,9 +26,9 @@ Snippets are elements that can be added by a Static Page, in the rich text edito
 
 Snippets are displayed in the sidebar list on the Static Pages and can be added into a rich editor with a mouse click. Snippets are configurable and have properties that users can manage with the Inspector.
 
-![image](http://i61.tinypic.com/k9gl6f.jpg)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-backend.png)
 
-![image](http://i60.tinypic.com/15citzp.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-frontend.png)
 
 ## Managing menus
 
@@ -36,11 +36,11 @@ You can manage menus on the Menus tab of the Static Pages plugin. A website can 
 
 Menus have two required parameters - the menu **Name** and menu **Code**. The menu name is displayed in the menu list in the back-end. The menu code is required for referring menus in the layout code, it's the API parameter.
 
-![image](http://s30.postimg.org/udnr61tqp/menu_management_2.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-management.png) {.img-responsive .frame}
 
 Menus can contain multiple **menu items**, and menu items can be nested. Each menu item has a number of properties. There are properties common for all menu item types, and some properties depend on the item type. The common menu item properties are **Title** and **Type**. The Title defines the menu item text. The Type is a drop-down list which displays all menu item types available in your OctoberCMS copy.
 
-![image](http://s13.postimg.org/a3nmvcrk7/menu_item.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-item.png) {.img-responsive .frame}
 
 #### Standard menu item types
 The available menu item types depend on the installed plugins, but there are three basic item types that are supported out of the box.
@@ -376,7 +376,7 @@ Partial-based snippets provide simpler functionality and usually are just contai
 
 To create snippet from a partial just enter the snippet code and snippet name in the partial form. 
 
-![image](http://i61.tinypic.com/2juurl.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-partial.png)
 
 The snippet properties are optional and can be defined with the grid control on the partial settings form. The table has the following columns:
 
