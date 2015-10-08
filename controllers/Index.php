@@ -399,7 +399,13 @@ class Index extends Controller
         $fields = $page->listLayoutSyntaxFields();
 
         foreach ($fields as $fieldCode => $fieldConfig) {
-            $formWidget->tabs['fields']['viewBag['.$fieldCode.']'] = $fieldConfig;
+            if ($fieldConfig['type'] == 'fileupload') continue;
+            
+            if ($fieldConfig['type'] == 'repeater') {
+                $fieldConfig['form']['tabs']['fields'] = array_get($fieldConfig, 'fields', []);
+                unset($fieldConfig['fields']);
+            }
+            $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
         }
     }
 
