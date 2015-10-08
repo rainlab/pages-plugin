@@ -29,6 +29,7 @@ return [
         'saved' => 'Меню было успешно сохранено.',
         'name' => 'Имя',
         'code' => 'Код',
+        'class' => 'Menu CSS Class',
         'items' => 'Пункты меню',
         'add_subitem' => 'Добавить подменю',
         'no_records' => 'Пункты не найдены',

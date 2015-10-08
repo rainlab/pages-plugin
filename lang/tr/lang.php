@@ -29,6 +29,7 @@ return [
         'saved' => 'Menü başarıyla kaydedildi.',
         'name' => 'İsim',
         'code' => 'Kod',
+        'class' => 'Menu CSS Class',
         'items' => 'Menü Ögeleri',
         'add_subitem' => 'Altöge ekle',
         'no_records' => 'Öge bulunamadı',

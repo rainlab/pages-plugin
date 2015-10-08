@@ -29,6 +29,7 @@ return [
         'saved' => 'فهرست با موفقیت ذخیره شد.',
         'name' => 'نام',
         'code' => 'کد',
+        'class' => 'Menu CSS Class',
         'items' => 'موارد فهرست',
         'add_subitem' => 'افزودن زیر فهرست',
         'no_records' => 'موردی یافت نشد',
