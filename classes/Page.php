@@ -361,7 +361,7 @@ class Page extends Content
      */
     public function getTwigContent()
     {
-        return $this->code;
+        return $this->markup;
     }
 
     //
