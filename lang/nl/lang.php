@@ -29,7 +29,7 @@ return [
         'saved' => 'Het menu is opgeslagen.',
         'name' => 'Naam',
         'code' => 'Code',        
-        'class' => 'Menu CSS Class',
+        'class' => 'cssClass',
         'items' => 'Menu items',
         'add_subitem' => 'Subitem toevoegen',
         'no_records' => 'Geen items gevonden',

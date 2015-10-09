@@ -54,7 +54,7 @@ class Menu extends CmsObject
     protected static $fillable = [
         'code',
         'name',
-        'menuclass',
+        'cssClass',
         'itemData'
     ];
 
@@ -274,7 +274,7 @@ class Menu extends CmsObject
         }
 
         $obj->name = $parsedData['name'];
-        $obj->menuclass = $parsedData['menuclass'];
+        $obj->cssClass = $parsedData['cssClass'];
 
         if (isset($parsedData['items'])) {
             $obj->items = MenuItem::initFromArray($parsedData['items']);
@@ -294,7 +294,7 @@ class Menu extends CmsObject
 
         $contentData = [
             'name'  => $this->name,
-            'menuclass'  => $this->menuclass,
+            'cssClass'  => $this->cssClass,
             'items' => $this->itemData ? $this->itemData : []
         ];
 

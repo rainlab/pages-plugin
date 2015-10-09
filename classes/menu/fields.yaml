@@ -10,7 +10,7 @@ fields:
         attributes:
             default-focus: 1
             
-    menuclass:
+    cssClass:
         span: left
         label: rainlab.pages::lang.menu.class
         placeholder: rainlab.pages::lang.menu.class

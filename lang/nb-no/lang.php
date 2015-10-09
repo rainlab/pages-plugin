@@ -33,7 +33,7 @@ return [
         'saved' => 'Menyen har blitt lagret.',
         'name' => 'Navn',
         'code' => 'Kode',
-        'class' => 'Menu CSS Class',
+        'class' => 'cssClass',
         'items' => 'Elementer',
         'add_subitem' => 'Nytt underelement',
         'no_records' => 'Ingen elementer funnet',

@@ -34,7 +34,7 @@ return [
         'saved' => 'Menu salvato con successo.',
         'name' => 'Nome',
         'code' => 'Codice',
-        'class' => 'Menu CSS Class',
+        'class' => 'cssClass',
         'items' => 'Voci di menu',
         'add_subitem' => 'Aggiungi sottomenu',
         'no_records' => 'Nessun elemento trovato',

@@ -34,7 +34,7 @@ return [
         'saved' => 'A menü mentése sikerült.',
         'name' => 'Név',
         'code' => 'Kód',
-        'class' => 'Menu CSS Class',
+        'class' => 'cssClass',
         'items' => 'Menüpont',
         'add_subitem' => 'Almenüpont hozzáadása',
         'no_records' => 'Nem található menüpont',
