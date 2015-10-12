@@ -1,5 +1,5 @@
 {% if __SELF__.menuItems %}
-    <ul>
+    <ul class="{% if __SELF__.menu.cssClass %}{{ __SELF__.menu.cssClass }}{% endif %}">
         {% partial __SELF__ ~ "::items" items=__SELF__.menuItems %}
     </ul>
 {% endif %}
