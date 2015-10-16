@@ -27,7 +27,7 @@
         })
 
         $(document).on('click', '[data-snippet]', function(){
-            $(this).inspector()
+            $.oc.inspector.manager.createInspector(this)
             return false
         })
     }
@@ -212,7 +212,7 @@
             switch (ev.which) {
                 case 32: 
                     // Space key
-                    $(snippet).inspector()
+                    $.oc.inspector.manager.createInspector(snippet)
                 break
             }
         }

@@ -104,7 +104,7 @@ In the simplest case you could create a [layout](http://octobercms.com/docs/cms/
         </body>
     </html>
 
-![http://oi58.tinypic.com/6gbnsn.jpg](http://oi58.tinypic.com/6gbnsn.jpg)  {.img-responsive .frame}
+![http://oi58.tinypic.com/6gbnsn.jpg](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-layout.png)  {.img-responsive .frame}
 
 ##### Static pages
 
