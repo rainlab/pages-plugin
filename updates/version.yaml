@@ -21,3 +21,4 @@
 1.1.6: Minor styling fix to the back-end UI.
 1.1.7: Improved menu item form to include css class, open in a new window and hidden flag.
 1.1.8: Improved the output of snippet partials when saved.
+1.1.9: Minor update to snippet inspector internal API.
