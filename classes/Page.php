@@ -320,7 +320,7 @@ class Page extends Content
             }
 
             $baseName = $layout->getBaseFileName();
-            $result[$baseName] = strlen($layout->name) ? $layout->name : $baseName;
+            $result[$baseName] = strlen($layout->description) ? $layout->description : $baseName;
         }
 
         if (!$result) {
