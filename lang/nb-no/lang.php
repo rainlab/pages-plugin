@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Vil du virkelig slette denne siden? Hvis siden har undersider, blir de også slettet.',
         'new' => 'Ny side',
         'add_subpage' => 'Ny underside',
-        'invalid_url' => 'Ugyldig URL-format. URL-en skal starte med en skråstrek og kan bare inneholde tall, latinske bokstaver og følgende symboler: _-/',
+        'invalid_url' => 'Ugyldig URL-format. URL-en skal starte med en skråstrek og kan bare inneholde tall, latinske bokstaver og følgende symboler: _-/.',
         'url_not_unique' => 'URL-en er allerede i bruk av en annen side.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Ingen layouts funnet',

@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Do you really want delete this page? This will also delete the subpages, if any.',
         'new' => 'New page',
         'add_subpage' => 'Add subpage',
-        'invalid_url' => 'Invalid URL format. The URL should start with the forward slash symbol and can contain digits, Latin letters and the following symbols: _-/',
+        'invalid_url' => 'Invalid URL format. The URL should start with the forward slash symbol and can contain digits, Latin letters and the following symbols: _-/.',
         'url_not_unique' => 'This URL is already used by another page.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Layouts not found',

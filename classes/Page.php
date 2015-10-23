@@ -40,7 +40,7 @@ class Page extends Content
 
     protected $viewBagValidationRules = [
         'title' => 'required',
-        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-]*$/i', 'uniqueUrl']
+        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
     ];
 
     /**

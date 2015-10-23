@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Vuoi davvero eliminare questa pagina? L\'operazione cancellerà anche le sottopagine, se presenti.',
         'new' => 'Nuova pagina',
         'add_subpage' => 'Aggiungi sottopagina',
-        'invalid_url' => 'Formato dell\'URL non valido. L\'URL deve iniziare con una barra e può contenere numeri, lettere latine e i seguenti simboli: _-/',
+        'invalid_url' => 'Formato dell\'URL non valido. L\'URL deve iniziare con una barra e può contenere numeri, lettere latine e i seguenti simboli: _-/.',
         'url_not_unique' => 'L\'URL è già utilizzato da un\'altra pagina.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Layouts non trovato',
