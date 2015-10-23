@@ -305,26 +305,29 @@ class Snippet
         $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
 
         foreach ($map as $snippetDeclaration => $snippetInfo) {
-            $snippetCode = $snippetInfo['code'];
-
-            if (!isset($snippetInfo['component'])) {
-                if (!array_key_exists($snippetCode, $partialSnippetMap)) {
-                    throw new ApplicationException(sprintf('Partial for the snippet %s is not found', $snippetCode));
-                }
-
-                $partialName = $partialSnippetMap[$snippetCode];
-                $generatedMarkup = $controller->renderPartial($partialName, $snippetInfo['properties']);
-            }
-            else {
-                $generatedMarkup = $controller->renderComponent($snippetCode);
-            }
-
             $pattern = preg_quote($snippetDeclaration);
-            $markup = mb_ereg_replace($pattern, $generatedMarkup, $markup);
+            $markup = mb_ereg_replace_callback($pattern,
+                function ($matches) use ($snippetInfo, $controller, $partialSnippetMap) {
+                    $snippetCode = $snippetInfo['code'];
+
+                    if ( ! isset( $snippetInfo['component'] )) {
+                        if ( ! array_key_exists($snippetCode, $partialSnippetMap)) {
+                            throw new ApplicationException(sprintf('Partial for the snippet %s is not found',
+                                $snippetCode));
+                        }
+
+                        $partialName = $partialSnippetMap[$snippetCode];
+
+                        return $controller->renderPartial($partialName, $snippetInfo['properties']);
+                    } else {
+                        return $controller->renderComponent($snippetCode);
+                    }
+                }, $markup);
         }
 
         return $markup;
     }
+
 
     public static function processTemplateSettingsArray($settingsArray)
     {
