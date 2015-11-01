@@ -237,7 +237,10 @@ class Page extends Content
      */
     public static function url($name)
     {
-        $page = static::find($name);
+        if (!$page = static::find($name)) {
+            return null;
+        }
+
         $url = $page->getViewBag()->property('url');
 
         if (substr($url, 0, 1) == '/') {
