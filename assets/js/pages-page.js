@@ -52,8 +52,11 @@
         $(document).on('change', '#pages-master-tabs form[data-object-type=page] select[name="viewBag[layout]"]', this.proxy(this.onLayoutChanged))
 
         // Create object button click
-        $(document).on('click', '#pages-side-panel form [data-control=create-object], #pages-side-panel form [data-control=create-template]', 
-            this.proxy(this.onCreateObject))
+        $(document).on(
+            'click',
+            '#pages-side-panel form [data-control=create-object], #pages-side-panel form [data-control=create-template]',
+            this.proxy(this.onCreateObject)
+        )
 
         // Submenu item is clicked in the sidebar
         $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', this.proxy(this.onSidebarSubmenuItemClick))
@@ -414,26 +417,34 @@
      * Triggered when a static page layout changes
      */
     PagesPage.prototype.onLayoutChanged = function(e) {
-        var $el = $(e.target),
-            $form = $el.closest('form'),
+        var
             self = this,
+            $el = $(e.target),
+            $form = $el.closest('form'),
             $pane = $form.closest('.tab-pane'),
             data = {
                 type: $('[name=objectType]', $form).val(),
                 theme: $('[name=theme]', $form).val(),
-                path: $('[name=objectPath]', $form).val(),
+                path: $('[name=objectPath]', $form).val()
             },
             tab = $pane.data('tab')
 
+        // $form.trigger('unchange.oc.changeMonitor')
+        $form.changeMonitor('dispose')
+
         $.oc.stripeLoadIndicator.show()
-        $form.request('onUpdatePageLayout', {
-            data: data
-        }).done(function(data){
-            $.oc.stripeLoadIndicator.hide()
-            self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
-        }).always(function(){
-            $.oc.stripeLoadIndicator.hide()
-        })
+
+        $form
+            .request('onUpdatePageLayout', {
+                data: data
+            })
+            .done(function(data){
+                self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
+            })
+            .always(function(){
+                $.oc.stripeLoadIndicator.hide()
+                $('form:first', $pane).changeMonitor().trigger('change')
+            })
     }
 
     /*
