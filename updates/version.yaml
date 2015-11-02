@@ -22,3 +22,4 @@
 1.1.7: Improved menu item form to include css class, open in a new window and hidden flag.
 1.1.8: Improved the output of snippet partials when saved.
 1.1.9: Minor update to snippet inspector internal API.
+1.1.10: Fixes a bug where selecting a layout causes permanent unsaved changes.
