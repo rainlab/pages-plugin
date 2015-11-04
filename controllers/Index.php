@@ -400,11 +400,12 @@ class Index extends Controller
 
         foreach ($fields as $fieldCode => $fieldConfig) {
             if ($fieldConfig['type'] == 'fileupload') continue;
-            
+
             if ($fieldConfig['type'] == 'repeater') {
-                $fieldConfig['form']['tabs']['fields'] = array_get($fieldConfig, 'fields', []);
+                $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
                 unset($fieldConfig['fields']);
             }
+
             $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
         }
     }
