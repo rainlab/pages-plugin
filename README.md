@@ -421,6 +421,17 @@ Alternatively you may use the field type as the tag name, here we use the `{text
 
     <h1>{text name="tagline" label="Tagline"}Our wonderful website{/text}</h1>
 
+You may also use the `{repeater}` tag for repeating content:
+
+    {repeater name="content_sections" prompt="Add another content section"}
+        <h3>
+            {text name="content_header" label="Content section" placeholder="Type in a heading and enter some content for it below"}{/text}
+        </h3>
+        <div>
+            {richeditor name="content_body" size="large"}{/richeditor}
+        </div>
+    {/repeater}
+
 For more details on syntax fields, see the [Parser section](http://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
 > **Note**: The `repeater` field type is currently unsupported, however we hope to change this in the future.
