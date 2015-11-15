@@ -110,6 +110,12 @@ class Index extends Controller
 
         $object->save();
 
+        /*
+         * Extensibility
+         */
+        Event::fire('static.page.save', [$this, $object]);
+        $this->fireEvent('page.save', [$object]);
+
         $result = [
             'objectPath'  => $type != 'content' ? $object->getBaseFileName() : $object->fileName,
             'objectMtime' => $object->mtime,
