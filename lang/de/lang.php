@@ -98,7 +98,7 @@ return [
         'name_comment' => 'Der Name wird in der Snippet-Liste in der Seitenleiste der Statische-Seiten angezeigt. Außerdem auf einer Seite wenn ein Snippet angelegt wird.',
         'no_records' => 'Keine Snippets gefunden',
         'menu_label' => 'Snippets',
-        'column_property' => 'Titel für die Eigentschaft',
+        'column_property' => 'Titel für die Eigenschaft',
         'column_type' => 'Typ',
         'column_code' => 'Code',
         'column_default' => 'Standard',
