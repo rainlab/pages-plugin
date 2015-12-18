@@ -179,6 +179,8 @@ class Menu extends CmsObject
                                         $reference->title = isset($item['title']) ? $item['title'] : '--no title--';
                                         $reference->url = isset($item['url']) ? $item['url'] : '#';
                                         $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;
+                                        $reference->viewBag['cssClass'] = isset($item['viewBag.cssClass']) ? $item['viewBag.cssClass'] : false;
+                                        $reference->viewBag['code'] = isset($item['viewBag.code']) ? $item['viewBag.code'] : false;
 
                                         if (!strlen($parentReference->url)) {
                                             $parentReference->url = $reference->url;
