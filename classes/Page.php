@@ -171,7 +171,7 @@ class Page extends Content
                 $fileName = 'index';
             }
 
-            $curName = $fileName.'.htm';
+            $curName = trim($fileName).'.htm';
             $counter = 2;
 
             while (File::exists($dir.'/'.$curName)) {
