@@ -126,7 +126,14 @@ class MenuItem
      */
     public function getTypeOptions($keyValue = null)
     {
-        $result = ['url' => 'URL'];
+        /*
+         * Baked in types
+         */
+        $result = [
+            'url' => 'URL',
+            'header' => 'Header',
+        ];
+
         $apiResult = Event::fire('pages.menuitem.listTypes');
 
         if (is_array($apiResult)) {
