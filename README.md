@@ -437,8 +437,6 @@ You may also use the `{repeater}` tag for repeating content:
 
 For more details on syntax fields, see the [Parser section](http://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
-> **Note**: The `repeater` field type is currently unsupported, however we hope to change this in the future.
-
 ##### Custom menu item form fields
 
 Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
