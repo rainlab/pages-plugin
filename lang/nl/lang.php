@@ -61,6 +61,8 @@ return [
         'cms_page_required' => 'Gelieve een CMS Pagina te selecteren',
         'code' => 'Code',
         'code_comment' => 'Geef de menu item code op indien u deze wilt benaderen via de API.',
+        'static_page' => 'Statische pagina',
+        'all_static_pages' => 'Alle statische pagina\'s'
     ],
     'content' => [
         'menu_label' => 'Inhoud',

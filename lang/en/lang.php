@@ -61,6 +61,8 @@ return [
         'cms_page_required' => 'Please select a CMS page',
         'code' => 'Code',
         'code_comment' => 'Enter the menu item code if you want to access it with the API.',
+        'static_page' => 'Static Page',
+        'all_static_pages' => 'All Static Pages'
     ],
     'content' => [
         'menu_label' => 'Content',
