@@ -2,38 +2,42 @@
 
 return [
     'plugin' => [
-        'name' => 'Pages',
-        'description' => 'Pages & menus features.',
+        'name' => 'Pagina\'s',
+        'description' => 'Pagina & menu functionaliteit.',
     ],
     'page' => [
         'menu_label' => 'Pagina\'s',
-        'delete_confirmation' => 'Bent u zeker dat u de geselecteerde pagina\'s wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
+        'delete_confirmation' => 'Weet u zeker dat u de geselecteerde pagina\'s wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
         'no_records' => 'Geen pagina\'s gevonden',
-        'delete_confirm_single' => 'Bent u zeker dat u deze pagina wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
+        'delete_confirm_single' => 'Weet u zeker dat u deze pagina wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
         'new' => 'Nieuwe pagina',
         'add_subpage' => 'Subpagina toevoegen',
         'invalid_url' => 'Ongeldige URL-structuur. De URL moet beginnen met een slash en kan enkel cijfers, Latijnse letters en deze symbolen bevatten: _-/',
         'url_not_unique' => 'Deze URL wordt al gebruikt door een andere pagina.',
         'layout' => 'Layout',
-        'layouts_not_found' => 'Geen layout gevonden',
-        'saved' => 'De pagina is opgeslagen.'
+        'layouts_not_found' => 'Geen layouts gevonden',
+        'saved' => 'De pagina is succesvol opgeslagen.',
+        'tab' => 'Pagina\'s',
+        'manage_pages' => 'Beheer statische pagina\'s',
+        'manage_menus' => 'Beheer statische menu\'s',
+        'access_snippets' => 'Toegang tot blokken',
+        'manage_content' => 'Beheer statische inhoud',
     ],
     'menu' => [
         'menu_label' => 'Menu\'s',
-        'delete_confirmation' => 'Bent u zeker dat u de geselecteerde menu\'s wilt verwijderen?',
+        'delete_confirmation' => 'Weet u zeker dat u de geselecteerde menu\'s wilt verwijderen?',
         'no_records' => 'Geen menu\'s gevonden',
         'new' => 'Nieuw menu',
         'new_name' => 'Nieuw menu',
         'new_code' => 'nieuw-menu',
-        'delete_confirm_single' => 'Bent u zeker dat u dit menu wilt verwijderen?',
+        'delete_confirm_single' => 'Weet u zeker dat u dit menu wilt verwijderen?',
         'saved' => 'Het menu is opgeslagen.',
         'name' => 'Naam',
         'code' => 'Code',
         'items' => 'Menu items',
         'add_subitem' => 'Subitem toevoegen',
-        'no_records' => 'Geen items gevonden',
-        'code_required' => 'Een Code is verplicht',
-        'invalid_code' => 'Ongeldige code-structuur. De Code kan enkel cijfers, Latijnse letters en deze symbolen bevatten: _-'
+        'code_required' => 'Code is verplicht',
+        'invalid_code' => 'Ongeldige code-structuur. De Code kan enkel cijfers, Latijnse letters en deze symbolen bevatten: _-',
     ],
     'menuitem' => [
         'title' => 'Titel',
@@ -43,7 +47,7 @@ return [
         'allow_nested_items_comment' => 'Geneste items worden dynamisch gegenereerd door statische pagina\'s en sommige andere types.',
         'url' => 'URL',
         'reference' => 'Referentie',
-        'title_required' => 'Een Titel is verplicht',
+        'title_required' => 'Titel is verplicht',
         'unknown_type' => 'Onbekend menu item type',
         'unnamed' => 'Onbenoemd menu item',
         'add_item' => '<u>I</u>tem toevoegen',
@@ -56,19 +60,19 @@ return [
         'url_required' => 'Een URL is verplicht',
         'cms_page_required' => 'Gelieve een CMS Pagina te selecteren',
         'code' => 'Code',
-        'code_comment' => 'Geef de menu item code op indien u deze wilt benaderen via de API.'
+        'code_comment' => 'Geef de menu item code op indien u deze wilt benaderen via de API.',
     ],
     'content' => [
         'menu_label' => 'Inhoud',
-        'cant_save_to_dir' => 'Het is niet toegelaten bestanden met inhoud op te slaan in de static-pages map.'
+        'cant_save_to_dir' => 'Het is niet toegelaten bestanden met inhoud op te slaan in de static-pages map.',
     ],
     'sidebar' => [
         'add' => 'Toevoegen',
-        'search' => 'Zoeken...'
+        'search' => 'Zoeken...',
     ],
     'object' => [
         'invalid_type' => 'Onbekend object type',
-        'not_found' => 'Het gevraagde object is niet gevonden.'
+        'not_found' => 'Het gevraagde object is niet gevonden.',
     ],
     'editor' => [
         'title' => 'Titel',
@@ -85,5 +89,25 @@ return [
         'hidden_comment' => 'Verborgen pagina\'s zijn alleen toegankelijk voor ingelogde gebruikers.',
         'navigation_hidden' => 'Verbergen in de navigatie',
         'navigation_hidden_comment' => 'Indien aangevinkt, zal deze pagina niet weergegeven worden in automatisch gegenereerde menu\'s en kruimelpaden (breadcrumbs).',
+    ],
+    'snippet' => [
+        'partialtab' => 'Blokken',
+        'code' => 'Blok code',
+        'code_comment' => 'Voer een code in om dit fragment beschikbaar the maken in de Static Pages plugin.',
+        'name' => 'Naam',
+        'name_comment' => 'De naam wordt weergegeven in de blokkenlijst in de zijbalk en op de pagina waar dit blok wordt toegevoegd.',
+        'no_records' => 'Geen blokken gevonden',
+        'menu_label' => 'Blokken',
+        'column_property' => 'Eigenschap naam',
+        'column_type' => 'Type',
+        'column_code' => 'Code',
+        'column_default' => 'Standaardwaarde',
+        'column_options' => 'Opties',
+        'column_type_string' => 'Tekst',
+        'column_type_checkbox' => 'Selectieveld',
+        'column_type_dropdown' => 'Selectielijst',
+        'not_found' => 'Blok met de gevraagde code :code is niet gevonden in het thema.',
+        'property_format_error' => 'De naam van de eigenschap moet beginnen met een letter en kan alleen letters en cijfers bevatten.',
+        'invalid_option_key' => 'Ongeldige selectlijst waarde: %s. Deze waarden mogen alleen cijfers, letters of de karakters _- bevatten.',
     ],
 ];
