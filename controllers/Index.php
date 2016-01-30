@@ -107,8 +107,13 @@ class Index extends Controller
         $type = Request::input('objectType');
 
         $object = $this->fillObjectFromPost($type);
-
         $object->save();
+
+        /*
+         * Extensibility
+         */
+        Event::fire('pages.object.save', [$this, $object, $type]);
+        $this->fireEvent('object.save', [$object, $type]);
 
         $result = [
             'objectPath'  => $type != 'content' ? $object->getBaseFileName() : $object->fileName,
@@ -399,7 +404,14 @@ class Index extends Controller
         $fields = $page->listLayoutSyntaxFields();
 
         foreach ($fields as $fieldCode => $fieldConfig) {
-            $formWidget->tabs['fields']['viewBag['.$fieldCode.']'] = $fieldConfig;
+            if ($fieldConfig['type'] == 'fileupload') continue;
+
+            if ($fieldConfig['type'] == 'repeater') {
+                $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
+                unset($fieldConfig['fields']);
+            }
+
+            $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
         }
     }
 

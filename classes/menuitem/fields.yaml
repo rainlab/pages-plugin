@@ -41,19 +41,11 @@ fields:
 
 tabs:
     fields:
-        viewBag[isExternal]:
-            label: External link
-            comment: Open links for this menu item in a new window.
-            type: checkbox
-            tab: Display
-            span: auto
-
         viewBag[isHidden]:
             label: Hidden
             comment: Hide this menu item from appearing on the front-end.
             type: checkbox
             tab: Display
-            span: auto
 
         code:
             label: rainlab.pages::lang.menuitem.code
@@ -62,7 +54,13 @@ tabs:
             span: auto
 
         viewBag[cssClass]:
-            label: Class
+            label: CSS Class
             comment: Enter a CSS class name to give this menu item a custom appearance.
             tab: Attributes
             span: auto
+
+        viewBag[isExternal]:
+            label: External link
+            comment: Open links for this menu item in a new window.
+            type: checkbox
+            tab: Attributes

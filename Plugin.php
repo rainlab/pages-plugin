@@ -145,8 +145,8 @@ class Plugin extends PluginBase
 
         Event::listen('pages.menuitem.listTypes', function() {
             return [
-                'static-page'      => 'Static page',
-                'all-static-pages' => 'All static pages'
+                'static-page'      => 'Static Page',
+                'all-static-pages' => 'All Static Pages'
             ];
         });
 
