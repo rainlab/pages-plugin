@@ -4,11 +4,18 @@
 
 fields:
     name:
-        span: left
+        span: full
         label: rainlab.pages::lang.menu.name
         placeholder: rainlab.pages::lang.menu.new_name
         attributes:
             default-focus: 1
+            
+    cssClass:
+        span: left
+        label: rainlab.pages::lang.menu.class
+        placeholder: rainlab.pages::lang.menu.class
+        attributes:
+            default-focus: 0
 
     code:
         span: right

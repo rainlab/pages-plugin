@@ -542,7 +542,7 @@ class Index extends Controller
             $objectData['settings'] = $settings;
         }
 
-        $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
+        $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name', 'cssClass'];
 
         if ($type != 'menu' && $type != 'content') {
             $fields[] = 'parentFileName';

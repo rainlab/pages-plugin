@@ -33,6 +33,7 @@ return [
         'saved' => 'Das Menü wurde erfolgreich gespeichert.',
         'name' => 'Name',
         'code' => 'Code',
+        'class' => 'cssClass',
         'items' => 'Menüpunkte',
         'add_subitem' => 'Neuer Menüpunkt',
         'no_records' => 'Keine Menüpunkte gefunden',

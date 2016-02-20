@@ -53,6 +53,7 @@ class Menu extends CmsObject
 
     protected static $fillable = [
         'code',
+        'cssClass',
         'name',
         'itemData'
     ];
@@ -136,6 +137,7 @@ class Menu extends CmsObject
         $currentUrl = Str::lower(URL::to($currentUrl));
 
         $activeMenuItem = $page->activeMenuItem ?: false;
+
         $iterator = function($items) use ($currentUrl, &$iterator, $activeMenuItem) {
             $result = [];
 
@@ -273,6 +275,7 @@ class Menu extends CmsObject
         }
 
         $obj->name = $parsedData['name'];
+        $obj->cssClass = $parsedData['cssClass'];
 
         if (isset($parsedData['items'])) {
             $obj->items = MenuItem::initFromArray($parsedData['items']);
@@ -292,6 +295,7 @@ class Menu extends CmsObject
 
         $contentData = [
             'name'  => $this->name,
+            'cssClass' => $this->cssClass,
             'items' => $this->itemData ? $this->itemData : []
         ];
 
@@ -309,6 +313,9 @@ class Menu extends CmsObject
     {
         $item['name'] = $this->name;
         $item['items'] = serialize($this->items);
+        if(isset($this->cssClass)){
+            $item['cssClass'] = $this->cssClass;
+        }
     }
 
     /**
@@ -319,5 +326,8 @@ class Menu extends CmsObject
     {
         $this->items = unserialize($cached['items']);
         $this->name = $cached['name'];
+        if(isset($cached['cssClass'])){
+            $this->cssClass = $cached['cssClass'];
+        }
     }
 }

@@ -5,7 +5,7 @@ use RainLab\Pages\Classes\Router;
 use Cms\Classes\Theme;
 use Request;
 use RainLab\Pages\Classes\Menu as PagesMenu;
-
+use Log;
 /**
  * The menu component.
  *
@@ -19,6 +19,7 @@ class StaticMenu extends ComponentBase
      * Each item is an object of the RainLab\Pages\Classes\MenuItemReference class.
      */
     protected $menuItems;
+    protected $menu;
 
     public function componentDetails()
     {
@@ -55,7 +56,22 @@ class StaticMenu extends ComponentBase
 
     public function onRun()
     {
+        $this->page['menu'] = $this->menu();
         $this->page['menuItems'] = $this->menuItems();
+    }
+
+    public function menu()
+    {
+        if ($this->menu !== null) {
+            return $this->menu;
+        }
+        
+        if (!strlen($this->property('code'))) {
+            return;
+        }
+        
+        $theme = Theme::getActiveTheme();
+        return $this->menu = PagesMenu::loadCached($theme, $this->property('code'));
     }
 
     public function menuItems()
@@ -64,12 +80,7 @@ class StaticMenu extends ComponentBase
             return $this->menuItems;
         }
 
-        if (!strlen($this->property('code'))) {
-            return;
-        }
-
-        $theme = Theme::getActiveTheme();
-        $menu = PagesMenu::loadCached($theme, $this->property('code'));
+        $menu = $this->menu();
 
         if ($menu) {
             $this->menuItems = $menu->generateReferences($this->page);
