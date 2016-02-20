@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Weet u zeker dat u deze pagina wilt verwijderen? Ook eventuele subpagina\'s zullen hierdoor verwijderd worden.',
         'new' => 'Nieuwe pagina',
         'add_subpage' => 'Subpagina toevoegen',
-        'invalid_url' => 'Ongeldige URL-structuur. De URL moet beginnen met een slash en kan enkel cijfers, Latijnse letters en deze symbolen bevatten: _-/',
+        'invalid_url' => 'Ongeldige URL-structuur. De URL moet beginnen met een slash en kan enkel cijfers, Latijnse letters en deze symbolen bevatten: _-/.',
         'url_not_unique' => 'Deze URL wordt al gebruikt door een andere pagina.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Geen layouts gevonden',

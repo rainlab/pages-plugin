@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Tem certeza que deseja excluir a página selecionada? Todas as subpáginas também serão excluídas.',
         'new' => 'Nova página',
         'add_subpage' => 'Adicionar subpágina',
-        'invalid_url' => 'Formato inválido de URL. A URL deve iniciar com o símbolo / e pode conter apenas dígitos, letras latinas e os seguintes símbolos: _-/',
+        'invalid_url' => 'Formato inválido de URL. A URL deve iniciar com o símbolo / e pode conter apenas dígitos, letras latinas e os seguintes símbolos: _-/.',
         'url_not_unique' => 'Esta URL já está sendo utilizada por outra página.',
         'layout' => 'Layout',
         'layouts_not_found' => 'Nenhum layout encontrado',
