@@ -21,7 +21,7 @@ return [
         'manage_pages' => 'Manage static pages',
         'manage_menus' => 'Manage static menus',
         'access_snippets' => 'Access snippets',
-        'manage_content' => 'Manage static content'
+        'manage_content' => 'Manage static content',
     ],
     'menu' => [
         'menu_label' => 'Menus',
@@ -36,9 +36,8 @@ return [
         'code' => 'Code',
         'items' => 'Menu items',
         'add_subitem' => 'Add subitem',
-        'no_records' => 'No items found',
         'code_required' => 'The Code is required',
-        'invalid_code' => 'Invalid Code format. The Code can contain digits, Latin letters and the following symbols: _-'
+        'invalid_code' => 'Invalid Code format. The Code can contain digits, Latin letters and the following symbols: _-',
     ],
     'menuitem' => [
         'title' => 'Title',
@@ -61,19 +60,21 @@ return [
         'url_required' => 'The URL is required',
         'cms_page_required' => 'Please select a CMS page',
         'code' => 'Code',
-        'code_comment' => 'Enter the menu item code if you want to access it with the API.'
+        'code_comment' => 'Enter the menu item code if you want to access it with the API.',
+        'static_page' => 'Static Page',
+        'all_static_pages' => 'All Static Pages'
     ],
     'content' => [
         'menu_label' => 'Content',
-        'cant_save_to_dir' => 'Saving content files to the static-pages directory is not allowed.'
+        'cant_save_to_dir' => 'Saving content files to the static-pages directory is not allowed.',
     ],
     'sidebar' => [
         'add' => 'Add',
-        'search' => 'Search...'
+        'search' => 'Search...',
     ],
     'object' => [
         'invalid_type' => 'Unknown object type',
-        'not_found' => 'The requested object was not found.'
+        'not_found' => 'The requested object was not found.',
     ],
     'editor' => [
         'title' => 'Title',
@@ -109,6 +110,6 @@ return [
         'column_type_dropdown' => 'Dropdown',
         'not_found' => 'Snippet with the requested code :code was not found in the theme.',
         'property_format_error' => 'Property code should start with a Latin letter and can contain only Latin letters and digits',
-        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -'
-    ]
+        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -',
+    ],
 ];
