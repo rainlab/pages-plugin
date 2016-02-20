@@ -421,7 +421,7 @@ Alternatively you may use the field type as the tag name, here we use the `{text
 
     <h1>{text name="tagline" label="Tagline"}Our wonderful website{/text}</h1>
 
-For more details on syntax fields, see the [Parser section](octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
+For more details on syntax fields, see the [Parser section](http://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
 > **Note**: The `repeater` field type is currently unsupported, however we hope to change this in the future.
 
