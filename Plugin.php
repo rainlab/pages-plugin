@@ -66,6 +66,7 @@ class Plugin extends PluginBase
                 'label'       => 'rainlab.pages::lang.plugin.name',
                 'url'         => Backend::url('rainlab/pages'),
                 'icon'        => 'icon-files-o',
+                'iconSvg'     => 'plugins/rainlab/pages/assets/images/pages-icon.svg',
                 'permissions' => ['rainlab.pages.*'],
                 'order'       => 20,
 
