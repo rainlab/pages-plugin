@@ -146,8 +146,8 @@ class Plugin extends PluginBase
 
         Event::listen('pages.menuitem.listTypes', function() {
             return [
-                'static-page'      => 'Static page',
-                'all-static-pages' => 'All static pages'
+                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
+                'all-static-pages' => 'rainlab.pages::lang.menuitem.all_static_pages'
             ];
         });
 
@@ -193,12 +193,12 @@ class Plugin extends PluginBase
 
         Event::listen('backend.richeditor.listTypes', function () {
             return [
-                'static-page' => 'Static page',
+                'static-page' => 'rainlab.pages::lang.menuitem.static_page',
             ];
         });
 
         Event::listen('backend.richeditor.getTypeInfo', function ($type) {
-            if ($type == 'static-page') {
+            if ($type === 'static-page') {
                 return StaticPage::getRichEditorTypeInfo($type);
             }
         });

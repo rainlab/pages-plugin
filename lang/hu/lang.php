@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Valóban törölni akarja ezt a lapot? Ez az allapokat is törölni fogja.',
         'new' => 'Új lap',
         'add_subpage' => 'Allap hozzáadása',
-        'invalid_url' => 'Érvénytelen az URL cím formátuma. Perjellel kell kezdődnie, és számokat, latin betűket, valamint a következő szimbólumokat tartalmazhatja: _-/',
+        'invalid_url' => 'Érvénytelen az URL cím formátuma. Perjellel kell kezdődnie, és számokat, latin betűket, valamint a következő szimbólumokat tartalmazhatja: _-/.',
         'url_not_unique' => 'Már használja egy másik lap ezt az URL címet.',
         'layout' => 'Elrendezés',
         'layouts_not_found' => 'Nem található elrendezés',

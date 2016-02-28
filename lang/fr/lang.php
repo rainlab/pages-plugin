@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Confirmez-vous la suppression de cette page ? Les sous-pages seront également supprimées.',
         'new' => 'Nouvelle page',
         'add_subpage' => 'Ajouter une sous-page',
-        'invalid_url' => 'Le format d’URL est invalide. L’URL doit commencer par un / et peut contenir des chiffres, des lettres et les symboles suivants : _-/',
+        'invalid_url' => 'Le format d’URL est invalide. L’URL doit commencer par un / et peut contenir des chiffres, des lettres et les symboles suivants : _-/.',
         'url_not_unique' => 'Cette URL est déjà utilisée par une autre page.',
         'layout' => 'Maquette',
         'layouts_not_found' => 'Aucune maquette trouvée',

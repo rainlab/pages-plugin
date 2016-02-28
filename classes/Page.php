@@ -40,7 +40,7 @@ class Page extends Content
 
     protected $viewBagValidationRules = [
         'title' => 'required',
-        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-]*$/i', 'uniqueUrl']
+        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
     ];
 
     /**
@@ -171,7 +171,7 @@ class Page extends Content
                 $fileName = 'index';
             }
 
-            $curName = $fileName.'.htm';
+            $curName = trim($fileName).'.htm';
             $counter = 2;
 
             while (File::exists($dir.'/'.$curName)) {
@@ -237,7 +237,10 @@ class Page extends Content
      */
     public static function url($name)
     {
-        $page = static::find($name);
+        if (!$page = static::find($name)) {
+            return null;
+        }
+
         $url = $page->getViewBag()->property('url');
 
         if (substr($url, 0, 1) == '/') {
@@ -320,7 +323,7 @@ class Page extends Content
             }
 
             $baseName = $layout->getBaseFileName();
-            $result[$baseName] = strlen($layout->name) ? $layout->name : $baseName;
+            $result[$baseName] = strlen($layout->description) ? $layout->description : $baseName;
         }
 
         if (!$result) {

@@ -45,22 +45,25 @@ Menus can contain multiple **menu items**, and menu items can be nested. Each me
 #### Standard menu item types
 The available menu item types depend on the installed plugins, but there are three basic item types that are supported out of the box.
 
+###### Header {.subheader}
+Items of this type are used for displaying text and don't link to anything. The text could be used as a category heading for other menu items. This type will only show a title property.
+
 ###### URL {.subheader}
 Items of this type are links to a specific fixed URL. That could be an URL of an or internal page. Items of this type don't have any other properties - just the title and URL.
 
-###### Static page {.subheader}
+###### Static Page {.subheader}
 Items of this type refer to static pages. The static page should be selected in the **Reference** drop-down list described below.
 
-###### All static pages {.subheader}
+###### All Static Pages {.subheader}
 Items of this type expand to create links to all static pages defined in the theme. Nested pages are represented with nested menu items.
 
 #### Custom menu item types
 Other plugins can supply new menu item types. For example, the [Blog plugin](http://octobercms.com/plugin/rainlab-blog) by [RainLab](http://octobercms.com/author/RainLab) supplies two more types:
 
-###### Blog category {.subheader}
+###### Blog Category {.subheader}
 An item of this type represents a link to a specific blog category. The category should be selected in the **Reference** drop-down. This menu type also requires selecting a **CMS page** that outputs a blog category.
 
-###### All blog categories {.subheader}
+###### All Blog Categories {.subheader}
 An item of this time expands into multiple items representing all blog existing categories. This menu type also requires selecting a **CMS page**.
 
 #### Menu item properties
@@ -104,7 +107,7 @@ In the simplest case you could create a [layout](http://octobercms.com/docs/cms/
         </body>
     </html>
 
-![http://oi58.tinypic.com/6gbnsn.jpg](http://oi58.tinypic.com/6gbnsn.jpg)  {.img-responsive .frame}
+![http://oi58.tinypic.com/6gbnsn.jpg](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-layout.png)  {.img-responsive .frame}
 
 ##### Static pages
 
@@ -421,9 +424,18 @@ Alternatively you may use the field type as the tag name, here we use the `{text
 
     <h1>{text name="tagline" label="Tagline"}Our wonderful website{/text}</h1>
 
-For more details on syntax fields, see the [Parser section](octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
+You may also use the `{repeater}` tag for repeating content:
 
-> **Note**: The `repeater` field type is currently unsupported, however we hope to change this in the future.
+    {repeater name="content_sections" prompt="Add another content section"}
+        <h3>
+            {text name="content_header" label="Content section" placeholder="Type in a heading and enter some content for it below"}{/text}
+        </h3>
+        <div>
+            {richeditor name="content_body" size="large"}{/richeditor}
+        </div>
+    {/repeater}
+
+For more details on syntax fields, see the [Parser section](http://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
 ##### Custom menu item form fields
 

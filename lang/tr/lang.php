@@ -12,7 +12,7 @@ return [
         'delete_confirm_single' => 'Bu sayfayı silmek istiyor musunuz? Alt sayfalar da silinecektir',
         'new' => 'Yeni sayfa',
         'add_subpage' => 'Altsayfa ekle',
-        'invalid_url' => 'Geçersiz URL formatı. URL eğik çizgi sembolü ile başlamalıdır ve rakam, latin harfleri ve bu sembolleri: _-/ içerebilir.',
+        'invalid_url' => 'Geçersiz URL formatı. URL eğik çizgi sembolü ile başlamalıdır ve rakam, latin harfleri ve bu sembolleri: _-/. içerebilir.',
         'url_not_unique' => 'Bu URL başka bir sayfa tarafından kullanılıyor',
         'layout' => 'Layout',
         'layouts_not_found' => 'Layouts not found',
