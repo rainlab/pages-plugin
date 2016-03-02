@@ -34,3 +34,4 @@ secondaryTabs:
             stretch: true
             type: richeditor
             size: huge
+            valueFrom: markup

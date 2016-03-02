@@ -336,10 +336,6 @@ class Index extends Controller
         if ($type == 'content') {
             $fileName = $object->getFileName();
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-
-            if ($extension == 'htm') {
-                $object->markup_html = $object->markup;
-            }
         }
 
         return $object;

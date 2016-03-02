@@ -1,7 +1,7 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Lang;
-use Cms\Classes\Page;
+use Cms\Classes\Page as CmsPage;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\CmsException;
@@ -47,7 +47,7 @@ class Controller
 
         $viewBag = $page->getViewBag();
 
-        $cmsPage = new Page($this->theme);
+        $cmsPage = new CmsPage($this->theme);
         $cmsPage->apiBag['staticPage'] = $page;
 
         $cmsPage->title = $viewBag->property('title');
