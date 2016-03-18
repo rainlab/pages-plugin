@@ -109,7 +109,7 @@ class MenuItems extends FormWidgetBase
         }
 
         if (isset($this->typeInfoCache[$item->type])) {
-            $result = $this->typeListCache[$item->type];
+            $result = trans($this->typeListCache[$item->type]);
 
             if ($item->type !== 'url') {
                 if (isset($this->typeInfoCache[$item->type]['references'])) {

@@ -345,7 +345,7 @@ class Index extends Controller
     {
         $class = $this->resolveTypeClassName($type);
 
-        if (!($object = new $class($this->theme))) {
+        if (!($object = $class::inTheme($this->theme))) {
             throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
         }
 
@@ -408,8 +408,8 @@ class Index extends Controller
             }
 
             $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+            }
         }
-    }
 
     protected function addPagePlaceholders($formWidget, $page)
     {

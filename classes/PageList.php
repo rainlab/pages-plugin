@@ -5,7 +5,6 @@ use Lang;
 use File;
 use ApplicationException;
 use RainLab\Pages\Classes\Page;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
 use SystemException;
 use DirectoryIterator;
 
@@ -154,8 +153,7 @@ class PageList
         $originalData = $this->getPagesConfig();
         $originalData['static-pages'] = $structure;
 
-        $dumper = new YamlDumper();
-        $yamlData = $dumper->dump($originalData, 20, 0, false, true);
+        $yamlData = Yaml::render($originalData);
 
         $filePath = $this->getConfigFilePath();
         $dirPath = dirname($filePath);
