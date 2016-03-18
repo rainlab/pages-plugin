@@ -1,6 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
-use URL;
+use Url;
 use File;
 use Lang;
 use Yaml;
@@ -13,12 +13,11 @@ use RainLab\Pages\Classes\MenuItemReference;
 use Cms\Classes\Theme;
 use Cms\Classes\CmsObject;
 use Cms\Classes\Controller as CmsController;
-use SystemException;
-use ValidationException;
-use ApplicationException;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
-use Symfony\Component\Yaml\Dumper as YamlDumper;
+use ApplicationException;
+use ValidationException;
+use SystemException;
 use DirectoryIterator;
 use Exception;
 
@@ -31,48 +30,82 @@ use Exception;
 class Menu extends CmsObject
 {
     /**
-     * @var string Specifies the menu name.
+     * @var string The container name associated with the model, eg: pages.
      */
-    public $name;
+    protected $dirName = 'meta/menus';
 
     /**
-     * @var array The menu items.
-     * Items are objects of the \RainLab\Pages\Classes\MenuItem class.
+     * @var array Cache store used by parseContent method.
      */
-    protected $items;
+    protected $contentDataCache;
 
     /**
-     * @var array Raw item data.
-     * This property is used by the menu editor.
+     * @var array Allowable file extensions.
      */
-    protected $itemData = false;
+    protected $allowedExtensions = ['yaml'];
 
-    protected static $allowedExtensions = ['yaml'];
+    /**
+     * @var string Default file extension.
+     */
+    protected $defaultExtension = 'yaml';
 
-    protected static $defaultExtension = 'yaml';
-
-    protected static $fillable = [
+    /**
+     * @var array The attributes that are mass assignable.
+     */
+    protected $fillable = [
+        'content',
         'code',
         'name',
         'itemData'
     ];
 
     /**
-     * Returns the directory name corresponding to the object type.
-     * For pages the directory name is "pages", for layouts - "layouts", etc.
-     * @return string
+     * @var array List of attribute names which are not considered "settings".
      */
-    public static function getObjectTypeDirName()
+    protected $purgeable = [
+        'code',
+        'name',
+        'itemData'
+    ];
+
+    /**
+     * Triggered before the menu is saved.
+     * @return void
+     */
+    public function beforeSave()
     {
-        return 'meta/menus';
+        $this->content = $this->renderContent();
+    }
+
+    /**
+     * Validate custom attributes.
+     * @return void
+     */
+    public function beforeValidate()
+    {
+        if (!strlen($this->code)) {
+            throw new ValidationException([
+                'code' => Lang::get('rainlab.pages::lang.menu.code_required')
+            ]);
+        }
+
+        if (!preg_match('/^[0-9a-z\-\_]+$/i', $this->code)) {
+            throw new ValidationException([
+                'code' => Lang::get('rainlab.pages::lang.menu.invalid_code')
+            ]);
+        }
     }
 
     /**
      * Returns the menu code.
      * @return string
      */
-    public function getCode()
+    public function getCodeAttribute()
     {
+        if (isset($this->attributes['code'])) {
+            return $this->attributes['code'];
+        }
+
         $place = strrpos($this->fileName, '.');
 
         if ($place !== false) {
@@ -87,36 +120,112 @@ class Menu extends CmsObject
      * @param string $code Specifies the file code.
      * @return \Cms\Classes\CmsObject Returns the object instance.
      */
-    public function setCode($code)
+    public function setCodeAttribute($code)
     {
         $code = trim($code);
 
-        if (!strlen($code)) {
-            throw new ValidationException([
-                'code' => Lang::get('rainlab.pages::lang.menu.code_required')
-            ]);
-        }
+        $this->attributes['code'] = $code;
 
-        if (!preg_match('/^[0-9a-z\-\_]+$/i', $code)) {
-            throw new ValidationException([
-                'code' => Lang::get('rainlab.pages::lang.menu.invalid_code')
-            ]);
+        if (strlen($code)) {
+            $this->fileName = $code.'.yaml';
         }
-
-        $this->code = $code;
-        $this->fileName = $code.'.yaml';
 
         return $this;
     }
 
     /**
-     * Returns the menu items.
-     * This function is used in the back-end.
-     * @return array Returns an array of the \RainLab\Pages\Classes\MenuItem objects.
+     * Returns a default value for name attribute.
+     * @return string
      */
-    public function getItems()
+    public function getNameAttribute()
     {
-        return $this->items;
+        if (array_key_exists('name', $this->attributes)) {
+            return $this->attributes['name'];
+        }
+
+        return $this->attributes['name'] = array_get($this->parseContent(), 'name');
+    }
+
+    /**
+     * Returns a default value for items attribute.
+     * Items are objects of the \RainLab\Pages\Classes\MenuItem class.
+     * @return array
+     */
+    public function getItemsAttribute()
+    {
+        if (array_key_exists('items', $this->attributes)) {
+            return $this->attributes['items'];
+        }
+
+        if ($items = array_get($this->parseContent(), 'items')) {
+            $itemObjects = MenuItem::initFromArray($items);
+        }
+        else {
+            $itemObjects = [];
+        }
+
+        return $this->attributes['items'] = $itemObjects;
+    }
+
+    /**
+     * Returns a default value for itemData attribute.
+     * @return array
+     */
+    public function getItemDataAttribute()
+    {
+        if (array_key_exists('itemData', $this->attributes)) {
+            return $this->attributes['itemData'];
+        }
+
+        return $this->attributes['itemData'] = array_get($this->parseContent(), 'items');
+    }
+
+    /**
+     * Processes the content attribute to an array of menu data.
+     * @return array|null
+     */
+    protected function parseContent()
+    {
+        if ($this->contentDataCache !== null) {
+            return $this->contentDataCache;
+        }
+
+        $parsedData = Yaml::parse($this->content);
+
+        if (!is_array($parsedData)) {
+            return null;
+        }
+
+        if (!array_key_exists('name', $parsedData)) {
+            throw new SystemException(sprintf('The content of the %s file is invalid: the name element is not found.', $fileName));
+        }
+
+        return $this->contentDataCache = $parsedData;
+    }
+
+    /**
+     * Renders the menu data as a content string in YAML format.
+     * @return string
+     */
+    protected function renderContent()
+    {
+        $contentData = [
+            'name'  => $this->name,
+            'items' => $this->itemData ? $this->itemData : []
+        ];
+
+        return Yaml::render($contentData);
+    }
+
+    /**
+     * Initializes a cache item.
+     * @param array &$item The cached item array.
+     */
+    public static function initCacheItem(&$item)
+    {
+        $obj = new static($item);
+        $item['name'] = $obj->name;
+        $item['items'] = $obj->items;
     }
 
     /**
@@ -133,7 +242,7 @@ class Menu extends CmsObject
             $currentUrl = '/';
         }
 
-        $currentUrl = Str::lower(URL::to($currentUrl));
+        $currentUrl = Str::lower(Url::to($currentUrl));
 
         $activeMenuItem = $page->activeMenuItem ?: false;
         $iterator = function($items) use ($currentUrl, &$iterator, $activeMenuItem) {
@@ -247,77 +356,5 @@ class Menu extends CmsObject
         $iterator($items);
 
         return $items;
-    }
-
-    /**
-     * Loads the object from a file.
-     * This method is used in the CMS back-end. It doesn't use any caching.
-     * @param \Cms\Classes\Theme $theme Specifies the theme the object belongs to.
-     * @param string $fileName Specifies the file name, with the extension.
-     * The file name can contain only alphanumeric symbols, dashes and dots.
-     * @return mixed Returns a CMS object instance or null if the object wasn't found.
-     */
-    public static function load($theme, $fileName)
-    {
-        if (!strlen(File::extension($fileName))) {
-            $fileName .= '.yaml';
-        }
-
-        if (($obj = parent::load($theme, $fileName)) === null) {
-            return null;
-        }
-
-        $parsedData = Yaml::parse($obj->content);
-        if (!array_key_exists('name', $parsedData)) {
-            throw new SystemException(sprintf('The content of the %s file is invalid: the name element is not found.', $fileName));
-        }
-
-        $obj->name = $parsedData['name'];
-
-        if (isset($parsedData['items'])) {
-            $obj->items = MenuItem::initFromArray($parsedData['items']);
-        }
-
-        return $obj;
-    }
-
-    /**
-     * Saves the object to the disk.
-     */
-    public function save()
-    {
-        if ($this->itemData !== false) {
-            $this->items = MenuItem::initFromArray($this->itemData);
-        }
-
-        $contentData = [
-            'name'  => $this->name,
-            'items' => $this->itemData ? $this->itemData : []
-        ];
-
-        $dumper = new YamlDumper();
-        $this->content = $dumper->dump($contentData, 20, 0, false, true);
-
-        return parent::save();
-   }
-
-    /**
-     * Initializes a cache item.
-     * @param array &$item The cached item array.
-     */
-    protected function initCacheItem(&$item)
-    {
-        $item['name'] = $this->name;
-        $item['items'] = serialize($this->items);
-    }
-
-    /**
-     * Initializes the object properties from the cached data.
-     * @param array $cached The cached data array.
-     */
-    protected function initFromCache($cached)
-    {
-        $this->items = unserialize($cached['items']);
-        $this->name = $cached['name'];
     }
 }

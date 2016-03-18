@@ -1,6 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
-use URL;
+use Url;
 use File;
 use Lang;
 use Cache;
@@ -28,19 +28,38 @@ use ApplicationException;
 class Page extends Content
 {
     /**
+     * @var string The container name associated with the model, eg: pages.
+     */
+    protected $dirName = 'content/static-pages';
+
+    /**
+     * @var bool Wrap code section in PHP tags.
+     */
+    protected $wrapCode = false;
+
+    /**
      * @var array Properties that can be set with fill()
      */
-    protected static $fillable = [
+    protected $fillable = [
         'markup',
         'settings',
         'code',
-        'fileName',
-        'parentFileName'
     ];
 
-    protected $viewBagValidationRules = [
+    /**
+     * @var array The rules to be applied to the data.
+     */
+    public $rules = [
         'title' => 'required',
         'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
+    ];
+
+    /**
+     * @var array The array of custom attribute names.
+     */
+    public $attributeNames = [
+        'title' => 'title',
+        'url' => 'url',
     ];
 
     /**
@@ -67,14 +86,13 @@ class Page extends Content
 
     /**
      * Creates an instance of the object and associates it with a CMS theme.
-     * @param \Cms\Classes\Theme $theme Specifies the theme the object belongs to.
-     * If the theme is specified as NULL, then a query can be performed on the object directly.
+     * @param array $attributes
      */
-    public function __construct(Theme $theme = null)
+    public function __construct(array $attributes = [])
     {
-        parent::__construct($theme);
+        parent::__construct($attributes);
 
-        $this->viewBagValidationMessages = [
+        $this->customMessages = [
             'url.regex'      => Lang::get('rainlab.pages::lang.page.invalid_url'),
             'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
         ];
@@ -85,25 +103,6 @@ class Page extends Content
     //
     // CMS Object
     //
-
-    /**
-     * Returns the directory name corresponding to the object type.
-     * For pages the directory name is "pages", for layouts - "layouts", etc.
-     * @return string
-     */
-    public static function getObjectTypeDirName()
-    {
-        return 'content/static-pages';
-    }
-
-    /**
-     * Determines if the content of the code section should be wrapped to PHP tags.
-     * @return boolean
-     */
-    protected function wrapCodeToPhpTags()
-    {
-        return false;
-    }
 
     /**
      * Sets the object attributes.
@@ -124,10 +123,19 @@ class Page extends Content
     }
 
     /**
+     * Returns the attributes used for validation.
+     * @return array
+     */
+    protected function getValidationAttributes()
+    {
+        return $this->getAttributes() + $this->viewBag;
+    }
+
+    /**
      * Validates the object properties.
      * Throws a ValidationException in case of an error.
      */
-    protected function validate()
+    public function beforeValidate()
     {
         $pages = Page::listInTheme($this->theme, true);
 
@@ -145,49 +153,58 @@ class Page extends Content
 
             return true;
         });
-
-        parent::validate();
     }
 
     /**
-     * Saves the object to the disk.
+     * Triggered before a new object is saved.
      */
-    public function save()
+    public function beforeCreate()
     {
-        $isNewFile = !strlen($this->fileName);
+        $this->fileName = $this->generateFilenameFromCode();
+    }
 
-        /*
-         * Generate a file name basing on the URL
-         */
-        if ($isNewFile) {
-            $dir = rtrim(static::getFilePath($this->theme, ''), '/');
+    /**
+     * Triggered after a new object is saved.
+     */
+    public function afterCreate()
+    {
+        $this->appendToMeta();
+    }
 
-            $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
-            if (strlen($fileName) > 200) {
-                $fileName = substr($fileName, 0, 200);
-            }
+    /**
+     * Adds this page to the meta index.
+     */
+    protected function appendToMeta()
+    {
+        $pageList = new PageList($this->theme);
+        $pageList->appendPage($this);
+    }
 
-            if (!strlen($fileName)) {
-                $fileName = 'index';
-            }
+    /*
+     * Generate a file name based on the URL
+     */
+    protected function generateFilenameFromCode()
+    {
+        $dir = rtrim($this->getFilePath(''), '/');
 
-            $curName = trim($fileName).'.htm';
-            $counter = 2;
-
-            while (File::exists($dir.'/'.$curName)) {
-                $curName = $fileName.'-'.$counter.'.htm';
-                $counter++;
-            }
-
-            $this->fileName = $curName;
+        $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
+        if (strlen($fileName) > 200) {
+            $fileName = substr($fileName, 0, 200);
         }
 
-        parent::save();
-
-        if ($isNewFile) {
-            $pageList = new PageList($this->theme);
-            $pageList->appendPage($this);
+        if (!strlen($fileName)) {
+            $fileName = 'index';
         }
+
+        $curName = trim($fileName).'.htm';
+        $counter = 2;
+
+        while (File::exists($dir.'/'.$curName)) {
+            $curName = $fileName.'-'.$counter.'.htm';
+            $counter++;
+        }
+
+        return $curName;
     }
 
     /**
@@ -209,8 +226,7 @@ class Page extends Content
         /*
          * Remove from meta
          */
-        $pageList = new PageList($this->theme);
-        $pageList->removeSubtree($this);
+        $this->removeFromMeta();
 
         /*
          * Delete the object
@@ -220,6 +236,16 @@ class Page extends Content
         parent::delete();
 
         return $result;
+    }
+
+
+    /**
+     * Removes this page to the meta index.
+     */
+    protected function removeFromMeta()
+    {
+        $pageList = new PageList($this->theme);
+        $pageList->removeSubtree($this);
     }
 
     //
@@ -251,10 +277,10 @@ class Page extends Content
         $actionExists = Route::getRoutes()->getByAction($routeAction) !== null;
 
         if ($actionExists) {
-            return URL::action($routeAction, ['slug' => $url]);
+            return Url::action($routeAction, ['slug' => $url]);
         }
         else {
-            return URL::to($url);
+            return Url::to($url);
         }
     }
 
@@ -590,7 +616,7 @@ class Page extends Content
      * with the following keys:
      * - url - the menu item URL. Not required for menu item types that return all available records.
      *   The URL should be returned relative to the website root and include the subdirectory, if any.
-     *   Use the URL::to() helper to generate the URLs.
+     *   Use the Url::to() helper to generate the URLs.
      * - isActive - determines whether the menu item is active. Not required for menu item types that 
      *   return all available records.
      * - items - an array of arrays with the same keys (url, isActive, items) + the title key. 
@@ -613,7 +639,7 @@ class Page extends Content
 
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
-            $result['url'] = URL::to($pageInfo['url']);
+            $result['url'] = Url::to($pageInfo['url']);
             $result['mtime'] = $pageInfo['mtime'];
             $result['isActive'] = $result['url'] == $url;
         }
@@ -634,7 +660,7 @@ class Page extends Content
                     }
 
                     $branchItem = [];
-                    $branchItem['url'] = URL::to($itemInfo['url']);
+                    $branchItem['url'] = Url::to($itemInfo['url']);
                     $branchItem['isActive'] = $branchItem['url'] == $url;
                     $branchItem['title'] = $itemInfo['title'];
                     $branchItem['mtime'] = $itemInfo['mtime'];
