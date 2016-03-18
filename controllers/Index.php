@@ -408,8 +408,16 @@ class Index extends Controller
             }
 
             $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+
+            /*
+             * Translation support
+             */
+            $translatableTypes = ['text', 'textarea', 'richeditor'];
+            if (in_array($fieldConfig['type'], $translatableTypes)) {
+                $page->translatable[] = 'viewBag['.$fieldCode.']';
             }
         }
+    }
 
     protected function addPagePlaceholders($formWidget, $page)
     {
@@ -481,19 +489,6 @@ class Index extends Controller
         return $object->getFileName();
     }
 
-    protected function formatSettings()
-    {
-        $settings = [];
-
-        if (!array_key_exists('viewBag', $_POST)) {
-            return $settings;
-        }
-
-        $settings['viewBag'] = $_POST['viewBag'];
-
-        return $settings;
-    }
-
     protected function setPlaceholders($page)
     {
         $data = post();
@@ -530,23 +525,28 @@ class Index extends Controller
     {
         $objectPath = trim(Request::input('objectPath'));
         $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
+        $formWidget = $this->makeObjectFormWidget($type, $object);
 
-        $settings = $this->formatSettings($this->formatSettings());
-
+        $saveData = $formWidget->getSaveData();
+        $postData = post();
         $objectData = [];
-        if ($settings) {
-            $objectData['settings'] = $settings;
+
+        if ($viewBag = array_get($saveData, 'viewBag')) {
+            $objectData['settings'] = ['viewBag' => $viewBag];
         }
 
         $fields = ['markup', 'code', 'fileName', 'content', 'itemData', 'name'];
 
         if ($type != 'menu' && $type != 'content') {
-            $fields[] = 'parentFileName';
+            $object->parentFileName = Request::input('parentFileName');
         }
 
         foreach ($fields as $field) {
-            if (array_key_exists($field, $_POST)) {
-                $objectData[$field] = Request::input($field);
+            if (array_key_exists($field, $saveData)) {
+                $objectData[$field] = $saveData[$field];
+            }
+            elseif (array_key_exists($field, $postData)) {
+                $objectData[$field] = $postData[$field];
             }
         }
 

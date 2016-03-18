@@ -27,6 +27,8 @@ use ApplicationException;
  */
 class Page extends Content
 {
+    public $implement = ['@RainLab.Translate.Behaviors.TranslatableCmsObject'];
+
     /**
      * @var string The container name associated with the model, eg: pages.
      */
@@ -60,6 +62,16 @@ class Page extends Content
     public $attributeNames = [
         'title' => 'title',
         'url' => 'url',
+    ];
+
+    /**
+     * @var array Attributes that support translation, if available.
+     */
+    public $translatable = [
+        'markup',
+        'viewBag[title]',
+        'viewBag[meta_title]',
+        'viewBag[meta_description]',
     ];
 
     /**
