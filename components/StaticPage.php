@@ -43,7 +43,7 @@ class StaticPage extends ComponentBase
 
     public function onRun()
     {
-        $url = Request::path();
+        $url = $this->getRouter()->getUrl();
 
         if (!strlen($url)) {
             $url = '/';
