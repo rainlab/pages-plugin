@@ -450,10 +450,12 @@ class Page extends Content
             }
 
             $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
+            $ignore = $node->hasAttribute('ignore') ? trim($node->getAttribute('ignore')) : false;
 
             $placeholderInfo = [
-                'title' => $title,
-                'type'  => $type ?: 'html'
+                'title'  => $title,
+                'type'   => $type ?: 'html',
+                'ignore' => $ignore
             ];
 
             $result[$node->getAttribute('name')] = $placeholderInfo;

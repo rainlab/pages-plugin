@@ -192,15 +192,25 @@ If you want to link to the static page by its URL, simply use the `|app` filter:
 
     {% placeholder ordering %}
 
-The `placeholder` tag accepts two optional attributes - `title` and `type`. The `title` attribute manages the tab title in the Static Page editor, and the type manages the placeholder type. There are two types supported at the moment - **text** and **html**. The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code and the `default` attribute, if it's presented. Example:
+The `placeholder` tag accepts some optional attributes:
+
+- `title`: manages the tab title in the Static Page editor.
+- `type`: manages the placeholder type. There are two types supported at the moment - **text** and **html**.
+- `ignore`: if set to true, will be ignored by the Static Page editor.
+
+The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code:
 
     {% placeholder ordering title="Ordering information" type="text" %}
 
-or
+They should also appear after the `default` attribute, if it's presented.
 
     {% placeholder ordering default title="Ordering information" type="text" %}
         There is no ordering information for this product.
     {% endplaceholder %}
+
+To prevent a placeholder from appearing in the editor set the `ignore` attribute.
+
+    {% placeholder systemInfo ignore=true %}
 
 ### Creating new menu item types
 

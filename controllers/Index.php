@@ -424,6 +424,10 @@ class Index extends Controller
         $placeholders = $page->listLayoutPlaceholders();
 
         foreach ($placeholders as $placeholderCode => $info) {
+            if ($info['ignore']) {
+                continue;
+            }
+
             $placeholderTitle = $info['title'];
             $fieldConfig = [
                 'tab'     => $placeholderTitle,
