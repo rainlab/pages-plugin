@@ -488,38 +488,6 @@ class Index extends Controller
         return $object->getFileName();
     }
 
-    protected function setPlaceholders($page)
-    {
-        $data = post();
-
-        if (!array_key_exists('placeholders', $data)) {
-            return null;
-        }
-
-        $placeholderData = $data['placeholders'];
-        $placeholders = $page->listLayoutPlaceholders();
-
-        $result = null;
-
-        foreach ($placeholders as $placeholderCode => $info) {
-            if (!array_key_exists($placeholderCode, $placeholderData)) {
-                continue;
-            }
-
-            $placeholderValue = trim($placeholderData[$placeholderCode]);
-
-            if (strlen($placeholderValue)) {
-                $putCode = "{% put $placeholderCode %}".PHP_EOL;
-                $putCode .= $placeholderValue.PHP_EOL;
-                $putCode .= "{% endput %}".PHP_EOL.PHP_EOL;
-
-                $result .= $putCode;
-            }
-        }
-
-        return trim($result);
-    }
-
     protected function fillObjectFromPost($type)
     {
         $objectPath = trim(Request::input('objectPath'));
@@ -550,11 +518,13 @@ class Index extends Controller
         }
 
         if ($type == 'page') {
-            $objectData['code'] = $this->setPlaceholders($object);
+            $placeholders = array_get($saveData, 'placeholders');
 
-            if (!empty($objectData['code']) && Config::get('cms.convertLineEndings', false) === true) {
-                $objectData['code'] = $this->convertLineEndings($objectData['code']);
+            if (is_array($placeholders) && Config::get('cms.convertLineEndings', false) === true) {
+                $placeholders = array_map([$this, 'convertLineEndings'], $placeholders);
             }
+
+            $objectData['placeholders'] = $placeholders;
         }
 
         if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true) {

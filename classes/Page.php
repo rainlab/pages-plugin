@@ -45,7 +45,7 @@ class Page extends Content
     protected $fillable = [
         'markup',
         'settings',
-        'code',
+        'placeholders',
     ];
 
     /**
@@ -502,6 +502,37 @@ class Page extends Content
         }
 
         return $result;
+    }
+
+    /**
+     * Takes an array of placeholder data (key: code, value: content) and renders
+     * it as a single string of Twig markup against the "code" attribute.
+     * @param array  $value
+     * @return void
+     */
+    public function setPlaceholdersAttribute($value)
+    {
+        if (!is_array($value)) {
+            return;
+        }
+
+        // Prune any attempt at setting a placeholder that
+        // is not actually defined by this pages layout.
+        $placeholders = array_intersect_key($value, $this->listLayoutPlaceholders());
+
+        $result = '';
+
+        foreach ($placeholders as $code => $content) {
+            if (!strlen($content)) {
+                continue;
+            }
+
+            $result .= '{% put '.$code.' %}';
+            $result .= PHP_EOL.$content.PHP_EOL;
+            $result .= '{% endput %}'.PHP_EOL.PHP_EOL;
+        }
+
+        $this->attributes['code'] = trim($result);
     }
 
     public function getProcessedMarkup()
