@@ -452,11 +452,6 @@ class Index extends Controller
 
             $formWidget->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
         }
-
-        $placeholderValues = $page->getPlaceholderValues();
-        foreach ($placeholderValues as $name => $value) {
-            $page->placeholders->add($name, $value);
-        }
     }
 
     protected function getTabTitle($type, $object)

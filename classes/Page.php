@@ -80,12 +80,6 @@ class Page extends Content
      */
     public $parentFileName;
 
-    /**
-     * @var RainLab\Pages\Classes\PlaceholderList Contains the page placeholder values.
-     * This property is used by the page editor internally.
-     */
-    public $placeholders;
-
     protected static $menuTreeCache = null;
 
     protected $parentCache = null;
@@ -108,8 +102,6 @@ class Page extends Content
             'url.regex'      => Lang::get('rainlab.pages::lang.page.invalid_url'),
             'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
         ];
-
-        $this->placeholders = new PlaceholderList;
     }
 
     //
@@ -488,7 +480,7 @@ class Page extends Content
      * Parses the page placeholder {% put %} tags and extracts the placeholder values.
      * @return array Returns an associative array of the placeholder names and values.
      */
-    public function getPlaceholderValues()
+    public function getPlaceholdersAttribute()
     {
         if (!strlen($this->code)) {
             return [];
