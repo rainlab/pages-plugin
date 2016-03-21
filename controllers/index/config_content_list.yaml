@@ -6,5 +6,5 @@ noRecordsMessage: 'cms::lang.content.no_list_records'
 deleteConfirmation: 'cms::lang.content.delete_confirm_multiple'
 itemType: content
 controlClass: hero content
-suppressDirectories:
-    - static-pages
+ignoreDirectories:
+    - static-pages*

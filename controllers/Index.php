@@ -1,15 +1,18 @@
 <?php namespace RainLab\Pages\Controllers;
 
-use URL;
+use Url;
 use Lang;
 use Flash;
 use Event;
 use Config;
 use Request;
 use Response;
-use Exception;
 use BackendMenu;
-use ApplicationException;
+use Cms\Classes\Theme;
+use Cms\Classes\Content;
+use Cms\Widgets\TemplateList;
+use Backend\Classes\Controller;
+use Backend\Classes\WidgetManager;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
@@ -19,11 +22,8 @@ use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Plugin as PagesPlugin;
 use RainLab\Pages\Classes\SnippetManager;
-use Backend\Classes\Controller;
-use Backend\Classes\WidgetManager;
-use Cms\Classes\Theme;
-use Cms\Classes\Content;
-use Cms\Widgets\TemplateList;
+use ApplicationException;
+use Exception;
 
 /**
  * Pages and Menus index
@@ -57,9 +57,8 @@ class Index extends Controller
             new MenuList($this, 'menuList');
             new SnippetList($this, 'snippetList');
 
-            $theme = $this->theme;
-            new TemplateList($this, 'contentList', function() use ($theme) {
-                return Content::listInTheme($theme, true);
+            new TemplateList($this, 'contentList', function() {
+                return Content::listInTheme($this->theme, true);
             });
         }
         catch (Exception $ex) {
@@ -122,7 +121,7 @@ class Index extends Controller
         ];
 
         if ($type == 'page') {
-            $result['pageUrl'] = URL::to($object->getViewBag()->property('url'));
+            $result['pageUrl'] = Url::to($object->getViewBag()->property('url'));
 
             PagesPlugin::clearCache();
         }
@@ -562,7 +561,7 @@ class Index extends Controller
         $this->vars['objectPath'] = Request::input('path');
 
         if ($type == 'page') {
-            $this->vars['pageUrl'] = URL::to($object->getViewBag()->property('url'));
+            $this->vars['pageUrl'] = Url::to($object->getViewBag()->property('url'));
         }
 
         return [
