@@ -623,13 +623,20 @@ class Page extends Content
     //
 
     /**
+     * Returns a cache key for this record.
+     */
+    protected static function getMenuCacheKey($theme)
+    {
+        return crc32($theme->getPath()).'static-page-menu-'.Lang::getLocale();
+    }
+
+    /**
      * Clears the menu item cache
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
      */
     public static function clearMenuCache($theme)
     {
-        $key = crc32($theme->getPath()).'static-page-menu-tree';
-        Cache::forget($key);
+        Cache::forget(self::getMenuCacheKey($theme));
     }
 
     /**
@@ -786,7 +793,7 @@ class Page extends Content
             return self::$menuTreeCache;
         }
 
-        $key = crc32($theme->getPath()).'static-page-menu-tree';
+        $key = self::getMenuCacheKey($theme);
 
         $cached = Cache::get($key, false);
         $unserialized = $cached ? @unserialize($cached) : false;
