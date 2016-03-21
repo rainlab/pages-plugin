@@ -49,6 +49,11 @@ class Page extends Content
     ];
 
     /**
+     * @var array List of attribute names which are not considered "settings".
+     */
+    protected $purgeable = ['parsedMarkup', 'placeholders'];
+
+    /**
      * @var array The rules to be applied to the data.
      */
     public $rules = [
@@ -68,11 +73,17 @@ class Page extends Content
      * @var array Attributes that support translation, if available.
      */
     public $translatable = [
+        'code',
         'markup',
         'viewBag[title]',
         'viewBag[meta_title]',
         'viewBag[meta_description]',
     ];
+
+    /**
+     * @var string Translation model used for translation, if available.
+     */
+    public $translatableModel = 'RainLab\Translate\Classes\MLStaticPage';
 
     /**
      * @var string Contains the page parent file name.
@@ -338,7 +349,7 @@ class Page extends Content
     }
 
     /**
-     * Returns a list of layouts available in the theme. 
+     * Returns a list of layouts available in the theme.
      * This method is used by the form widget.
      * @return array Returns an array of strings.
      */
@@ -486,6 +497,10 @@ class Page extends Content
             return [];
         }
 
+        if ($placeholders = array_get($this->attributes, 'placeholders')) {
+            return $placeholders;
+        }
+
         $bodyNode = $this->getTwigNodeTree($this->code)->getNode('body')->getNode(0);
         if ($bodyNode instanceof \Cms\Twig\PutNode) {
             $bodyNode = [$bodyNode];
@@ -500,6 +515,8 @@ class Page extends Content
             $bodyNode = $node->getNode('body');
             $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
         }
+
+        $this->attributes['placeholders'] = $result;
 
         return $result;
     }
@@ -527,12 +544,14 @@ class Page extends Content
                 continue;
             }
 
-            $result .= '{% put '.$code.' %}';
-            $result .= PHP_EOL.$content.PHP_EOL;
-            $result .= '{% endput %}'.PHP_EOL.PHP_EOL;
+            $result .= '{% put '.$code.' %}'.PHP_EOL;
+            $result .= $content.PHP_EOL;
+            $result .= '{% endput %}'.PHP_EOL;
+            $result .= PHP_EOL;
         }
 
         $this->attributes['code'] = trim($result);
+        $this->attributes['placeholders'] = $placeholders;
     }
 
     public function getProcessedMarkup()

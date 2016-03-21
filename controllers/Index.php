@@ -451,6 +451,11 @@ class Index extends Controller
             }
 
             $formWidget->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
+
+            /*
+             * Translation support
+             */
+            $page->translatable[] = 'placeholders['.$placeholderCode.']';
         }
     }
 
