@@ -45,7 +45,7 @@ class Controller
             return null;
         }
 
-        $viewBag = $page->getViewBag();
+        $viewBag = $page->viewBag;
 
         $cmsPage = CmsPage::inTheme($this->theme);
         $cmsPage->url = $url;
@@ -57,7 +57,7 @@ class Controller
         $viewBagToSettings = ['title', 'layout', 'meta_title', 'meta_description', 'is_hidden'];
 
         foreach ($viewBagToSettings as $property) {
-            $cmsPage->settings[$property] = $viewBag->property($property);
+            $cmsPage->settings[$property] = array_get($viewBag, $property);
         }
 
         return $cmsPage;

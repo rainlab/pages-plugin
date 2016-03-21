@@ -803,16 +803,17 @@ class Page extends Content
             $result = [];
 
             foreach ($items as $item) {
-                $viewBag = $item->page->getViewBag();
+                $viewBag = $item->page->viewBag;
                 $pageCode = $item->page->getBaseFileName();
+                $pageUrl = Str::lower(RouterHelper::normalizeUrl(array_get($viewBag, 'url')));
 
                 $itemData = [
-                    'url'    => Str::lower(RouterHelper::normalizeUrl($viewBag->property('url'))),
-                    'title'  => $viewBag->property('title'),
+                    'url'    => $pageUrl,
+                    'title'  => array_get($viewBag, 'title'),
                     'mtime'  => $item->page->mtime,
                     'items'  => $iterator($item->subpages, $pageCode, $level+1),
                     'parent' => $parent,
-                    'navigation_hidden' => $viewBag->property('navigation_hidden')
+                    'navigation_hidden' => array_get($viewBag, 'navigation_hidden')
                 ];
 
                 if ($level == 0) {
