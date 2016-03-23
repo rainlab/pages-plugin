@@ -14,16 +14,24 @@
             self.syncEditorCode(this)
         })
 
-        $(document).on('init.oc.richeditor', '.redactor-box textarea', function(ev, $editor){
-            self.initSnippets($editor)
+        $(document).on('init.oc.richeditor', '.redactor-box textarea', function(ev, richeditor){
+            self.initSnippets(richeditor.getElement())
         })
 
-        $(document).on('syncBefore.oc.richeditor', '.redactor-box textarea', function(ev, container){
+        $(document).on('visualMode.oc.richeditor', '.redactor-box textarea', function(ev, richeditor){
+            self.initSnippets(richeditor.getElement())
+        })
+
+        $(document).on('setContent.oc.richeditor', '.redactor-box textarea', function(ev, richeditor){
+            self.initSnippets(richeditor.getElement())
+        })
+
+        $(document).on('syncBefore.oc.richeditor', '.redactor-box textarea', function(ev, richeditor, container){
             self.syncPageMarkup(ev, container)
         })
 
-        $(document).on('keydown.oc.richeditor', '.redactor-box textarea', function(ev, originalEv, $editor, $textarea){
-            self.editorKeyDown(ev, originalEv, $editor, $textarea)
+        $(document).on('keydown.oc.richeditor', '.redactor-box textarea', function(ev, originalEv, richeditor){
+            self.editorKeyDown(ev, originalEv, richeditor)
         })
 
         $(document).on('click', '[data-snippet]', function(){
@@ -102,7 +110,6 @@
         var updatedCode = originalCode,
             counter = 1,
             snippetFound = false
-
 
         do {
             snippetFound = false
@@ -191,26 +198,19 @@
         container.html = $domTree.html()
     }
 
-    SnippetManager.prototype.editorKeyDown = function(ev, originalEv, $editor, $textarea) {
-        if ($textarea === undefined)
+    SnippetManager.prototype.editorKeyDown = function(ev, originalEv, richeditor) {
+        if (richeditor.getTextarea() === undefined)
             return
-
-        var redactor = $textarea.redactor('core.getObject')
 
         if (originalEv.target && $(originalEv.target).attr('data-snippet') !== undefined) {
             this.snippetKeyDown(originalEv, originalEv.target)
-
-            return
         }
     }
 
     SnippetManager.prototype.snippetKeyDown = function(ev, snippet) {
         if (ev.which == 32) {
-            var $textarea = $(snippet).closest('.redactor-box').find('textarea'),
-                redactor = $textarea.redactor('core.getObject')
-
             switch (ev.which) {
-                case 32: 
+                case 32:
                     // Space key
                     $.oc.inspector.manager.createInspector(snippet)
                 break
