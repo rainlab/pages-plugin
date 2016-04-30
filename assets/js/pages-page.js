@@ -240,18 +240,6 @@
             $tabPane = $(form).closest('.tab-pane')
 
         this.updateContentEditorMode($tabPane, false)
-
-        var extension = this.getContentExtension($tabPane),
-            val = ''
-
-        if (extension == 'htm' || extension == 'html')
-            val = $('div[data-control=richeditor]', $tabPane).data('oc.richEditor').$textarea.redactor('code.get')
-        else {
-            var editor = $('[data-control=codeeditor]', $tabPane)
-            val = editor.data('oc.codeEditor').editor.getSession().getValue()
-        }
-
-       data.options.data['markup'] = val
     }
 
     /*

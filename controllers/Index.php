@@ -9,7 +9,6 @@ use Request;
 use Response;
 use BackendMenu;
 use Cms\Classes\Theme;
-use Cms\Classes\Content;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
 use Backend\Classes\Controller;
@@ -20,6 +19,7 @@ use RainLab\Pages\Widgets\SnippetList;
 use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
+use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Plugin as PagesPlugin;
 use RainLab\Pages\Classes\SnippetManager;
@@ -334,11 +334,6 @@ class Index extends Controller
             return null;
         }
 
-        if ($type == 'content') {
-            $fileName = $object->getFileName();
-            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
-        }
-
         return $object;
     }
 
@@ -358,7 +353,7 @@ class Index extends Controller
         $types = [
             'page'    => 'RainLab\Pages\Classes\Page',
             'menu'    => 'RainLab\Pages\Classes\Menu',
-            'content' => 'Cms\Classes\Content'
+            'content' => 'RainLab\Pages\Classes\Content'
         ];
 
         if (!array_key_exists($type, $types)) {
@@ -533,6 +528,20 @@ class Index extends Controller
             $objectData['placeholders'] = $placeholders;
         }
 
+        if ($type == 'content') {
+            $fileName = $objectData['fileName'];
+
+            if (dirname($fileName) == 'static-pages') {
+                throw new ApplicationException(trans('rainlab.pages::lang.content.cant_save_to_dir'));
+            }
+
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+
+            if ($extension === 'htm' || $extension === 'html') {
+                $objectData['markup'] = array_get($saveData, 'markup_html');
+            }
+        }
+
         if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
         }
@@ -540,14 +549,6 @@ class Index extends Controller
         if (!Request::input('objectForceSave') && $object->mtime) {
             if (Request::input('objectMtime') != $object->mtime) {
                 throw new ApplicationException('mtime-mismatch');
-            }
-        }
-
-        if ($type == 'content') {
-            $fileName = $objectData['fileName'];
-
-            if (dirname($fileName) == 'static-pages') {
-                throw new ApplicationException(trans('rainlab.pages::lang.content.cant_save_to_dir'));
             }
         }
 
