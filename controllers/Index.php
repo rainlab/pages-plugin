@@ -59,7 +59,7 @@ class Index extends Controller
             new SnippetList($this, 'snippetList');
 
             new TemplateList($this, 'contentList', function() {
-                return Content::listInTheme($this->theme, true);
+                return $this->getContentTemplateList();
             });
         }
         catch (Exception $ex) {
@@ -606,5 +606,41 @@ class Index extends Controller
         $markup = str_replace("\r", "\n", $markup);
 
         return $markup;
+    }
+
+    /**
+     * Returns a list of content files
+     * @return \October\Rain\Database\Collection
+     */
+    protected function getContentTemplateList()
+    {
+        $templates = Content::listInTheme($this->theme, true)->each(function($content) {
+            $content->nice_title = $this->makeNiceContentTitle($content);
+        });
+
+        /*
+         * Extensibility
+         */
+        if (
+            ($event = $this->fireEvent('content.templateList', [$templates], true)) ||
+            ($event = Event::fire('pages.content.templateList', [$this, $templates], true))
+        ) {
+            return $event;
+        }
+
+        return $templates;
+    }
+
+    /**
+     * Converts a content object file name in to something nicer
+     * for humans to read.
+     * @param \Cms\Classes\Content $content
+     * @return string
+     */
+    protected function makeNiceContentTitle($content)
+    {
+        $title = basename($content->getBaseFileName());
+        $title = ucwords(str_replace(['-', '_'], ' ', $title));
+        return $title;
     }
 }
