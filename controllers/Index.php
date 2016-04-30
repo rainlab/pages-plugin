@@ -10,6 +10,7 @@ use Response;
 use BackendMenu;
 use Cms\Classes\Theme;
 use Cms\Classes\Content;
+use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
 use Backend\Classes\Controller;
 use Backend\Classes\WidgetManager;
@@ -248,6 +249,7 @@ class Index extends Controller
     public function onUpdatePageLayout()
     {
         $this->validateRequestTheme();
+
         $type = Request::input('objectType');
 
         $object = $this->fillObjectFromPost($type);
@@ -550,6 +552,13 @@ class Index extends Controller
         }
 
         $object->fill($objectData);
+
+        /*
+         * Rehydrate the object viewBag array property where values are sourced.
+         */
+        if ($object instanceof CmsCompoundObject && is_array($viewBag)) {
+            $object->viewBag = $viewBag + $object->viewBag;
+        }
 
         return $object;
     }
