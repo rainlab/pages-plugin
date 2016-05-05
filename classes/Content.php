@@ -20,4 +20,16 @@ class Content extends ContentBase
     ];
 
     public $translatableModel = 'RainLab\Translate\Classes\MLContent';
+
+    /**
+     * Converts the content object file name in to something nicer
+     * for humans to read.
+     * @return string
+     */
+    public function getNiceTitleAttribute()
+    {
+        $title = basename($this->getBaseFileName());
+        $title = ucwords(str_replace(['-', '_'], ' ', $title));
+        return $title;
+    }
 }

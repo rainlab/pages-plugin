@@ -602,7 +602,8 @@
      * Returns the content file extension
      */
     PagesPage.prototype.getContentExtension = function(form) {
-        var fileName = $('input[name=fileName]', form).val(),
+        var $input = $('input[name=fileName]', form),
+            fileName = $input.length ? $input.val() : '',
             parts = fileName.split('.')
 
         if (parts.length >= 2)

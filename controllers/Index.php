@@ -378,6 +378,7 @@ class Index extends Controller
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
         $widgetConfig->alias = $alias ?: 'form'.studly_case($type).md5($object->getFileName()).uniqid();
+        $widgetConfig->context = !$object->exists ? 'create' : 'update';
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
 
@@ -615,9 +616,7 @@ class Index extends Controller
      */
     protected function getContentTemplateList()
     {
-        $templates = Content::listInTheme($this->theme, true)->each(function($content) {
-            $content->nice_title = $this->makeNiceContentTitle($content);
-        });
+        $templates = Content::listInTheme($this->theme, true);
 
         /*
          * Extensibility
@@ -630,18 +629,5 @@ class Index extends Controller
         }
 
         return $templates;
-    }
-
-    /**
-     * Converts a content object file name in to something nicer
-     * for humans to read.
-     * @param \Cms\Classes\Content $content
-     * @return string
-     */
-    protected function makeNiceContentTitle($content)
-    {
-        $title = basename($content->getBaseFileName());
-        $title = ucwords(str_replace(['-', '_'], ' ', $title));
-        return $title;
     }
 }
