@@ -12,7 +12,7 @@ use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
-use Cms\Classes\Content;
+use Cms\Classes\Content as ContentBase;
 use Cms\Classes\ComponentManager;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
@@ -25,7 +25,7 @@ use ApplicationException;
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges
  */
-class Page extends Content
+class Page extends ContentBase
 {
     public $implement = ['@RainLab.Translate.Behaviors.TranslatableCmsObject'];
 
