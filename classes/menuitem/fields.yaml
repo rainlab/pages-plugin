@@ -53,6 +53,12 @@ tabs:
             tab: Attributes
             span: auto
 
+        viewBag[customImage]:
+            label: image Custom
+            comment: Specify the path to an Image that will substitute the button text.
+            tab: Display
+            span: auto
+            
         viewBag[cssClass]:
             label: CSS Class
             comment: Enter a CSS class name to give this menu item a custom appearance.
