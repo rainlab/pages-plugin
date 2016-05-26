@@ -27,3 +27,4 @@
 1.2.0: Added support for translations, UI updates.
 1.2.1: Use nice titles when listing the content files.
 1.2.2: Minor styling update.
+1.2.3: Snippets can now be moved by dragging them.

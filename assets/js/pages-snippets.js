@@ -73,6 +73,7 @@
             'data-snippet': snippetCode,
             'data-name': $sidebarItem.data('snippet-name'),
             'tabindex': '0',
+            'draggable': 'true',
             'data-ui-block': 'true'
         })
 
@@ -129,13 +130,17 @@
 
             snippetCodes.push(snippetCode)
 
-            $snippet.addClass('loading')
-            $snippet.attr({
-                'data-name': 'Loading...',
-                'tabindex': '0',
-                'data-inspector-css-class': 'hero',
-                'data-ui-block': true
-            })
+            $snippet
+                .addClass('loading')
+                .addClass('fr-draggable')
+                .attr({
+                    'data-inspector-css-class': 'hero',
+                    'data-name': 'Loading...',
+                    'data-ui-block': 'true',
+                    'draggable': 'true',
+                    'tabindex': '0'
+                })
+                .html('&nbsp;')
 
             if (componentClass) {
                 $snippet.attr('data-inspector-class', componentClass)
@@ -167,7 +172,8 @@
         $('[data-snippet]', $domTree).each(function(){
             var $snippet = $(this)
 
-            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty data-ui-block')
+            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty data-ui-block draggable')
+            $snippet.removeClass('fr-draggable fr-dragging')
 
             if (!$snippet.attr('class')) {
                 $snippet.removeAttr('class')
