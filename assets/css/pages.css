@@ -85,9 +85,6 @@
 .fancy-layout .pagesTextEditor {
   border-left: 1px solid #bdc3c7 !important;
 }
-.fancy-layout .pagesTextEditor .ace_scroller {
-  padding: 20px;
-}
 .control-richeditor [data-snippet]:before {
   content: attr(data-name);
 }

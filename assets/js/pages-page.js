@@ -565,16 +565,17 @@
             $('[data-field-name=markup_html]', pane).show()
 
             if (!initialization && $(pane).data('prev-extension') != 'htm') {
-                var val = editor.data('oc.codeEditor').editor.getSession().getValue()
-                $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('code.set', val)
+                var val = editor.codeEditor('getContent')
+                $('div[data-control=richeditor]', pane).richEditor('setContent', val)
             }
-        } else {
+        }
+        else {
             $('[data-field-name=markup]', pane).show()
             $('[data-field-name=markup_html]', pane).hide()
 
             if (!initialization && $(pane).data('prev-extension') == 'htm') {
-                var val = $('div[data-control=richeditor]', pane).data('oc.richEditor').$textarea.redactor('code.get')
-                editor.data('oc.codeEditor').editor.getSession().setValue(val)
+                var val = $('div[data-control=richeditor]', pane).richEditor('getContent')
+                editor.codeEditor('setContent', val)
             }
 
             var modes = $.oc.codeEditorExtensionModes
@@ -584,7 +585,9 @@
 
             var setEditorMode = function() {
                 window.setTimeout(function(){
-                    editor.data('oc.codeEditor').editor.getSession().setMode({path: 'ace/mode/'+mode})
+                    editor.codeEditor('getEditorObject')
+                        .getSession()
+                        .setMode({ path: 'ace/mode/'+mode })
                 }, 200)
             }
 

@@ -28,3 +28,4 @@
 1.2.1: Use nice titles when listing the content files.
 1.2.2: Minor styling update.
 1.2.3: Snippets can now be moved by dragging them.
+1.2.4: Fixes a bug where the cursor is misplaced when editing text files.

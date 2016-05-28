@@ -444,7 +444,7 @@ class Index extends Controller
                 $fieldConfig['cssClass'] = 'pagesTextEditor';
                 $fieldConfig['showInvisibles'] = false;
                 $fieldConfig['fontSize'] = 13;
-                $fieldConfig['wordWrap'] = '80';
+                $fieldConfig['margin'] = '20';
             }
 
             $formWidget->secondaryTabs['fields']['placeholders['.$placeholderCode.']'] = $fieldConfig;
