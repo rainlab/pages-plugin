@@ -32,7 +32,6 @@ class PageList extends WidgetBase
 
     public $noRecordsMessage = 'rainlab.pages::lang.page.no_records';
 
-    public $addSubpageLabel = 'rainlab.pages::lang.page.add_subpage';
 
     public function __construct($controller, $alias)
     {
