@@ -36,7 +36,6 @@ return [
         'code' => 'Codice',
         'items' => 'Voci di menu',
         'add_subitem' => 'Aggiungi sottomenu',
-        'no_records' => 'Nessun elemento trovato',
         'code_required' => 'Il Codice è obbligatorio',
         'invalid_code' => 'Formato del Codice non valido. Il Codice può contenere numeri, lettere latine e i seguenti simboli: _-'
     ],
@@ -61,7 +60,9 @@ return [
         'url_required' => 'L\'URL è obbligatorio',
         'cms_page_required' => 'Seleziona una pagina CMS',
         'code' => 'Codice',
-        'code_comment' => 'Inserisci il codice della voce di menu se vuoi accedervi con l\'API.'
+        'code_comment' => 'Inserisci il codice della voce di menu se vuoi accedervi con l\'API.',
+        'static_page' => 'Pagine',
+        'all_static_pages' => 'Tutte le pagine'
     ],
     'content' => [
         'menu_label' => 'Contenuti',
