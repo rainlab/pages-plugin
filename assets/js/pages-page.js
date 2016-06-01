@@ -415,7 +415,12 @@
                 theme: $('[name=theme]', $form).val(),
                 path: $('[name=objectPath]', $form).val()
             },
-            tab = $pane.data('tab')
+            tab = $pane.data('tab');
+
+        var hasParent = $('[name=parentFileName]', $form).length > 0;
+
+        if (hasParent)
+            var parent = $('[name=parentFileName]', $form).val();
 
         // $form.trigger('unchange.oc.changeMonitor')
         $form.changeMonitor('dispose')
@@ -427,7 +432,14 @@
                 data: data
             })
             .done(function(data){
-                self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
+                if(hasParent)
+                {
+                    var $data_tab = $(data.tab);
+                    $data_tab.append('<input type="hidden" name="parentFileName" value="' + parent + '">');
+                    data.tab = $data_tab.outerHTML;
+                }
+
+                self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab);
             })
             .always(function(){
                 $.oc.stripeLoadIndicator.hide()
