@@ -36,10 +36,26 @@ class Plugin extends PluginBase
     public function registerPermissions()
     {
         return [
-            'rainlab.pages.manage_pages'    => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_pages'],
-            'rainlab.pages.manage_menus'    => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_menus'],
-            'rainlab.pages.manage_content'  => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.manage_content'],
-            'rainlab.pages.access_snippets' => ['tab' => 'rainlab.pages::lang.page.tab', 'order' => 200, 'label' => 'rainlab.pages::lang.page.access_snippets']
+            'rainlab.pages.manage_pages' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_pages'
+            ],
+            'rainlab.pages.manage_menus' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_menus'
+                ],
+            'rainlab.pages.manage_content' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.manage_content'
+            ],
+            'rainlab.pages.access_snippets' => [
+                'tab'   => 'rainlab.pages::lang.page.tab',
+                'order' => 200,
+                'label' => 'rainlab.pages::lang.page.access_snippets'
+            ]
         ];
     }
 
@@ -50,6 +66,7 @@ class Plugin extends PluginBase
                 'label'       => 'rainlab.pages::lang.plugin.name',
                 'url'         => Backend::url('rainlab/pages'),
                 'icon'        => 'icon-files-o',
+                'iconSvg'     => 'plugins/rainlab/pages/assets/images/pages-icon.svg',
                 'permissions' => ['rainlab.pages.*'],
                 'order'       => 20,
 
@@ -83,7 +100,6 @@ class Plugin extends PluginBase
                         'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
-
             ]
         ];
     }
@@ -130,22 +146,25 @@ class Plugin extends PluginBase
 
         Event::listen('pages.menuitem.listTypes', function() {
             return [
-                'static-page'      => 'Static page',
-                'all-static-pages' => 'All static pages'
+                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
+                'all-static-pages' => 'rainlab.pages::lang.menuitem.all_static_pages'
             ];
         });
 
         Event::listen('pages.menuitem.getTypeInfo', function($type) {
-            if ($type == 'url')
+            if ($type == 'url') {
                 return [];
+            }
 
-            if ($type == 'static-page'|| $type == 'all-static-pages')
+            if ($type == 'static-page'|| $type == 'all-static-pages') {
                 return StaticPage::getMenuTypeInfo($type);
+            }
         });
 
         Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
-            if ($type == 'static-page' || $type == 'all-static-pages')
+            if ($type == 'static-page' || $type == 'all-static-pages') {
                 return StaticPage::resolveMenuItem($item, $url, $theme);
+            }
         });
 
         Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
@@ -174,12 +193,12 @@ class Plugin extends PluginBase
 
         Event::listen('backend.richeditor.listTypes', function () {
             return [
-                'static-page' => 'Static page',
+                'static-page' => 'rainlab.pages::lang.menuitem.static_page',
             ];
         });
 
         Event::listen('backend.richeditor.getTypeInfo', function ($type) {
-            if ($type == 'static-page') {
+            if ($type === 'static-page') {
                 return StaticPage::getRichEditorTypeInfo($type);
             }
         });
@@ -193,7 +212,7 @@ class Plugin extends PluginBase
     {
         return [
             'filters' => [
-                'staticPage' => ['RainLab\Pages\Classes\Page', 'url'],
+                'staticPage' => ['RainLab\Pages\Classes\Page', 'url']
             ]
         ];
     }

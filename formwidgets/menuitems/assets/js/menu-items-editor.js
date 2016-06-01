@@ -69,7 +69,7 @@
             $container = $('> div', $item),
             self = this
 
-        $container.one('show.oc.popover', function(e){
+        $container.one('show.oc.popup', function(e){
             $(document).trigger('render')
 
             self.$popupContainer = $(e.relatedTarget);
@@ -115,23 +115,25 @@
             self.loadTypeInfo()
         })
 
-        $container.one('hide.oc.popover', function(e) {
+        $container.one('hide.oc.popup', function(e) {
             if (!self.itemSaved && newItemMode)
                 $item.remove()
 
             self.$treeView.treeView('update')
             self.$treeView.treeView('fixSubItems')
+
+            $container.removeClass('popover-highlight')
         })
 
-        $container.ocPopover({
-            content: $('script[data-editor-template]', this.$el).html(),
-            placement: 'center',
-            modal: true,
-            closeOnPageClick: true,
-            highlightModalTarget: true,
-            width: 600,
-            useAnimation: true
+        $container.popup({
+            content: $('script[data-editor-template]', this.$el).html()
         })
+
+        /*
+         * Highlight modal target
+         */
+        $container.addClass('popover-highlight')
+        $container.blur()
 
         return false
     }
@@ -139,19 +141,30 @@
     MenuItemsEditor.prototype.loadProperties = function($popupContainer, properties) {
         this.properties = properties
 
-        var self = this
-
-        $.each(properties, function(property) {
-            var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
-
-            if ($input.prop('type') !== 'checkbox' ) {
-                $input.val(this)
-                $input.change()
+        var setPropertyOnElement = function($input, val) {
+            if ($input.prop('type') == 'checkbox') {
+                var checked = !(val == '0' || val == 'false' || val == 0 || val == undefined || val == null)
+                checked ? $input.prop('checked', 'checked') : $input.removeAttr('checked')
+            }
+            else if ($input.prop('type') == 'radio') {
+                $input.filter('[value="'+val+'"]').prop('checked', true)
             }
             else {
-                var checked = !(this == '0' || this == 'false' || this == 0 || this == undefined || this == null)
+                $input.val(val)
+                $input.change()
+            }
+        }
 
-                checked ? $input.prop('checked', 'checked') : $input.removeAttr('checked')
+        $.each(properties, function(property, val) {
+            if (property == 'viewBag') {
+                $.each(val, function(vbProperty, vbVal) {
+                    var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
+                    setPropertyOnElement($input, vbVal)
+                })
+            }
+            else {
+                var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
+                setPropertyOnElement($input, val)
             }
         })
     }
@@ -217,7 +230,9 @@
 
             iterator(typeInfo.references, 0, '')
 
-            $optionSelector.val(prevSelectedReference ? prevSelectedReference : this.properties.reference)
+            $optionSelector
+                .val(prevSelectedReference ? prevSelectedReference : this.properties.reference)
+                .triggerHandler('change')
         }
         else {
             $referenceFormGroup.hide()
@@ -234,7 +249,9 @@
                 $cmsPageSelector.append($option)
             })
 
-            $cmsPageSelector.val(prevSelectedPage ? prevSelectedPage : this.properties.cmsPage)
+            $cmsPageSelector
+                .val(prevSelectedPage ? prevSelectedPage : this.properties.cmsPage)
+                .triggerHandler('change')
         }
         else {
             $cmsPageFormGroup.hide()
@@ -318,7 +335,8 @@
                         return false
                     }
                 }
-            } else {
+            }
+            else {
                 data[propertyName] = $input.prop('checked') ? 1 : 0
             }
         })
@@ -338,7 +356,8 @@
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
-        }  else {
+        }
+        else {
             $.each(propertyNames, function(){
                 if (this != 'url' && basicProperties[this] === undefined)
                     delete data[this]
@@ -380,10 +399,59 @@
 
         $('> div span.comment', self.$itemDataContainer).text(referenceDescription)
 
+        this.attachViewBagData(data)
+
         this.$itemDataContainer.data('menu-item', data)
         this.itemSaved = true
-        this.$popupContainer.trigger('close.oc.popover')
+        this.$popupContainer.trigger('close.oc.popup')
         this.$el.trigger('change')
+    }
+
+    MenuItemsEditor.prototype.attachViewBagData = function(data) {
+        var fields = this.$popupForm.serializeArray(),
+            fieldName,
+            fieldValue
+
+        $.each(fields, function(index, field) {
+            fieldName = field.name
+            fieldValue = field.value
+
+            if (fieldName.indexOf('viewBag[') != 0) {
+                return true // Continue
+            }
+
+            /*
+             * Break field name in to elements
+             */
+            var elements = [],
+                searchResult,
+                expression = /([^\]\[]+)/g
+
+            while ((searchResult = expression.exec(fieldName))) {
+                elements.push(searchResult[0])
+            }
+
+            /*
+             * Attach elements to data with value
+             */
+            var currentData = data,
+                elementsNum = elements.length,
+                lastIndex = elementsNum - 1,
+                currentProperty
+
+            for (var i = 0; i < elementsNum; ++i) {
+                currentProperty = elements[i]
+
+                if (i === lastIndex) {
+                    currentData[currentProperty] = fieldValue
+                }
+                else if (currentData[currentProperty] === undefined) {
+                    currentData[currentProperty] = {}
+                }
+
+                currentData = currentData[currentProperty]
+            }
+        })
     }
 
     MenuItemsEditor.prototype.onCreateItem = function(target) {

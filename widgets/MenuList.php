@@ -48,7 +48,7 @@ class MenuList extends WidgetBase
     public function render()
     {
         return $this->makePartial('body', [
-            'data'=>$this->getData()
+            'data' => $this->getData()
         ]);
     }
 
@@ -72,6 +72,7 @@ class MenuList extends WidgetBase
     {
         $this->setSearchTerm(Input::get('search'));
         $this->extendSelection();
+
         return $this->updateList();
     }
 

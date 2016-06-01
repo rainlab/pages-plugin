@@ -15,7 +15,7 @@ class SnippetsRenameViewbagProperties extends Migration
             $partials = Partial::inTheme($theme)->all();
             foreach ($partials as $partial) {
                 try {
-                    $path = $partial->getFullPath();
+                    $path = $partial->getFilePath();
                     $contents = File::get($path);
                     if (strpos($contents, 'staticPageSnippetCode') === false) continue;
                     $contents = str_replace('staticPageSnippetName', 'snippetName', $contents);

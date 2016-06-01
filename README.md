@@ -6,7 +6,7 @@ This plugin allows end users to create and edit static pages and menus with a si
 
 Static pages are managed on the Pages tab of the Static Pages plugin. Static pages have three required parameters - **Title**, **URL** and **Layout**. The URL is generated automatically when the Title is entered, but it could be changed manually. URLs must start with the forward slash character. The Layout drop-down allows to select a layout created with the CMS. Only layouts that host the `staticPage` component are displayed in the drop-down.
 
-![image](http://oi57.tinypic.com/2le5qx2.jpg) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-page.png) {.img-responsive .frame}
 
 Pages are hierarchical. The page hierarchy is used when a new page URL is generated, but as URLs can be changed manually, the hierarchy doesn't really affect the routing process. The only place where the page hierarchy matters is the generated Menus. The generated menus reflect the page hierarchy. You can manage the page hierarchy by dragging pages in the page tree. The page drag handle ![http://s13.postimg.org/6kd6lwgar/hierarchy_drag_handle.png](http://s13.postimg.org/6kd6lwgar/hierarchy_drag_handle.png) appears when you move the mouse cursor over page item in the tree.
 
@@ -26,9 +26,9 @@ Snippets are elements that can be added by a Static Page, in the rich text edito
 
 Snippets are displayed in the sidebar list on the Static Pages and can be added into a rich editor with a mouse click. Snippets are configurable and have properties that users can manage with the Inspector.
 
-![image](http://i61.tinypic.com/k9gl6f.jpg)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-backend.png)
 
-![image](http://i60.tinypic.com/15citzp.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-frontend.png)
 
 ## Managing menus
 
@@ -36,31 +36,34 @@ You can manage menus on the Menus tab of the Static Pages plugin. A website can 
 
 Menus have two required parameters - the menu **Name** and menu **Code**. The menu name is displayed in the menu list in the back-end. The menu code is required for referring menus in the layout code, it's the API parameter.
 
-![image](http://s30.postimg.org/udnr61tqp/menu_management_2.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-management.png) {.img-responsive .frame}
 
 Menus can contain multiple **menu items**, and menu items can be nested. Each menu item has a number of properties. There are properties common for all menu item types, and some properties depend on the item type. The common menu item properties are **Title** and **Type**. The Title defines the menu item text. The Type is a drop-down list which displays all menu item types available in your OctoberCMS copy.
 
-![image](http://s13.postimg.org/a3nmvcrk7/menu_item.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-item.png) {.img-responsive .frame}
 
 #### Standard menu item types
 The available menu item types depend on the installed plugins, but there are three basic item types that are supported out of the box.
 
+###### Header {.subheader}
+Items of this type are used for displaying text and don't link to anything. The text could be used as a category heading for other menu items. This type will only show a title property.
+
 ###### URL {.subheader}
 Items of this type are links to a specific fixed URL. That could be an URL of an or internal page. Items of this type don't have any other properties - just the title and URL.
 
-###### Static page {.subheader}
+###### Static Page {.subheader}
 Items of this type refer to static pages. The static page should be selected in the **Reference** drop-down list described below.
 
-###### All static pages {.subheader}
+###### All Static Pages {.subheader}
 Items of this type expand to create links to all static pages defined in the theme. Nested pages are represented with nested menu items.
 
 #### Custom menu item types
 Other plugins can supply new menu item types. For example, the [Blog plugin](http://octobercms.com/plugin/rainlab-blog) by [RainLab](http://octobercms.com/author/RainLab) supplies two more types:
 
-###### Blog category {.subheader}
+###### Blog Category {.subheader}
 An item of this type represents a link to a specific blog category. The category should be selected in the **Reference** drop-down. This menu type also requires selecting a **CMS page** that outputs a blog category.
 
-###### All blog categories {.subheader}
+###### All Blog Categories {.subheader}
 An item of this time expands into multiple items representing all blog existing categories. This menu type also requires selecting a **CMS page**.
 
 #### Menu item properties
@@ -104,7 +107,7 @@ In the simplest case you could create a [layout](http://octobercms.com/docs/cms/
         </body>
     </html>
 
-![http://oi58.tinypic.com/6gbnsn.jpg](http://oi58.tinypic.com/6gbnsn.jpg)  {.img-responsive .frame}
+![http://oi58.tinypic.com/6gbnsn.jpg](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-layout.png)  {.img-responsive .frame}
 
 ##### Static pages
 
@@ -189,15 +192,25 @@ If you want to link to the static page by its URL, simply use the `|app` filter:
 
     {% placeholder ordering %}
 
-The `placeholder` tag accepts two optional attributes - `title` and `type`. The `title` attribute manages the tab title in the Static Page editor, and the type manages the placeholder type. There are two types supported at the moment - **text** and **html**. The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code and the `default` attribute, if it's presented. Example:
+The `placeholder` tag accepts some optional attributes:
+
+- `title`: manages the tab title in the Static Page editor.
+- `type`: manages the placeholder type. There are two types supported at the moment - **text** and **html**.
+- `ignore`: if set to true, will be ignored by the Static Page editor.
+
+The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code:
 
     {% placeholder ordering title="Ordering information" type="text" %}
 
-or
+They should also appear after the `default` attribute, if it's presented.
 
     {% placeholder ordering default title="Ordering information" type="text" %}
         There is no ordering information for this product.
     {% endplaceholder %}
+
+To prevent a placeholder from appearing in the editor set the `ignore` attribute.
+
+    {% placeholder systemInfo ignore=true %}
 
 ### Creating new menu item types
 
@@ -376,7 +389,7 @@ Partial-based snippets provide simpler functionality and usually are just contai
 
 To create snippet from a partial just enter the snippet code and snippet name in the partial form. 
 
-![image](http://i61.tinypic.com/2juurl.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-partial.png)
 
 The snippet properties are optional and can be defined with the grid control on the partial settings form. The table has the following columns:
 
@@ -417,3 +430,52 @@ These act just like regular form field definitions. Accessing the variables insi
     <h1>{{ tagline }}</h1>
     <img src="{{ banner|media }}" alt="" />
 
+Alternatively you may use the field type as the tag name, here we use the `{text}` tag to directly render the `tagline` variable:
+
+    <h1>{text name="tagline" label="Tagline"}Our wonderful website{/text}</h1>
+
+You may also use the `{repeater}` tag for repeating content:
+
+    {repeater name="content_sections" prompt="Add another content section"}
+        <h3>
+            {text name="content_header" label="Content section" placeholder="Type in a heading and enter some content for it below"}{/text}
+        </h3>
+        <div>
+            {richeditor name="content_body" size="large"}{/richeditor}
+        </div>
+    {/repeater}
+
+For more details on syntax fields, see the [Parser section](http://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
+
+##### Custom menu item form fields
+
+Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
+
+    Event::listen('backend.form.extendFields', function ($widget) {
+
+        if (
+            !$widget->getController() instanceof \RainLab\Pages\Controllers\Index ||
+            !$widget->model instanceof \RainLab\Pages\Classes\MenuItem
+        ) {
+            return;
+        }
+
+        $widget->addTabFields([
+            'viewBag[featured]' => [
+                'tab' => 'Display',
+                'label' => 'Featured',
+                'comment' => 'Mark this menu item as featured',
+                'type' => 'checkbox'
+            ]
+        ]);
+    });
+
+This value can then be accessed in Twig using the `{{ item.viewBag }}` property on the menu item. For example:
+
+    {% for item in items %}
+        <li class="{{ item.viewBag.featured ? 'featured' }}">
+            <a href="{{ item.url }}">
+                {{ item.title }}
+            </a>
+        </li>
+    {% endfor %}

@@ -43,7 +43,7 @@ class StaticPage extends ComponentBase
 
     public function onRun()
     {
-        $url = Request::path();
+        $url = $this->getRouter()->getUrl();
 
         if (!strlen($url)) {
             $url = '/';
@@ -53,7 +53,7 @@ class StaticPage extends ComponentBase
         $this->pageObject = $this->page['page'] = $router->findByUrl($url);
 
         if ($this->pageObject) {
-            $this->title = $this->page['title'] = $this->pageObject->getViewBag()->property('title');
+            $this->title = $this->page['title'] = array_get($this->pageObject->viewBag, 'title');
             $this->extraData = $this->page['extraData'] = $this->defineExtraData();
         }
     }

@@ -33,8 +33,9 @@ class StaticBreadcrumbs extends ComponentBase
     {
         $url = Request::path();
 
-        if (!strlen($url))
+        if (!strlen($url)) {
             $url = '/';
+        }
 
         $theme =Theme::getActiveTheme();
         $router = new Router($theme);

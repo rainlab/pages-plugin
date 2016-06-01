@@ -43,7 +43,7 @@ class SnippetList extends WidgetBase
     public function render()
     {
         return $this->makePartial('body', [
-            'data'=>$this->getData()
+            'data' => $this->getData()
         ]);
     }
 
@@ -59,6 +59,7 @@ class SnippetList extends WidgetBase
     public function onSearch()
     {
         $this->setSearchTerm(Input::get('search'));
+
         return $this->updateList();
     }
 
@@ -78,14 +79,15 @@ class SnippetList extends WidgetBase
             $filteredSnippets = [];
 
             foreach ($snippets as $snippet) {
-                if ($this->textMatchesSearch($words, $snippet->getName().' '.$snippet->code.' '.$snippet->getDescription()))
+                if ($this->textMatchesSearch($words, $snippet->getName().' '.$snippet->code.' '.$snippet->getDescription())) {
                     $filteredSnippets[] = $snippet;
+                }
             }
 
             $snippets = $filteredSnippets;
         }
 
-        usort($snippets, function($a, $b){
+        usort($snippets, function($a, $b) {
             return strcmp($a->getName(), $b->getName());
         });
 
@@ -94,7 +96,7 @@ class SnippetList extends WidgetBase
 
     protected function updateList()
     {
-        return ['#'.$this->getId('snippet-list') => $this->makePartial('items', ['items'=>$this->getData()])];
+        return ['#'.$this->getId('snippet-list') => $this->makePartial('items', ['items' => $this->getData()])];
     }
 
     protected function getThemeSessionKey($prefix)

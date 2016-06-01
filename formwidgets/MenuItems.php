@@ -45,6 +45,7 @@ class MenuItems extends FormWidgetBase
     public function render()
     {
         $this->prepareVars();
+
         return $this->makePartial('menuitems');
     }
 
@@ -108,7 +109,7 @@ class MenuItems extends FormWidgetBase
         }
 
         if (isset($this->typeInfoCache[$item->type])) {
-            $result = $this->typeListCache[$item->type];
+            $result = trans($this->typeListCache[$item->type]);
 
             if ($item->type !== 'url') {
                 if (isset($this->typeInfoCache[$item->type]['references'])) {
@@ -138,10 +139,10 @@ class MenuItems extends FormWidgetBase
                 }
 
                 if (is_array($info) && isset($info['items'])) {
-                    $result = $iterator($info['items'], $path . ' / '.$this->getMenuItemTitle($info));
+                    $result = $iterator($info['items'], $path.' / '.$this->getMenuItemTitle($info));
 
                     if (strlen($result)) {
-                        return strlen($path) ? $path.' / ' .$result : $result;
+                        return strlen($path) ? $path.' / '.$result : $result;
                     }
                 }
             }

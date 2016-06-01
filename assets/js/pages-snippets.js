@@ -10,24 +10,28 @@
 
         var self = this
 
-        $(document).on('hidden.oc.inspector', '.redactor-box [data-snippet]', function(){
+        $(document).on('hidden.oc.inspector', '.field-richeditor [data-snippet]', function() {
             self.syncEditorCode(this)
         })
 
-        $(document).on('init.oc.richeditor', '.redactor-box textarea', function(ev, $editor){
-            self.initSnippets($editor)
+        $(document).on('init.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor) {
+            self.initSnippets(richeditor.getElement())
         })
 
-        $(document).on('syncBefore.oc.richeditor', '.redactor-box textarea', function(ev, container){
+        $(document).on('setContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor) {
+            self.initSnippets(richeditor.getElement())
+        })
+
+        $(document).on('syncContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor, container) {
             self.syncPageMarkup(ev, container)
         })
 
-        $(document).on('keydown.oc.richeditor', '.redactor-box textarea', function(ev, originalEv, $editor, $textarea){
-            self.editorKeyDown(ev, originalEv, $editor, $textarea)
+        $(document).on('figureKeydown.oc.richeditor', '.field-richeditor textarea', function(ev, originalEv, richeditor) {
+            self.editorKeyDown(ev, originalEv, richeditor)
         })
 
-        $(document).on('click', '[data-snippet]', function(){
-            $(this).inspector()
+        $(document).on('click', '[data-snippet]', function() {
+            $.oc.inspector.manager.createInspector(this)
             return false
         })
     }
@@ -36,21 +40,19 @@
         var $pageForm = $('div.tab-content > .tab-pane.active form[data-object-type=page]', this.$masterTabs)
 
         if (!$pageForm.length) {
-            alert('Snippets can only be added to Pages. Please open or create a Page first.')
-
+            $.oc.alert('Snippets can only be added to Pages. Please open or create a Page first.')
             return
         }
 
         var $activeEditorTab = $('.control-tabs.secondary-tabs .tab-pane.active', $pageForm),
             $textarea = $activeEditorTab.find('[data-control="richeditor"] textarea'),
             $richeditorNode = $textarea.closest('[data-control="richeditor"]'),
-            $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero" />'),
+            $snippetNode = $('<figure contenteditable="false" data-inspector-css-class="hero">&nbsp;</figure>'),
             componentClass = $sidebarItem.attr('data-component-class'),
             snippetCode = $sidebarItem.data('snippet')
 
         if (!$textarea.length) {
-            alert('Snippets can only be added to page Content or HTML placeholders.')
-
+            $.oc.alert('Snippets can only be added to page Content or HTML placeholders.')
             return
         }
 
@@ -71,29 +73,11 @@
             'data-snippet': snippetCode,
             'data-name': $sidebarItem.data('snippet-name'),
             'tabindex': '0',
+            'draggable': 'true',
             'data-ui-block': 'true'
         })
 
-        $snippetNode.get(0).contentEditable = false
-
-        var redactor = $textarea.redactor('core.getObject'),
-            current = redactor.selection.getCurrent()
-
-        if (current === false)
-            redactor.focus.setStart()
-
-        current = redactor.selection.getCurrent()
-
-        if (current !== false) {
-            // If the current element doesn't belog to the redactor on the active tab,
-            // exit. A better solution would be inserting the snippet to the top of the
-            // text, but it looks like there's a bug in Redactor - although the redactor 
-            // object ponts to a correct editor on the page, calling redactor.insert.node 
-            // inserts the snippet to an editor on another tab.
-            var $currentParent = $(current).parent()
-            if ($currentParent.length && !$.contains($activeEditorTab.get(0), $currentParent.get(0))) 
-                return
-        }
+        $snippetNode.addClass('fr-draggable')
 
         $richeditorNode.richEditor('insertUiBlock', $snippetNode)
     }
@@ -103,13 +87,12 @@
             counter = 1,
             snippetFound = false
 
-
         do {
             snippetFound = false
 
             $('[data-control="richeditor"] textarea', $pageForm).each(function(){
                 var $textarea = $(this),
-                    $codeDom = $('<div>' + $textarea.redactor('code.get') + '</div>')
+                    $codeDom = $('<div>' + $textarea.richEditor('getContent') + '</div>')
 
                 if ($codeDom.find('[data-snippet="'+updatedCode+'"][data-component]').length > 0) {
                     snippetFound = true
@@ -126,16 +109,18 @@
     }
 
     SnippetManager.prototype.syncEditorCode = function(inspectable) {
-        var $textarea = $(inspectable).closest('[data-control=richeditor]').find('textarea')
-
-        $textarea.redactor('code.sync')
-        inspectable.focus()
+        // Race condition
+        setTimeout(function() {
+            var $richeditor = $(inspectable).closest('[data-control=richeditor]')
+            $richeditor.richEditor('syncContent')
+            inspectable.focus()
+        }, 0)
     }
 
     SnippetManager.prototype.initSnippets = function($editor) {
         var snippetCodes = []
 
-        $('.redactor-editor [data-snippet]', $editor).each(function(){
+        $('.fr-view [data-snippet]', $editor).each(function(){
             var $snippet = $(this),
                 snippetCode = $snippet.attr('data-snippet'),
                 componentClass = $snippet.attr('data-component')
@@ -145,16 +130,21 @@
 
             snippetCodes.push(snippetCode)
 
-            $snippet.addClass('loading')
-            $snippet.attr({
-                'data-name': 'Loading...',
-                'tabindex': '0',
-                'data-inspector-css-class': 'hero',
-                'data-ui-block': true
-            })
+            $snippet
+                .addClass('loading')
+                .addClass('fr-draggable')
+                .attr({
+                    'data-inspector-css-class': 'hero',
+                    'data-name': 'Loading...',
+                    'data-ui-block': 'true',
+                    'draggable': 'true',
+                    'tabindex': '0'
+                })
+                .html('&nbsp;')
 
-            if (componentClass)
+            if (componentClass) {
                 $snippet.attr('data-inspector-class', componentClass)
+            }
 
             this.contentEditable = false
         })
@@ -182,37 +172,32 @@
         $('[data-snippet]', $domTree).each(function(){
             var $snippet = $(this)
 
-            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty data-ui-block')
+            $snippet.removeAttr('contenteditable data-name tabindex data-inspector-css-class data-inspector-class data-property-inspectorclassname data-property-inspectorproperty data-ui-block draggable')
+            $snippet.removeClass('fr-draggable fr-dragging')
 
-            if (!$snippet.attr('class'))
+            if (!$snippet.attr('class')) {
                 $snippet.removeAttr('class')
+            }
         })
 
         container.html = $domTree.html()
     }
 
-    SnippetManager.prototype.editorKeyDown = function(ev, originalEv, $editor, $textarea) {
-        if ($textarea === undefined)
+    SnippetManager.prototype.editorKeyDown = function(ev, originalEv, richeditor) {
+        if (richeditor.getTextarea() === undefined)
             return
-
-        var redactor = $textarea.redactor('core.getObject')
 
         if (originalEv.target && $(originalEv.target).attr('data-snippet') !== undefined) {
             this.snippetKeyDown(originalEv, originalEv.target)
-
-            return
         }
     }
 
     SnippetManager.prototype.snippetKeyDown = function(ev, snippet) {
         if (ev.which == 32) {
-            var $textarea = $(snippet).closest('.redactor-box').find('textarea'),
-                redactor = $textarea.redactor('core.getObject')
-
             switch (ev.which) {
-                case 32: 
+                case 32:
                     // Space key
-                    $(snippet).inspector()
+                    $.oc.inspector.manager.createInspector(snippet)
                 break
             }
         }

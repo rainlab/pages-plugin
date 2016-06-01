@@ -100,6 +100,7 @@ class Snippet
         }
 
         $component = $this->getComponent();
+
         return $this->name = ComponentHelpers::getComponentName($component);
     }
 
@@ -119,6 +120,7 @@ class Snippet
         }
 
         $component = $this->getComponent();
+
         return $this->description = ComponentHelpers::getComponentDescription($component);
     }
 
@@ -137,53 +139,156 @@ class Snippet
      */
     public function getProperties()
     {
-        if (!$this->componentClass)
+        if (!$this->componentClass) {
             return self::parseIniProperties($this->properties);
-        else
+        }
+        else {
             return ComponentHelpers::getComponentsPropertyConfig($this->getComponent(), false, true);
+        }
     }
 
     /**
-     * Parses properties stored in a template in the INI format and converts them to an array.
+     * Returns a list of component definitions declared on the page.
+     * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
+     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
+     * @return array Returns an array of component definitions
      */
-    protected static function parseIniProperties($properties, $inspectorCompatible = true)
+    public static function listPageComponents($pageName, $theme, $markup)
     {
+        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
+
         $result = [];
 
-        foreach ($properties as $propertyInfo => $value) {
-            $qualifiers = explode('|', $propertyInfo);
-
-            if (($cnt = count($qualifiers)) < 2) {
-                // Ignore lines with invalid format
+        foreach ($map as $snippetDeclaration => $snippetInfo) {
+            if (!isset($snippetInfo['component'])) {
                 continue;
             }
 
-            $propertyCode = trim($qualifiers[0]);
-            if (!array_key_exists($propertyCode, $result)) {
-                $result[$propertyCode] = [
-                    'property' => $propertyCode
-                ];
-            }
-
-            $paramName = trim($qualifiers[1]);
-
-            // Handling the "[viewMode|options|list] => Display as a list" case
-            if ($qualifiers[1] == 'options') {
-                if ($cnt > 2) {
-                    if (!array_key_exists('options', $result[$propertyCode])) {
-                        $result[$propertyCode]['options'] = [];
-                    }
-
-                    $result[$propertyCode]['options'][$qualifiers[2]] = $value;
-                }
-            }
-            else {
-                $result[$propertyCode][$paramName] = $value;
-            }
+            $result[] = [
+                'class'      => $snippetInfo['component'],
+                'alias'      => $snippetInfo['code'],
+                'properties' => $snippetInfo['properties']
+            ];
         }
 
-        return array_values($result);
+        return $result;
     }
+
+    /**
+     * Extends the partial form with Snippet fields.
+     */
+    public static function extendPartialForm($formWidget)
+    {
+        /*
+         * Snippet code field
+         */
+
+        $fieldConfig = [
+            'tab'     => 'rainlab.pages::lang.snippet.partialtab',
+            'type'    => 'text',
+            'label'   => 'rainlab.pages::lang.snippet.code',
+            'comment' => 'rainlab.pages::lang.snippet.code_comment',
+            'span'    => 'left'
+        ];
+
+        $formWidget->tabs['fields']['viewBag[snippetCode]'] = $fieldConfig;
+
+        /*
+         * Snippet description field
+         */
+
+        $fieldConfig = [
+            'tab'     => 'rainlab.pages::lang.snippet.partialtab',
+            'type'    => 'text',
+            'label'   => 'rainlab.pages::lang.snippet.name',
+            'comment' => 'rainlab.pages::lang.snippet.name_comment',
+            'span'    => 'right'
+        ];
+
+        $formWidget->tabs['fields']['viewBag[snippetName]'] = $fieldConfig;
+
+        /*
+         * Snippet properties field
+         */
+
+        $fieldConfig = [
+            'tab'    => 'rainlab.pages::lang.snippet.partialtab',
+            'type'   => 'datatable',
+            'height' => '150',
+            'dynamicHeight' => true,
+            'columns' => [
+                'title' => [
+                    'title' => 'rainlab.pages::lang.snippet.column_property',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'Please provide the property title',
+                            'requiredWith' => 'property'
+                        ]
+                    ]
+                ],
+                'property' => [
+                    'title' => 'rainlab.pages::lang.snippet.column_code',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'Please provide the property code',
+                            'requiredWith' => 'title'
+                        ],
+                        'regex' => [
+                            'pattern'   => '^[a-z][a-z0-9]*$',
+                            'modifiers' => 'i',
+                            'message'   => Lang::get('rainlab.pages::lang.snippet.property_format_error')
+                        ]
+                    ]
+                ],
+                'type' => [
+                    'title'   => 'rainlab.pages::lang.snippet.column_type',
+                    'type'    => 'dropdown',
+                    'options' => [
+                        'string'   => 'rainlab.pages::lang.snippet.column_type_string',
+                        'checkbox' => 'rainlab.pages::lang.snippet.column_type_checkbox',
+                        'dropdown' => 'rainlab.pages::lang.snippet.column_type_dropdown'
+                    ],
+                    'validation' => [
+                        'required' => [
+                            'requiredWith' => 'title'
+                        ]
+                    ]
+                ],
+                'default' => [
+                    'title' => 'rainlab.pages::lang.snippet.column_default'
+                ],
+                'options' => [
+                    'title' => 'rainlab.pages::lang.snippet.column_options'
+                ]
+            ]
+        ];
+
+       $formWidget->tabs['fields']['viewBag[snippetProperties]'] = $fieldConfig;
+    }
+
+    /**
+     * Returns a component corresponding to the snippet.
+     * This method should not be used in the front-end request handling code.
+     * @return \Cms\Classes\ComponentBase
+     */
+    protected function getComponent()
+    {
+        if ($this->componentClass === null) {
+            return null;
+        }
+
+        if ($this->componentObj !== null) {
+            return $this->componentObj;
+        }
+
+        $componentClass = $this->componentClass;
+
+        return $this->componentObj = new $componentClass();
+    }
+
+    //
+    // Parsing
+    //
 
     /**
      * Parses the static page markup and renders snippets defined on the page.
@@ -197,9 +302,8 @@ class Snippet
         $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
 
         $controller = CmsController::getController();
-
         $partialSnippetMap = SnippetManager::instance()->getPartialSnippetMap($theme);
-        $controller = CmsController::getController();
+
         foreach ($map as $snippetDeclaration => $snippetInfo) {
             $snippetCode = $snippetInfo['code'];
 
@@ -222,75 +326,30 @@ class Snippet
         return $markup;
     }
 
-    /**
-     * Returns a list of component definitions declared on the page.
-     * @param string $pageName Specifies the static page file name (the name of the corresponding content block file).
-     * @param \Cms\Classes\Theme $theme Specifies a parent theme.
-     * @return array Returns an array of component definitions
-     */
-    public static function listPageComponents($pageName, $theme, $markup)
-    {
-        $map = self::extractSnippetsFromMarkupCached($theme, $pageName, $markup);
-
-        $result = [];
-        foreach ($map as $snippetDeclaration => $snippetInfo) {
-            if (!isset($snippetInfo['component'])) {
-                continue;
-            }
-
-            $result[] = [
-                'class' => $snippetInfo['component'],
-                'alias' => $snippetInfo['code'],
-                'properties' => $snippetInfo['properties']
-            ];
-        }
-
-        return $result;
-    }
-
     public static function processTemplateSettingsArray($settingsArray)
     {
-        if (isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
-            $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
+        if (!isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+            return $settingsArray;
+        }
 
-            $columns = ['title', 'property', 'type', 'default', 'options'];
+        $properties = [];
+        $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
 
-            $properties = [];
-            foreach ($rows as $row) {
-                $rowHasData = false;
+        foreach ($rows as $row) {
+            $property = array_get($row, 'property');
+            $settings = array_only($row, ['title', 'type', 'default', 'options']);
 
-                foreach ($columns as $column) {
-                    if (isset($row[$column]) && strlen(trim($row[$column]))) {
-                        $rowHasData = true;
-                        $row[$column] = trim($row[$column]);
-                    }
-                }
-
-                if (!$rowHasData) {
-                    continue;
-                }
-
-                $properties['snippetProperties['.$row['property'].'|type]'] = $row['type'];
-                $properties['snippetProperties['.$row['property'].'|title]'] = $row['title'];
-
-                if (isset($row['default']) && strlen($row['default'])) {
-                    $properties['snippetProperties[' . $row['property'] . '|default]'] = $row['default'];
-                }
-
-                if (isset($row['options']) && strlen($row['options'])) {
-                    $options = self::dropDownOptionsToArray($row['options']);
-
-                    foreach ($options as $index => $option) {
-                        $properties['snippetProperties['.$row['property'].'|options|'.$index.']'] = trim($option);
-                    }
-                }
+            if (isset($settings['options'])) {
+                $settings['options'] = self::dropDownOptionsToArray($settings['options']);
             }
 
-            unset($settingsArray['viewBag']['snippetProperties']);
+            $properties[$property] = $settings;
+        }
 
-            foreach ($properties as $name => $value) {
-                $settingsArray['viewBag'][$name] = $value;
-            }
+        $settingsArray['viewBag']['snippetProperties'] = [];
+
+        foreach ($properties as $name => $value) {
+            $settingsArray['viewBag']['snippetProperties'][$name] = $value;
         }
 
         return $settingsArray;
@@ -302,9 +361,9 @@ class Snippet
             return;
         }
 
-        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties'], false);
+        $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties']);
 
-        foreach ($parsedProperties as $index=>&$property) {
+        foreach ($parsedProperties as $index => &$property) {
             $property['id'] = $index;
 
             if (isset($property['options'])) {
@@ -313,6 +372,55 @@ class Snippet
         }
 
         $template->viewBag['snippetProperties'] = $parsedProperties;
+    }
+
+    /**
+     * Apples default property values and fixes property names.
+     *
+     * As snippet properties are defined with data attributes, they are lower case, whereas
+     * real property names are case sensitive. This method finds original property names defined
+     * in snippet classes or partials and replaces property names defined in the static page markup.
+     */
+    protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
+    {
+        $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
+        if (!$snippet) {
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]));
+        }
+
+        $properties = array_change_key_case($properties);
+        $snippetProperties = $snippet->getProperties();
+
+        foreach ($snippetProperties as $propertyInfo) {
+            $propertyCode = $propertyInfo['property'];
+            $lowercaseCode = strtolower($propertyCode);
+
+            if (!array_key_exists($lowercaseCode, $properties)) {
+                if (array_key_exists('default', $propertyInfo)) {
+                    $properties[$propertyCode] = $propertyInfo['default'];
+                }
+            }
+            else {
+                $markupPropertyInfo = $properties[$lowercaseCode];
+                unset($properties[$lowercaseCode]);
+                $properties[$propertyCode] = $markupPropertyInfo;
+            }
+        }
+
+        return $properties;
+    }
+
+    /**
+     * Converts a keyed object to an array, converting the index to the "property" value.
+     * @return array
+     */
+    protected static function parseIniProperties($properties)
+    {
+        foreach ($properties as $index => $value) {
+            $properties[$index]['property'] = $index;
+        }
+
+        return array_values($properties);
     }
 
     protected static function dropDownOptionsToArray($optionsString)
@@ -332,10 +440,12 @@ class Snippet
                     }
 
                     $result[$key] = trim($parts[1]);
-                } else {
+                }
+                else {
                     $result[$index] = trim($optionStr);
                 }
-            } else {
+            }
+            else {
                 $result[$index] = trim($optionStr);
             }
         }
@@ -346,112 +456,26 @@ class Snippet
     protected static function dropDownOptionsToString($optionsArray)
     {
         $result = [];
+        $isAssoc = (bool) count(array_filter(array_keys($optionsArray), 'is_string'));
+
         foreach ($optionsArray as $optionIndex => $optionValue) {
-            $result[] = $optionIndex.':'.$optionValue;
+            $result[] = $isAssoc
+                ? $optionIndex.':'.$optionValue
+                : $optionValue;
         }
 
         return implode(' | ', $result);
-    }
-
-    /**
-     * Extends the partial form with Snippet fields.
-     */
-    public static function extendPartialForm($formWidget)
-    {
-        /*
-         * Snippet code field
-         */
-
-        $fieldConfig = [
-            'tab' => 'rainlab.pages::lang.snippet.partialtab',
-            'type' => 'text',
-            'label' => 'rainlab.pages::lang.snippet.code',
-            'comment' => 'rainlab.pages::lang.snippet.code_comment',
-            'span' => 'left'
-        ];
-
-        $formWidget->tabs['fields']['viewBag[snippetCode]'] = $fieldConfig;
-
-        /*
-         * Snippet description field
-         */
-
-        $fieldConfig = [
-            'tab' => 'rainlab.pages::lang.snippet.partialtab',
-            'type' => 'text',
-            'label' => 'rainlab.pages::lang.snippet.name',
-            'comment' => 'rainlab.pages::lang.snippet.name_comment',
-            'span' => 'right'
-        ];
-
-        $formWidget->tabs['fields']['viewBag[snippetName]'] = $fieldConfig;
-
-        /*
-         * Snippet properties field
-         */
-
-        $fieldConfig = [
-            'tab' => 'rainlab.pages::lang.snippet.partialtab',
-            'type' => 'datatable',
-            'height' => '150',
-            'dynamicHeight' => true,
-            'columns' => [
-                'title' => [
-                    'title' => 'rainlab.pages::lang.snippet.column_property',
-                    'validation' => [
-                        'required' => [
-                            'message' => 'Please provide the property title',
-                            'requiredWith' => 'property'
-                        ]
-                    ]
-                ],
-                'property' => [
-                    'title' => 'rainlab.pages::lang.snippet.column_code',
-                    'validation' => [
-                        'required' => [
-                            'message' => 'Please provide the property code',
-                            'requiredWith' => 'title'
-                        ],
-                        'regex' => [
-                            'pattern' => '^[a-z][a-z0-9]*$',
-                            'modifiers' => 'i',
-                            'message' => Lang::get('rainlab.pages::lang.snippet.property_format_error')
-                        ]
-                    ]
-                ],
-                'type' => [
-                    'title' => 'rainlab.pages::lang.snippet.column_type',
-                    'type' => 'dropdown',
-                    'options' => [
-                        'string' => 'rainlab.pages::lang.snippet.column_type_string',
-                        'checkbox' => 'rainlab.pages::lang.snippet.column_type_checkbox',
-                        'dropdown' => 'rainlab.pages::lang.snippet.column_type_dropdown'
-                    ],
-                    'validation' => [
-                        'required' => [
-                            'requiredWith' => 'title'
-                        ]
-                    ]
-                ],
-                'default' => [
-                    'title' => 'rainlab.pages::lang.snippet.column_default',
-                ],
-                'options' => [
-                    'title' => 'rainlab.pages::lang.snippet.column_options',
-                ]
-            ]
-        ];
-
-       $formWidget->tabs['fields']['viewBag[snippetProperties]'] = $fieldConfig;
     }
 
     protected static function extractSnippetsFromMarkup($markup, $theme)
     {
         $map = [];
         $matches = [];
+
         if (preg_match_all('/\<figure\s+[^\>]+\>[^\<]*\<\/figure\>/i', $markup, $matches)) {
             foreach ($matches[0] as $snippetDeclaration) {
                 $nameMatch = [];
+
                 if (!preg_match('/data\-snippet\s*=\s*"([^"]+)"/', $snippetDeclaration, $nameMatch)) {
                     continue;
                 }
@@ -469,16 +493,18 @@ class Snippet
 
                 $componentMatch = [];
                 $componentClass = null;
-                if (preg_match('/data\-component\s*=\s*"([^"]+)"/', $snippetDeclaration, $componentMatch)) 
+
+                if (preg_match('/data\-component\s*=\s*"([^"]+)"/', $snippetDeclaration, $componentMatch)) {
                     $componentClass = $componentMatch[1];
+                }
 
                 // Apply default values for properties not defined in the markup
                 // and normalize property code names.
                 $properties = self::preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties);
 
                 $map[$snippetDeclaration] = [
-                    'code' => $snippetCode,
-                    'component' => $componentClass,
+                    'code'       => $snippetCode,
+                    'component'  => $componentClass,
                     'properties' => $properties
                 ];
             }
@@ -507,8 +533,9 @@ class Snippet
         if (!is_array($map)) {
             $map = self::extractSnippetsFromMarkup($markup, $theme);
 
-            if (!is_array($cached))
+            if (!is_array($cached)) {
                 $cached = [];
+            }
 
             $cached[$pageName] = $map;
             Cache::put($key, serialize($cached), Config::get('cms.parsedPageCacheTTL', 10));
@@ -517,60 +544,5 @@ class Snippet
         self::$pageSnippetMap[$pageName] = $map;
 
         return $map;
-    }
-
-    /**
-     * Apples default property values and fixes property names.
-     *
-     * As snippet properties are defined with data attributes, they are lower case, whereas
-     * real property names are case sensitive. This method finds original property names defined
-     * in snippet classes or partials and replaces property names defined in the static page markup.
-     */
-    protected static function preprocessPropertyValues($theme, $snippetCode, $componentClass, $properties)
-    {
-        $snippet = SnippetManager::instance()->findByCodeOrComponent($theme, $snippetCode, $componentClass, true);
-        if (!$snippet) {
-            throw new ApplicationException(Lang::get('rainlab.pages::lang.snippet.not_found', ['code'=>$snippetCode]));
-        }
-
-        $properties = array_change_key_case($properties);
-        $snippetProperties = $snippet->getProperties();
-        foreach ($snippetProperties as $propertyInfo) {
-            $propertyCode = $propertyInfo['property'];
-            $lowercaseCode = strtolower($propertyCode);
-
-            if (!array_key_exists($lowercaseCode, $properties)) {
-                if (array_key_exists('default', $propertyInfo)) {
-                    $properties[$propertyCode] = $propertyInfo['default'];
-                }
-            }
-            else {
-                $markupPropertyInfo = $properties[$lowercaseCode];
-                unset($properties[$lowercaseCode]);
-                $properties[$propertyCode] = $markupPropertyInfo;
-            }
-        }
-
-        return $properties;
-    }
-
-    /**
-     * Returns a component corresponding to the snippet.
-     * This method should not be used in the front-end request handling code.
-     * @return \Cms\Classes\ComponentBase
-     */
-    protected function getComponent()
-    {
-        if ($this->componentClass === null) {
-            return null;
-        }
-
-        if ($this->componentObj !== null) {
-            return $this->componentObj;
-        }
-
-        $componentClass = $this->componentClass;
-
-        return $this->componentObj = new $componentClass();
     }
 }

@@ -6,7 +6,7 @@
   width: 18px;
   height: 18px;
   left: 17px;
-  top: 23px;
+  top: 18px;
   content: ' ';
   background-image: url(../images/menu-icons.png);
   background-position: 0 0;
@@ -24,7 +24,7 @@
   width: 18px;
   height: 22px;
   left: 18px;
-  top: 15px;
+  top: 10px;
   content: ' ';
   background-image: url(../images/content-icons.png);
   background-position: 0 0;
@@ -51,7 +51,7 @@
   background-repeat: no-repeat;
   background-size: 34px auto;
   left: 18px;
-  top: 17px;
+  top: 13px;
 }
 .control-filelist.snippet-list li > a:hover:before {
   background-position: 0 -21px;
@@ -83,15 +83,12 @@
   }
 }
 .fancy-layout .pagesTextEditor {
-  border-left: 1px solid #e0e0e0 !important;
+  border-left: 1px solid #bdc3c7 !important;
 }
-.fancy-layout .pagesTextEditor .ace_scroller {
-  padding: 20px;
-}
-.redactor-editor [data-snippet]:before {
+.control-richeditor [data-snippet]:before {
   content: attr(data-name);
 }
-.redactor-editor [data-snippet]:after {
+.control-richeditor [data-snippet]:after {
   position: absolute;
   width: 17px;
   height: 19px;
@@ -105,7 +102,7 @@
   left: 11px;
   top: 12px;
 }
-.redactor-editor [data-snippet].loading:after {
+.control-richeditor [data-snippet].loading:after {
   background-image: url(../../../../../modules/system/assets/ui/images/loader-transparent.svg);
   background-size: 15px 15px;
   background-position: 50% 50%;
@@ -118,7 +115,7 @@
   animation: spin 1s linear infinite;
 }
 @media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-devicepixel-ratio: 1.5), only screen and (min-resolution: 1.5dppx) {
-  .redactor-editor [data-snippet]:after {
+  .control-richeditor [data-snippet]:after {
     background-position: 0px -21px;
     background-size: 17px auto;
   }
