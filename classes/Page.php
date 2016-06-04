@@ -14,8 +14,10 @@ use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\Content as ContentBase;
 use Cms\Classes\ComponentManager;
+use System\Helpers\View as ViewHelper;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
+use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
 use ApplicationException;
 
@@ -560,11 +562,22 @@ class Page extends ContentBase
             return $this->processedMarkupCache;
         }
 
+        /*
+         * Process snippets
+         */
         $markup = Snippet::processPageMarkup(
             $this->getFileName(),
             $this->theme,
             $this->markup
         );
+
+        /*
+         * Inject global view variables
+         */
+        $globalVars = ViewHelper::getGlobalVars();
+        if (!empty($globalVars)) {
+            $markup = TextParser::parse($markup, $globalVars);
+        }
 
         return $this->processedMarkupCache = $markup;
     }
@@ -575,11 +588,22 @@ class Page extends ContentBase
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
+        /*
+         * Process snippets
+         */
         $markup = Snippet::processPageMarkup(
             $this->getFileName().md5($placeholderName),
             $this->theme,
             $placeholderContents
         );
+
+        /*
+         * Inject global view variables
+         */
+        $globalVars = ViewHelper::getGlobalVars();
+        if (!empty($globalVars)) {
+            $markup = TextParser::parse($markup, $globalVars);
+        }
 
         return $this->processedBlockMarkupCache[$placeholderName] = $markup;
     }

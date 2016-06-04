@@ -30,3 +30,4 @@
 1.2.3: Snippets can now be moved by dragging them.
 1.2.4: Fixes a bug where the cursor is misplaced when editing text files.
 1.2.5: Fixes a bug where the parent page is lost upon changing a page layout.
+1.2.6: Shared view variables are now passed to static pages.
