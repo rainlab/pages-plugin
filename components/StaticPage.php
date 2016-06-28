@@ -37,7 +37,7 @@ class StaticPage extends ComponentBase
     {
         return [
             'name'        => 'Static page',
-            'description' => 'Outputs a static page in a CMS layout.'
+            'description' => 'rainlab.pages::lang.component.static_page_description'
         ];
     }
 
