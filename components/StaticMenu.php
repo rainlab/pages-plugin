@@ -24,7 +24,7 @@ class StaticMenu extends ComponentBase
     {
         return [
             'name'        => 'Static menu',
-            'description' => 'Outputs a menu in a CMS layout.'
+            'description' => 'rainlab.pages::lang.component.static_menu_description'
         ];
     }
 
@@ -33,7 +33,7 @@ class StaticMenu extends ComponentBase
         return [
             'code' => [
                 'title'       => 'Menu',
-                'description' => 'Specify a code of the menu the component should output',
+                'description' => 'rainlab.pages::lang.component.static_menu_menu_code',
                 'type'        => 'dropdown'
             ]
         ];
