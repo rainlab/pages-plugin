@@ -25,7 +25,7 @@ class StaticBreadcrumbs extends ComponentBase
     {
         return [
             'name'        => 'Static breadcrumbs',
-            'description' => 'Outputs breadcrumbs for a static page.'
+            'description' => 'rainlab.pages::lang.component.static_breadcrumbs_description'
         ];
     }
 
