@@ -89,10 +89,9 @@
 
         do {
             snippetFound = false
-
             $('[data-control="richeditor"] textarea', $pageForm).each(function(){
                 var $textarea = $(this),
-                    $codeDom = $('<div>' + $textarea.richEditor('getContent') + '</div>')
+                    $codeDom = $('<div>' + $textarea.val() + '</div>')
 
                 if ($codeDom.find('[data-snippet="'+updatedCode+'"][data-component]').length > 0) {
                     snippetFound = true
