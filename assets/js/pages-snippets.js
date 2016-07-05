@@ -89,6 +89,7 @@
 
         do {
             snippetFound = false
+
             $('[data-control="richeditor"] textarea', $pageForm).each(function(){
                 var $textarea = $(this),
                     $codeDom = $('<div>' + $textarea.val() + '</div>')
