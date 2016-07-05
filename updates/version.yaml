@@ -31,3 +31,4 @@
 1.2.4: Fixes a bug where the cursor is misplaced when editing text files.
 1.2.5: Fixes a bug where the parent page is lost upon changing a page layout.
 1.2.6: Shared view variables are now passed to static pages.
+1.2.7: Fixes issue with duplicating properties when adding multiple snippets on the same page.
