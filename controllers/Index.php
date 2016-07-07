@@ -538,7 +538,7 @@ class Index extends Controller
 
             $extension = pathinfo($fileName, PATHINFO_EXTENSION);
 
-            if ($extension === 'htm' || $extension === 'html') {
+            if ($extension === 'htm' || $extension === 'html' || !strlen($extension)) {
                 $objectData['markup'] = array_get($saveData, 'markup_html');
             }
         }
