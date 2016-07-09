@@ -321,8 +321,8 @@ The `cmsPages` is a list of CMS pages that can display objects supported by the 
 When the Static Pages plugin generates a menu on the front-end, every menu item should **resolved** by the plugin that supplies the menu item type. The process of resolving involves generating the real item URL, determining whether the menu item is active, and generating the subitems (if required). Plugins should register the `pages.menuitem.resolveItem` event handler in order to resolve menu items. The event handler takes four arguments:
 
 * `$type` - the item type name. Plugins must only handle item types they provide and ignore other types.
-* `$item` - the menu item object (RainLab\Pages\Classes\MenuItem). The menu item object represents the menu item configuration provided by the user. The object has the following properties: `title`, `type`, `reference`, `cmsPage`, `nesting`. 
-* `$url` - specifies the current absolute URL, in lower case. Always use the `URL::to()` helper to generate menu item links and compare them with the current URL.
+* `$item` - the menu item object (RainLab\Pages\Classes\MenuItem). The menu item object represents the menu item configuration provided by the user. The object has the following properties: `title`, `type`, `reference`, `cmsPage`, `nesting`.
+* `$url` - specifies the current absolute URL, in lower case. Always use the `Url::to()` helper to generate menu item links and compare them with the current URL.
 * `$theme` - the current theme object (`Cms\Classes\Theme`).
 
 The event handler should return an array. The array keys depend on whether the menu item contains subitems or not. Expected result format:
@@ -354,7 +354,7 @@ If your item type requires a CMS page to resolve item URLs, you might need to re
     use Cms\Classes\Page as CmsPage;
     use October\Rain\Router\Helper as RouterHelper;
     use Str;
-    use URL;
+    use Url;
 
     ...
 
@@ -362,12 +362,12 @@ If your item type requires a CMS page to resolve item URLs, you might need to re
 
     // Always check if the page can be resolved
     if (!$page)
-        return; 
+        return;
 
-    // Generate the URL 
+    // Generate the URL
     $url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug]);
 
-    $url = URL::to(Str::lower(RouterHelper::normalizeUrl($url)));
+    $url = Url::to(Str::lower(RouterHelper::normalizeUrl($url)));
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
 

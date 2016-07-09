@@ -110,7 +110,7 @@ return [
         'column_type_dropdown' => 'Dropdown',
         'not_found' => 'Snippet with the requested code :code was not found in the theme.',
         'property_format_error' => 'Property code should start with a Latin letter and can contain only Latin letters and digits',
-        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -',
+        'invalid_option_key' => 'Invalid drop-down option key: :key. Option keys can contain only digits, Latin letters and characters _ and -',
     ],
     'component' => [
         'static_page_description' => 'Outputs a static page in a CMS layout.',
