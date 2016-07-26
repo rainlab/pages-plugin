@@ -436,7 +436,7 @@ class Snippet
 
                 if (strlen($key)) {
                     if (!preg_match('/^[0-9a-z-_]+$/i', $key)) {
-                        throw new ValidationException(['snippetProperties' => sprintf(Lang::get('rainlab.pages::lang.snippet.invalid_option_key'), $key)]);
+                        throw new ValidationException(['snippetProperties' => Lang::get('rainlab.pages::lang.snippet.invalid_option_key', ['key'=>$key])]);
                     }
 
                     $result[$key] = trim($parts[1]);

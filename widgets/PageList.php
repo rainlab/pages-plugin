@@ -31,15 +31,15 @@ class PageList extends WidgetBase
     public $deleteConfirmation = 'rainlab.pages::lang.page.delete_confirmation';
 
     public $noRecordsMessage = 'rainlab.pages::lang.page.no_records';
-
+    
     public $addSubpageLabel = 'rainlab.pages::lang.page.add_subpage';
+
 
     public function __construct($controller, $alias)
     {
         $this->alias = $alias;
         $this->theme = Theme::getEditTheme();
         $this->dataIdPrefix = 'page-'.$this->theme->getDirName();
-        $this->addSubpageLabel = trans($this->addSubpageLabel);
 
         parent::__construct($controller, []);
         $this->bindToController();

@@ -12,10 +12,10 @@ return [
         'delete_confirm_single' => 'Valóban törölni akarja ezt a lapot? Ez az allapokat is törölni fogja.',
         'new' => 'Új lap',
         'add_subpage' => 'Allap hozzáadása',
-        'invalid_url' => 'Érvénytelen az URL cím formátuma. Perjellel kell kezdődnie, és számokat, latin betűket, valamint a következő szimbólumokat tartalmazhatja: _-/.',
-        'url_not_unique' => 'Már használja egy másik lap ezt az URL címet.',
+        'invalid_url' => 'Érvénytelen a webcím formátuma. Perjellel kell kezdődnie, és számokat, latin betűket, valamint a következő szimbólumokat tartalmazhatja: _-/.',
+        'url_not_unique' => 'Már használja egy másik lap ezt a webcímet.',
         'layout' => 'Elrendezés',
-        'layouts_not_found' => 'Nem található elrendezés',
+        'layouts_not_found' => 'Nem található elrendezés.',
         'saved' => 'A lap mentése sikerült.',
         'tab' => 'Lapok',
         'manage_pages' => 'Lapok kezelése',
@@ -36,7 +36,6 @@ return [
         'code' => 'Kód',
         'items' => 'Menüpont',
         'add_subitem' => 'Almenüpont hozzáadása',
-        'no_records' => 'Nem található menüpont',
         'code_required' => 'A Kód kötelező',
         'invalid_code' => 'Érvénytelen a kód formátuma. Csak számokat, latin betűket és a következő szimbólumokat tartalmazhatja: _-'
     ],
@@ -46,7 +45,7 @@ return [
         'type' => 'Típus',
         'allow_nested_items' => 'Beágyazott menüpontok engedélyezése',
         'allow_nested_items_comment' => 'A beágyazott menüpontokat a lap és néhány más menüpont típus dinamikusan generálhatja',
-        'url' => 'URL cím',
+        'url' => 'Webcím',
         'reference' => 'Hivatkozás',
         'title_required' => 'A cím megadása kötelező',
         'unknown_type' => 'Ismeretlen menüponttípus',
@@ -58,10 +57,12 @@ return [
         'cms_page' => 'Lap',
         'cms_page_comment' => 'Válassza ki a menüpontra kattintáskor megnyitni kívánt lapot.',
         'reference_required' => 'A menüpont hivatkozás kitöltése kötelező.',
-        'url_required' => 'Az URL cím kitöltése kötelező',
+        'url_required' => 'A webcím megadása kötelező',
         'cms_page_required' => 'Válasszon egy lapot',
         'code' => 'Kód',
-        'code_comment' => 'Adja meg a menüpont kódját, ha az API-val akarja elérni.'
+        'code_comment' => 'Adja meg a menüpont kódját, ha az API-val akarja elérni.',
+        'static_page' => 'Lapok',
+        'all_static_pages' => 'Összes lap'
     ],
     'content' => [
         'menu_label' => 'Tartalom',
@@ -79,7 +80,7 @@ return [
         'title' => 'Cím',
         'new_title' => 'Új lap címe',
         'content' => 'Tartalom',
-        'url' => 'URL cím',
+        'url' => 'Webcím',
         'filename' => 'Fájlnév',
         'layout' => 'Elrendezés',
         'description' => 'Leírás',
@@ -94,10 +95,10 @@ return [
     'snippet' => [
         'partialtab' => 'Kódrészlet',
         'code' => 'Kódrészlet kódja',
-        'code_comment' => 'Enter a code to make this partial available as a snippet in the Static Pages plugin.',
+        'code_comment' => 'Adja meg a kódot, hogy a jelenlegi részlap elérhető legyen kódrészletként a Lapok bővítményben.',
         'name' => 'Név',
-        'name_comment' => 'The name is displayed in the snippet list in the Static Pages sidebar and on a Page when a snippet is added.',
-        'no_records' => 'Nincs megjeleníthető kódrészlet.',
+        'name_comment' => 'A Kódrészletek listában jelenik meg a Lapok oldalsó menüjében, valamint a Lapok aloldalon.',
+        'no_records' => 'Nem található kódrészlet',
         'menu_label' => 'Kódrészletek',
         'column_property' => 'Cím',
         'column_type' => 'Típus',
@@ -108,7 +109,7 @@ return [
         'column_type_checkbox' => 'Jelölőnégyzet',
         'column_type_dropdown' => 'Lenyíló lista',
         'not_found' => 'A(z) :code nevű kódrészlet nem található a témában.',
-        'property_format_error' => 'Property code should start with a Latin letter and can contain only Latin letters and digits',
-        'invalid_option_key' => 'Invalid drop-down option key: %s. Option keys can contain only digits, Latin letters and characters _ and -'
+        'property_format_error' => 'A kód latin karakterrel kezdődhet és csak latin karaktereket és számokat tartalmazhat.',
+        'invalid_option_key' => 'Érvénytelen formátum: %s. Csak számokat, latin betűket és a következő szimbólumokat tartalmazhatja: _-'
     ]
 ];
