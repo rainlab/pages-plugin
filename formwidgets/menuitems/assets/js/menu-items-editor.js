@@ -1,5 +1,5 @@
 /*
- * The menu item editor. Provides tools for managing the 
+ * The menu item editor. Provides tools for managing the
  * menu items.
  */
 +function ($) { "use strict";
@@ -77,7 +77,7 @@
 
             $('input[type=checkbox]', self.$popupContainer).removeAttr('checked')
 
-            self.loadProperties(self.$popupContainer, self.$itemDataContainer.data('menu-item'))
+            self.loadProperties(self.$popupContainer, self.$itemDataContainer)
             self.$popupForm = self.$popupContainer.find('form')
             self.itemSaved = false
 
@@ -138,7 +138,8 @@
         return false
     }
 
-    MenuItemsEditor.prototype.loadProperties = function($popupContainer, properties) {
+    MenuItemsEditor.prototype.loadProperties = function($popupContainer, $itemDataContainer) {
+        var properties = $itemDataContainer.data('menu-item')
         this.properties = properties
 
         var setPropertyOnElement = function($input, val) {
@@ -163,8 +164,13 @@
                 })
             }
             else {
-                var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
+                var $input = (property == 'image') ? $('[name="'+property+'"][type=hidden]', $popupContainer) : $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
                 setPropertyOnElement($input, val)
+                if (property == 'image' && val.length) {
+                    $('[data-find-image]', $popupContainer).attr('src', $('> div p.image img', $itemDataContainer).attr('src'))
+                    $('.field-mediafinder.style-image-single.is-image', $popupContainer).toggleClass('is-populated', 1)
+                    $('[data-find-file-name]', $popupContainer).text(val.substring(1))
+                }
             }
         })
     }
@@ -295,7 +301,9 @@
             basicProperties = {
                 'title': 1,
                 'type': 1,
-                'code': 1
+                'code': 1,
+                'description': 0,
+                'image': 0
             },
             typeInfoPropertyMap = {
                 reference: 'references',
@@ -307,7 +315,7 @@
 
         $.each(propertyNames, function() {
             var propertyName = this,
-                $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
+                $input = (propertyName == 'image') ? $('[name="'+propertyName+'"][type=hidden]', self.$popupContainer) : $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]');
 
             if ($input.prop('type') !== 'checkbox') {
                 data[propertyName] = $.trim($input.val())
@@ -352,7 +360,7 @@
                     return
 
                 var typeInfoProperty = typeInfoPropertyMap[property] !== undefined ? typeInfoPropertyMap[property] : property
-                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false) 
+                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false)
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
@@ -398,6 +406,15 @@
         }
 
         $('> div span.comment', self.$itemDataContainer).text(referenceDescription)
+
+        $('> div p.comment', self.$itemDataContainer).text(data.description)
+
+        if (data.image) {
+            if (!$('> div p.image img', self.$itemDataContainer).length) {
+                $('> div p.image', self.$itemDataContainer).append('<img src="">');
+            }
+            $('> div p.image img', self.$itemDataContainer).attr('src', $('[name=image]', self.$popupContainer).closest('div.field-mediafinder').find('.find-object .icon-container img[data-find-image]').attr('src'));
+        }
 
         this.attachViewBagData(data)
 

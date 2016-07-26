@@ -22,6 +22,16 @@ class MenuItemReference
     public $title;
 
     /**
+     * @var string Additional information pertaining to the menu item.
+     */
+    public $description;
+
+    /**
+     * @var image src to be displayed with the menu item, useful for restaurant menus
+     */
+    public $image;
+
+    /**
      * @var string Specifies the item URL
      */
     public $url;
