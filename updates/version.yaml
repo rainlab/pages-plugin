@@ -33,3 +33,4 @@
 1.2.6: Shared view variables are now passed to static pages.
 1.2.7: Fixes issue with duplicating properties when adding multiple snippets on the same page.
 1.2.8: Fixes a bug where creating a content block without extension doesn't save the contents to file.
+1.2.9: Add conditional support for translating page URLs.
