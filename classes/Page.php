@@ -29,7 +29,10 @@ use ApplicationException;
  */
 class Page extends ContentBase
 {
-    public $implement = ['@RainLab.Translate.Behaviors.TranslatableCmsObject'];
+    public $implement = [
+        '@RainLab.Translate.Behaviors.TranslatablePageUrl',
+        '@RainLab.Translate.Behaviors.TranslatableCmsObject'
+    ];
 
     /**
      * @var string The container name associated with the model, eg: pages.
@@ -254,7 +257,6 @@ class Page extends ContentBase
 
         return $result;
     }
-
 
     /**
      * Removes this page to the meta index.
