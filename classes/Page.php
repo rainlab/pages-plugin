@@ -286,7 +286,7 @@ class Page extends ContentBase
             return null;
         }
 
-        $url = $page->getViewBag()->property('url');
+        $url = array_get($page->attributes, 'viewBag.url');
 
         if (substr($url, 0, 1) == '/') {
             $url = substr($url, 1);
@@ -544,7 +544,7 @@ class Page extends ContentBase
         $result = '';
 
         foreach ($placeholders as $code => $content) {
-            if (!strlen($content)) {
+            if (!strlen(trim($content))) {
                 continue;
             }
 
