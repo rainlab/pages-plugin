@@ -1,7 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Cms;
-use Url;
 use File;
 use Lang;
 use Cache;
