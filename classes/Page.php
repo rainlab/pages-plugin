@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
+use Cms;
 use Url;
 use File;
 use Lang;
@@ -288,19 +289,7 @@ class Page extends ContentBase
 
         $url = array_get($page->attributes, 'viewBag.url');
 
-        if (substr($url, 0, 1) == '/') {
-            $url = substr($url, 1);
-        }
-
-        $routeAction = 'Cms\Classes\CmsController@run';
-        $actionExists = Route::getRoutes()->getByAction($routeAction) !== null;
-
-        if ($actionExists) {
-            return Url::action($routeAction, ['slug' => $url]);
-        }
-        else {
-            return Url::to($url);
-        }
+        return Cms::url($url);
     }
 
     //
@@ -705,7 +694,7 @@ class Page extends ContentBase
      * with the following keys:
      * - url - the menu item URL. Not required for menu item types that return all available records.
      *   The URL should be returned relative to the website root and include the subdirectory, if any.
-     *   Use the Url::to() helper to generate the URLs.
+     *   Use the Cms::url() helper to generate the URLs.
      * - isActive - determines whether the menu item is active. Not required for menu item types that 
      *   return all available records.
      * - items - an array of arrays with the same keys (url, isActive, items) + the title key. 
@@ -728,7 +717,7 @@ class Page extends ContentBase
 
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
-            $result['url'] = Url::to($pageInfo['url']);
+            $result['url'] = Cms::url($pageInfo['url']);
             $result['mtime'] = $pageInfo['mtime'];
             $result['isActive'] = $result['url'] == $url;
         }
@@ -749,7 +738,7 @@ class Page extends ContentBase
                     }
 
                     $branchItem = [];
-                    $branchItem['url'] = Url::to($itemInfo['url']);
+                    $branchItem['url'] = Cms::url($itemInfo['url']);
                     $branchItem['isActive'] = $branchItem['url'] == $url;
                     $branchItem['title'] = $itemInfo['title'];
                     $branchItem['mtime'] = $itemInfo['mtime'];

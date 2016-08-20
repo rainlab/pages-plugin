@@ -19,7 +19,7 @@
 1.1.4: Minor fix to the StaticPage component API.
 1.1.5: Fixes bug when using syntax fields.
 1.1.6: Minor styling fix to the back-end UI.
-1.1.7: Improved menu item form to include css class, open in a new window and hidden flag.
+1.1.7: Improved menu item form to include CSS class, open in a new window and hidden flag.
 1.1.8: Improved the output of snippet partials when saved.
 1.1.9: Minor update to snippet inspector internal API.
 1.1.10: Fixes a bug where selecting a layout causes permanent unsaved changes.
@@ -34,3 +34,4 @@
 1.2.7: Fixes issue with duplicating properties when adding multiple snippets on the same page.
 1.2.8: Fixes a bug where creating a content block without extension doesn't save the contents to file.
 1.2.9: Add conditional support for translating page URLs.
+1.2.10: Streamline generation of URLs to use the new Cms::url helper.
