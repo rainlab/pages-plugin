@@ -61,6 +61,8 @@ return [
         'cms_page_required' => 'Sélectionnez une page CMS s’il vous plaît',
         'code' => 'Code',
         'code_comment' => 'Entrez le code de l’élément du menu si vous souhaitez y accéder via l’API.'
+        'static_page' => 'Page Statique',
+        'all_static_pages' => 'Toutes les pages'
     ],
     'content' => [
         'menu_label' => 'Contenu',
@@ -109,5 +111,11 @@ return [
         'not_found' => 'Le fragment demandé avec le code :code n’a pas été trouvé dans le thème.',
         'property_format_error' => 'Le code de la propriété devrait commencer par une lettre et ne peut contenir que des lettres et des chiffres',
         'invalid_option_key' => 'Clé de l’option de la liste déroulante invalide. Les clés des options ne peuvent contenir que des chiffres, des lettres et les symboles _ et -'
-    ]
+    ],
+    'component' => [
+        'static_page_description' => 'Affiche une page statique dans une maquette du CMS.',
+        'static_menu_description' => 'Affiche un menu dans une maquette du CMS.',
+        'static_menu_menu_code' => 'Spécifiez le code du menu que le composant devrait afficher.',
+        'static_breadcrumbs_description' => 'Affiche l\' aide à la navigation dans une page statique.',
+    ],
 ];
