@@ -60,7 +60,7 @@ return [
         'url_required' => 'L’URL est requise',
         'cms_page_required' => 'Sélectionnez une page CMS s’il vous plaît',
         'code' => 'Code',
-        'code_comment' => 'Entrez le code de l’élément du menu si vous souhaitez y accéder via l’API.'
+        'code_comment' => 'Entrez le code de l’élément du menu si vous souhaitez y accéder via l’API.',
         'static_page' => 'Page Statique',
         'all_static_pages' => 'Toutes les pages'
     ],
