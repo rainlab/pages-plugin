@@ -36,7 +36,7 @@ class StaticPage extends ComponentBase
     public function componentDetails()
     {
         return [
-            'name'        => 'Static page',
+            'name'        => 'rainlab.pages::lang.component.static_page_name',
             'description' => 'rainlab.pages::lang.component.static_page_description'
         ];
     }
@@ -92,7 +92,7 @@ class StaticPage extends ComponentBase
     }
 
     /**
-     * Find foreign view bag values and add them to 
+     * Find foreign view bag values and add them to
      * the component and page vars.
      */
     protected function defineExtraData()
