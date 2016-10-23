@@ -89,7 +89,7 @@ return [
         'exit_fullscreen' => 'Annuler le mode plein écran',
         'hidden' => 'Caché',
         'hidden_comment' => 'Les pages cachées sont seulement accessibles aux administrateurs connectés.',
-        'navigation_hidden' => 'Maquer dans la navigation',
+        'navigation_hidden' => 'Masquer dans la navigation',
         'navigation_hidden_comment' => 'Cochez cette case pour masquer cette page dans les menus et le fil d’ariane générés automatiquement.',
     ],
     'snippet' => [
