@@ -23,7 +23,7 @@ class StaticMenu extends ComponentBase
     public function componentDetails()
     {
         return [
-            'name'        => 'Static menu',
+            'name'        => 'rainlab.pages::lang.component.static_menu_name',
             'description' => 'rainlab.pages::lang.component.static_menu_description'
         ];
     }
@@ -32,8 +32,8 @@ class StaticMenu extends ComponentBase
     {
         return [
             'code' => [
-                'title'       => 'Menu',
-                'description' => 'rainlab.pages::lang.component.static_menu_menu_code',
+                'title'       => 'rainlab.pages::lang.component.static_menu_code_name',
+                'description' => 'rainlab.pages::lang.component.static_menu_code_description',
                 'type'        => 'dropdown'
             ]
         ];

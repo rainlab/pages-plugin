@@ -3,7 +3,7 @@
 return [
     'plugin' => [
         'name' => 'Lapok',
-        'description' => 'Lapok, menük és kódrészletek menedzselése.',
+        'description' => 'Lapok, menük és kódrészletek menedzselése.'
     ],
     'page' => [
         'menu_label' => 'Lapok',
@@ -66,7 +66,7 @@ return [
     ],
     'content' => [
         'menu_label' => 'Tartalom',
-        'cant_save_to_dir' => 'A tartalomfájlok mentése a static-pages könyvtárba nem engedélyezett.'
+        'cant_save_to_dir' => 'A fájlok mentése a "static-pages" könyvtárba nem engedélyezett.'
     ],
     'sidebar' => [
         'add' => 'Hozzáadás',
@@ -110,6 +110,16 @@ return [
         'column_type_dropdown' => 'Lenyíló lista',
         'not_found' => 'A(z) :code nevű kódrészlet nem található a témában.',
         'property_format_error' => 'A kód latin karakterrel kezdődhet és csak latin karaktereket és számokat tartalmazhat.',
-        'invalid_option_key' => 'Érvénytelen formátum: %s. Csak számokat, latin betűket és a következő szimbólumokat tartalmazhatja: _-'
+        'invalid_option_key' => 'Érvénytelen formátum: :key. Csak számokat, latin betűket és a következő szimbólumokat tartalmazhatja: _-'
+    ],
+    'component' => [
+        'static_page_name' => 'Statikus lap',
+        'static_page_description' => 'Lapok megjelenítése.',
+        'static_menu_name' => 'Statikus menü',
+        'static_menu_description' => 'Menük megjelenítése.',
+        'static_menu_code_name' => 'Menü',
+        'static_menu_code_description' => 'Speciális kód a megjelenő menünek.',
+        'static_breadcrumbs_name' => 'Statikus kenyérmorzsa',
+        'static_breadcrumbs_description' => 'Kenyérmorzsa megjelenítése.',
     ]
 ];
