@@ -12,7 +12,6 @@ use Cms\Classes\Theme;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
 use Backend\Classes\Controller;
-use Backend\Classes\WidgetManager;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
