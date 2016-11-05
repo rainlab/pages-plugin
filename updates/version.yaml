@@ -35,3 +35,4 @@
 1.2.8: Fixes a bug where creating a content block without extension doesn't save the contents to file.
 1.2.9: Add conditional support for translating page URLs.
 1.2.10: Streamline generation of URLs to use the new Cms::url helper.
+1.2.11: Implements repeater usage with translate plugin.
