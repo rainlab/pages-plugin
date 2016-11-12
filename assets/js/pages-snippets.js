@@ -19,7 +19,9 @@
         })
 
         $(document).on('setContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor) {
-            self.initSnippets(richeditor.getElement())
+            if (!richeditor.isCodeViewActive()) {
+                self.initSnippets(richeditor.getElement())
+            }
         })
 
         $(document).on('syncContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor, container) {
