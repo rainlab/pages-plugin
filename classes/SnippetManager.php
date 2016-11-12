@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
+use Lang;
 use Cache;
 use Config;
 use Cms\Classes\Partial;
@@ -16,8 +17,6 @@ use RainLab\Pages\Classes\Snippet;
 class SnippetManager
 {
     use \October\Rain\Support\Traits\Singleton;
-
-    const CACHE_KEY_PARTIAL_MAP = 'snippet-partial-map';
 
     protected $snippets = null;
 
@@ -111,12 +110,17 @@ class SnippetManager
      */
     public static function clearCache($theme)
     {
-        $keys = [self::CACHE_KEY_PARTIAL_MAP, Snippet::CACHE_PAGE_SNIPPET_MAP];
-        $keyBase = crc32($theme->getPath());
+        Cache::forget(self::getPartialMapCacheKey($theme));
 
-        foreach ($keys as $key) {
-            Cache::forget($keyBase.$key);
-        }
+        Snippet::clearMapCache($theme);
+    }
+
+    /**
+     * Returns a cache key for this record.
+     */
+    protected static function getPartialMapCacheKey($theme)
+    {
+        return crc32($theme->getPath()).'snippet-partial-map-'.Lang::getLocale();
     }
 
     /**
@@ -126,9 +130,9 @@ class SnippetManager
      */
     public function getPartialSnippetMap($theme)
     {
-        $result = [];
+        $key = self::getPartialMapCacheKey($theme);
 
-        $key = crc32($theme->getPath()).self::CACHE_KEY_PARTIAL_MAP;
+        $result = [];
         $cached = Cache::get($key, false);
 
         if ($cached !== false && ($cached = @unserialize($cached)) !== false) {

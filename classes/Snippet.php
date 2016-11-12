@@ -18,8 +18,6 @@ use DOMDocument;
  */
 class Snippet
 {
-    const CACHE_PAGE_SNIPPET_MAP = 'snippet-map';
-
     /**
      * @var string Specifies the snippet code.
      */
@@ -519,7 +517,7 @@ class Snippet
             return self::$pageSnippetMap[$pageName];
         }
 
-        $key = crc32($theme->getPath()).self::CACHE_PAGE_SNIPPET_MAP;
+        $key = self::getMapCacheKey($theme);
 
         $map = null;
         $cached = Cache::get($key, false);
@@ -544,5 +542,22 @@ class Snippet
         self::$pageSnippetMap[$pageName] = $map;
 
         return $map;
+    }
+
+    /**
+     * Returns a cache key for this record.
+     */
+    protected static function getMapCacheKey($theme)
+    {
+        return crc32($theme->getPath()).'snippet-map-'.Lang::getLocale();
+    }
+
+    /**
+     * Clears the snippet map item cache
+     * @param \Cms\Classes\Theme $theme Specifies the current theme.
+     */
+    public static function clearMapCache($theme)
+    {
+        Cache::forget(self::getMapCacheKey($theme));
     }
 }
