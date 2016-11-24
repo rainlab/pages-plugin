@@ -590,7 +590,8 @@ class Index extends Controller
     {
         $alias = Request::input('formWidgetAlias');
         $type = Request::input('objectType');
-        $object = $this->loadObject($type, Request::input('objectPath'));
+        $objectPath = trim(Request::input('objectPath'));
+        $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
 
         $widget = $this->makeObjectFormWidget($type, $object, $alias);
         $widget->bindToController();
