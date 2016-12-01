@@ -194,7 +194,7 @@ class MenuItemGenerator extends ModelBehavior
 
         if (isset($config->orderBy)) {
             if (is_array($config->orderBy)) {
-                $sortField = $config->orderBy['column'];
+                $sortField = $config->orderBy['field'];
                 $sortDir = $config->orderBy['direction'];
             } else {
                 list($sortField,$sortDir) = explode(' ', $config->orderBy);
