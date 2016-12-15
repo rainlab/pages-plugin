@@ -186,8 +186,8 @@ class MenuItemGenerator extends ModelBehavior
      */
     protected function resolveMenuItemForList($config, $item, $url, $theme)
     {
-        $query = $this->model->select(
-            'id',
+        $modelQuery = $this->model->select(
+            $this->model->getKeyName(),
             $config->titleFrom,
             $config->slugField
         );
@@ -200,11 +200,14 @@ class MenuItemGenerator extends ModelBehavior
                 list($sortField,$sortDir) = explode(' ', $config->orderBy);
             }
             if ($sortField != $config->titleFrom && $sortField != $config->slugField) {
-                $query->addSelect($sortField);
+                $modelQuery->addSelect($sortField);
             }
-            $query->orderBy($sortField,$sortDir);
+            $modelQuery->orderBy($sortField,$sortDir);
         }
-        $modelItems = $query->get();
+        if (isset($config->scope)) {
+            $modelQuery->{$config->scope}();
+        }
+        $modelItems = $modelQuery->get();
 
         if (!$modelItems->count()) {
             return;
