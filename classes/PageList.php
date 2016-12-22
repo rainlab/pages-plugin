@@ -167,6 +167,8 @@ class PageList
         if (@File::put($filePath, $yamlData) === false) {
             throw new ApplicationException(Lang::get('cms::lang.cms_object.error_saving', ['name' => $filePath]));
         }
+
+        self::$configCache = $originalData;
     }
 
     /**
@@ -211,8 +213,6 @@ class PageList
     {
         $pagesConfig = $this->getPagesConfig();
         $requestedFileName = $page->getBaseFileName();
-
-        $tree = [];
 
         $iterator = function($configPages) use (&$iterator, &$pages, $requestedFileName) {
             $result = [];
