@@ -84,7 +84,7 @@ class SnippetList extends WidgetBase
 
         return collect($snippets)->sortBy(function($snippet) {
             return $snippet->getName();
-        })->values();
+        })->values()->all();
     }
 
     protected function updateList()
