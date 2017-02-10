@@ -82,11 +82,9 @@ class SnippetList extends WidgetBase
             $snippets = $filteredSnippets;
         }
 
-        usort($snippets, function($a, $b) {
-            return strcmp($a->getName(), $b->getName());
-        });
-
-        return $snippets;
+        return collect($snippets)->sortBy(function($snippet) {
+            return $snippet->getName();
+        })->values();
     }
 
     protected function updateList()
