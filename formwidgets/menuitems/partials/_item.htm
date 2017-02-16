@@ -1,11 +1,11 @@
 <?php
     $groupStatus = true;
 ?>
+<?php if (!strpos(e($this->getReferenceDescription($item)), 'Unnamed')): ?>
 <li
     class="<?= $item->items ? 'has-subitems' : null ?>"
     data-status="<?= $groupStatus || !$item->items ? 'expanded' : 'collapsed' ?>"
-    data-menu-item="<?= e(json_encode($item->toArray())) ?>"
->
+    data-menu-item="<?= e(json_encode($item->toArray())) ?>">
     <div>
         <a href="#" data-menu-item-link>
             <span class="title"><?= e($item->title) ?></span>
@@ -36,3 +36,4 @@
         <?php endif ?>
     </ol>
 </li>
+<?php endif ?>
