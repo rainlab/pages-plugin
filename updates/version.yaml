@@ -39,3 +39,4 @@
 1.2.12: Fixes minor issue when using snippets and switching the application locale.
 1.2.13: Fixes bug when AJAX is used on a page that does not yet exist.
 1.2.14: Add theme logging support for changes made to menus.
+1.2.15: Back-end navigation sort order updated.
