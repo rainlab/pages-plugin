@@ -187,7 +187,7 @@
     /*
      * Handles AJAX errors in the master tab forms. Processes the mtime mismatch condition (concurrency).
      */
-    PagesPage.prototype.onAjaxError = function(event, context, data, jqXHR) {
+    PagesPage.prototype.onAjaxError = function(event, context, message, data, jqXHR) {
         if (context.handler != 'onSave')
             return
 

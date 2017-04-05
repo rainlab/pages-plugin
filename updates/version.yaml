@@ -40,3 +40,4 @@
 1.2.13: Fixes bug when AJAX is used on a page that does not yet exist.
 1.2.14: Add theme logging support for changes made to menus.
 1.2.15: Back-end navigation sort order updated.
+1.2.16: Fixes a bug when saving a template that has been modified outside of the CMS (mtime mismatch).
