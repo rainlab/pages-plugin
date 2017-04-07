@@ -40,6 +40,19 @@ class StaticPage extends ComponentBase
             'description' => 'rainlab.pages::lang.component.static_page_description'
         ];
     }
+    
+    public function defineProperties()
+    {
+        return [
+            'useContent' => [
+                'title'             => 'rainlab.pages::lang.component.static_page_use_content_name',
+                'description'       => 'rainlab.pages::lang.component.static_page_use_content_description',
+                'default'           => 1,
+                'type'              => 'checkbox',
+                'showExternalParam' => false
+            ]
+        ];
+    }
 
     public function onRun()
     {

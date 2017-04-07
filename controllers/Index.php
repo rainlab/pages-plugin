@@ -383,12 +383,25 @@ class Index extends Controller
 
         if ($type == 'page') {
             $widget->bindEvent('form.extendFieldsBefore', function() use ($widget, $object) {
+                $this->checkContentField($widget, $object);
                 $this->addPagePlaceholders($widget, $object);
                 $this->addPageSyntaxFields($widget, $object);
             });
         }
 
         return $widget;
+    }
+    
+    protected function checkContentField($formWidget, $page)
+    {
+        if (!($layout = $page->getLayoutObject())) {
+            return;
+        }
+        
+        $component = $layout->getComponent('staticPage');
+        if (!$component->property('useContent', true)) {
+            unset($formWidget->secondaryTabs['fields']['markup']);
+        }
     }
 
     protected function addPageSyntaxFields($formWidget, $page)
