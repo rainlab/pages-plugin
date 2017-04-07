@@ -116,6 +116,8 @@ Include the Static Page [component](http://octobercms.com/docs/cms/components) t
 * `title` - specifies the static page title.
 * `content` - the static page content.
 
+If your layout does not need static page content entry, that section can be removed from the page form using the Inspector or manually with the `useContent` component property.
+
 ##### Static menus
 
 Add the staticMenu component to the static page layout to output a menu. The static menu component has the `code` property that should refer a code of a static menu the component should display. In the Inspector the `code` field is displayed as Menu. 

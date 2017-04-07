@@ -115,6 +115,8 @@ return [
     'component' => [
         'static_page_name' => 'Static page',
         'static_page_description' => 'Outputs a static page in a CMS layout.',
+        'static_page_use_content_name' => 'Use page content field',
+        'static_page_use_content_description' => 'If unchecked, the content section will not appear when editing the static page. Page content will be determined solely through placeholders and variables.',
         'static_menu_name' => 'Static menu',
         'static_menu_description' => 'Outputs a menu in a CMS layout.',
         'static_menu_code_name' => 'Menu',
