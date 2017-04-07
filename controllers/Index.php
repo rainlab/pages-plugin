@@ -403,7 +403,8 @@ class Index extends Controller
                 unset($fieldConfig['fields']);
             }
 
-            $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+            $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
+            $formWidget->secondaryTabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
 
             /*
              * Translation support
