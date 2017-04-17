@@ -118,6 +118,21 @@ Include the Static Page [component](http://octobercms.com/docs/cms/components) t
 
 If your layout does not need static page content entry, that section can be removed from the page form using the Inspector or manually with the `useContent` component property.
 
+###### Default page layout
+
+If adding a new subpage, the parent page's layout is checked for a `childLayout` property, and the new subpage's layout will default to that property value. Otherwise, the theme layouts will be searched for the `default` component property and that layout will be selected by default.
+
+Example:
+```
+# /themes/mytheme/layouts/layout1.htm
+[staticPage]
+default = true
+childLayout = "child"
+
+# /themes/mytheme/layouts/child.htm
+[staticPage]
+```
+
 ##### Static menus
 
 Add the staticMenu component to the static page layout to output a menu. The static menu component has the `code` property that should refer a code of a static menu the component should display. In the Inspector the `code` field is displayed as Menu. 

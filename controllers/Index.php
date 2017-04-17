@@ -8,6 +8,7 @@ use Config;
 use Request;
 use Response;
 use BackendMenu;
+use Cms\Classes\Layout;
 use Cms\Classes\Theme;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
@@ -149,8 +150,12 @@ class Index extends Controller
         $parent = Request::input('parent');
         $parentPage = null;
 
-        if ($type == 'page' && strlen($parent)) {
-            $parentPage = StaticPage::load($this->theme, $parent);
+        if ($type == 'page') {
+            if (strlen($parent)) {
+                $parentPage = StaticPage::load($this->theme, $parent);
+            }
+            
+            $object->setDefaultLayout($parentPage);
         }
 
         $widget = $this->makeObjectFormWidget($type, $object);
