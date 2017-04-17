@@ -3,6 +3,7 @@
 use Request;
 use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\MenuItem;
+use Cms\Classes\MediaLibrary;
 
 /**
  * Menu items widget.
@@ -61,6 +62,8 @@ class MenuItems extends FormWidgetBase
 
         $emptyItem = new MenuItem;
         $emptyItem->title = trans('rainlab.pages::lang.menuitem.new_item');
+        $emptyItem->image = '';
+        $emptyItem->description = '';
         $emptyItem->type = 'url';
         $emptyItem->url = '/';
 
@@ -169,5 +172,10 @@ class MenuItems extends FormWidgetBase
         }
 
         return strlen($itemInfo) ? $itemInfo : trans('rainlab.pages::lang.menuitem.unnamed');
+    }
+
+    public function getMediaImageAbsUrl($file)
+    {
+        return MediaLibrary::url($file);
     }
 }

@@ -22,6 +22,16 @@ class MenuItem
     public $title;
 
     /**
+     * @var string Additional information pertaining to the menu item.
+     */
+    public $description;
+
+    /**
+     * @var image src to be displayed with the menu item, useful for restaurant menus
+     */
+    public $image;
+
+    /**
      * @var array Specifies the item subitems
      */
     public $items = [];
@@ -75,6 +85,8 @@ class MenuItem
 
     public $fillable = [
         'title',
+        'description',
+        'image',
         'nesting',
         'type',
         'url',

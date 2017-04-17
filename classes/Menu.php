@@ -260,6 +260,8 @@ class Menu extends CmsObject
             foreach ($items as $item) {
                 $parentReference = new MenuItemReference;
                 $parentReference->title = $item->title;
+                $parentReference->description = $item->description;
+                $parentReference->image = $item->image;
                 $parentReference->code = $item->code;
                 $parentReference->viewBag = $item->viewBag;
 
@@ -295,6 +297,8 @@ class Menu extends CmsObject
                                     foreach ($items as $item) {
                                         $reference = new MenuItemReference;
                                         $reference->title = isset($item['title']) ? $item['title'] : '--no title--';
+                                        $reference->description = isset($item['description']) ? $item['description'] : '';
+                                        $reference->image = isset($item['image']) ? $item['image'] : '';
                                         $reference->url = isset($item['url']) ? $item['url'] : '#';
                                         $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;
                                         $reference->viewBag = isset($item['viewBag']) ? $item['viewBag'] : [];
