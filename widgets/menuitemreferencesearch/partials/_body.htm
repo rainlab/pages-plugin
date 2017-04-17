@@ -1,0 +1,20 @@
+<div class="form-group">
+    <div class="loading-indicator-container size-input-text">
+        <input
+            type="text"
+            name="search"
+            value="<?= e($this->getSearchTerm()) ?>"
+            class="form-control icon search" autocomplete="off"
+            placeholder="<?= e(trans($this->searchPlaceholderMessage)) ?>"
+            data-track-input
+            data-load-indicator
+            data-load-indicator-opaque
+            data-request="onMenuItemReferenceSearch"
+            data-request-data="alias: '<?=e($this->alias)?>'"
+        />
+    </div>
+</div>
+
+<div id="<?= $this->getId('matches') ?>" data-field-name="matches">
+    <?= $this->getMatchesPartial() ?>
+</div>

@@ -1,0 +1,22 @@
+<?php if ($this->getSearchTerm()): ?>
+
+<div class="form-group">
+    <?php if ($total === 0): ?>
+        <?= e(trans($this->noRecordsMessage)) ?>
+    <?php else: ?>
+        <label><?= e(trans($this->optionHeaderMessage, ['count'=>$total])) ?></label>
+    
+        <select name="selectMatch" class="form-control">
+            <option value=""><?= e(trans($this->selectResultMessage)) ?></option>
+            
+            <?php foreach ($matches as $type): ?>
+                <optgroup label="<?= e(trans($type['title'])) ?>">
+                <?php foreach ($type['references'] as $key => $title): ?>
+                    <option value="<?= $key ?>" data-type="<?= $type['code'] ?>"><?= e($title) ?></option>
+                <?php endforeach; ?>
+                </optgroup>
+            <?php endforeach ?>
+        </select>
+    <?php endif ?>
+    </div>
+<?php endif ?>
