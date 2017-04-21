@@ -117,23 +117,22 @@
                 }
             })
             
-            self.$popupContainer.on('change', 'select[name="selectMatch"]', function() {
+            self.$popupContainer.on('change', 'select[name="referenceSearch"]', function() {
                 var $select = $(this),
-                    selected = $select.find('option:selected'),
-                    val = $select.val()
-                    
+                    val = $select.val(),
+                    parts
+                    console.log(val);
+                 
                 if (!val)
                     return
                 
-                self.referenceSearchOverride = val
+                parts = val.split('::', 2) // type::reference ID
+                self.referenceSearchOverride = parts[1];
                 
-                $('input[name=search]', self.$popupContainer)
-                    .val('')
-            
-                $('div[data-field-name=matches]', self.$popupContainer).html('');
-            
+                $select.empty().trigger('change.select2');
+                
                 typeField
-                    .val(selected.attr('data-type'))
+                    .val(parts[0])
                     .triggerHandler('change')
             })
 

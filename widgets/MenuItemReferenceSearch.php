@@ -20,13 +20,7 @@ class MenuItemReferenceSearch extends WidgetBase
     use \Backend\Traits\SearchableWidget;
     
     
-    public $noRecordsMessage = 'rainlab.pages::lang.menuitem.search_not_found';
-    
-    public $optionHeaderMessage = 'rainlab.pages::lang.menuitem.search_result';
-    
     public $searchPlaceholderMessage = 'rainlab.pages::lang.menuitem.search_placeholder';
-    
-    public $selectResultMessage = 'rainlab.pages::lang.menuitem.search_select';
 
     
     /**
@@ -35,7 +29,7 @@ class MenuItemReferenceSearch extends WidgetBase
      */
     public function render()
     {
-        return $this->makePartial('body', $this->getData());
+        return $this->makePartial('body');
     }
 
     /*
@@ -44,31 +38,19 @@ class MenuItemReferenceSearch extends WidgetBase
 
     public function onSearch()
     {
-        $this->setSearchTerm(Input::get('search'));
+        $this->setSearchTerm(Input::get('term'));
 
-        return $this->updateResults();
+        return $this->getData();
     }
 
-    public function getMatchesPartial()
-    {
-        return $this->makePartial('matches', $this->getData());
-    }
-    
     /*
      * Methods for internal use
      */
 
     protected function getData()
     {
-        $matches = $this->getMatches();
-        $total = 0;
-        foreach ($matches as $type) {
-            $total += count($type['references']);
-        }
-        
         return [
-            'matches' => $matches,
-            'total' => $total
+            'results' => $this->getMatches()
         ];
     }
     
@@ -94,15 +76,17 @@ class MenuItemReferenceSearch extends WidgetBase
                 $title = is_array($referenceInfo) ? $referenceInfo['title'] : $referenceInfo;
                 
                 if ($this->textMatchesSearch($words, $title)) {
-                    $typeMatches[$key] = $title;
+                    $typeMatches[] = [
+                        'id'   => "$type::$key",
+                        'text' => $title
+                    ];
                 }
             }
             
             if (!empty($typeMatches)) {
                 $types[] = [
-                    'code'       => $type,
-                    'title'      => $typeTitle,
-                    'references' => $typeMatches
+                    'text' => trans($typeTitle),
+                    'children' => $typeMatches
                 ];
             }
         }
@@ -110,19 +94,4 @@ class MenuItemReferenceSearch extends WidgetBase
         return $types;
     }
 
-    protected function updateResults()
-    {
-        return ['#'.$this->getId('matches') => $this->getMatchesPartial()];
-    }
-    
-    /* Ignore session usage -- do not save search value */
-    
-    protected function getSession($key = null, $default = null)
-    {
-        return $default;
-    }
-
-    protected function putSession($key, $value) 
-    {
-    }
 }
