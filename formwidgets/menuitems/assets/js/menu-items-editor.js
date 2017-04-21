@@ -81,8 +81,8 @@
             self.$popupForm = self.$popupContainer.find('form')
             self.itemSaved = false
 
-            var titleField = $('input[name=title]', self.$popupContainer).focus().select()
-            var typeField = $('select[name=type]', self.$popupContainer).change(function(){
+            var $titleField = $('input[name=title]', self.$popupContainer).focus().select()
+            var $typeField = $('select[name=type]', self.$popupContainer).change(function(){
                 self.loadTypeInfo(false, true)
             })
 
@@ -90,7 +90,7 @@
                 var selectedTitle = $(this).find('option:selected').text();
                 // If the saved title is the default new item title, use reference title, removing CMS page [base file name] suffix
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
-                    titleField.val(selectedTitle.replace(/\s*\[.*\]$/, '')) 
+                    $titleField.val(selectedTitle.replace(/\s*\[.*\]$/, '')) 
                 }
             })
 
@@ -131,7 +131,7 @@
                 
                 $select.empty().trigger('change.select2');
                 
-                typeField
+                $typeField
                     .val(parts[0])
                     .triggerHandler('change')
             })
