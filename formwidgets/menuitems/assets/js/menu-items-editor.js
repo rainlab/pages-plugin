@@ -88,9 +88,10 @@
 
             $('select[name=reference]', self.$popupContainer).change(function() {
                 var selectedTitle = $(this).find('option:selected').text();
-                // If the saved title is the default new item title, use reference title, removing CMS page [base file name] suffix
+                // If the saved title is the default new item title, use reference title,
+                // removing CMS page [base file name] suffix
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
-                    $titleField.val(selectedTitle.replace(/\s*\[.*\]$/, '')) 
+                    $titleField.val(selectedTitle.replace(/\s*\[.*\]$/, ''))
                 }
             })
 
@@ -116,21 +117,21 @@
                     return false
                 }
             })
-            
+
             self.$popupContainer.on('change', 'select[name="referenceSearch"]', function() {
                 var $select = $(this),
                     val = $select.val(),
                     parts
-                    console.log(val);
-                 
-                if (!val)
-                    return
-                
-                parts = val.split('::', 2) // type::reference ID
+
+                if (!val) return
+
+                // type::reference ID
+                parts = val.split('::', 2)
+
                 self.referenceSearchOverride = parts[1];
-                
+
                 $select.empty().trigger('change.select2');
-                
+
                 $typeField
                     .val(parts[0])
                     .triggerHandler('change')

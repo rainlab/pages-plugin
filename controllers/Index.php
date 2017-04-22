@@ -314,11 +314,17 @@ class Index extends Controller
             'names' => $result
         ];
     }
-    
+
     public function onMenuItemReferenceSearch()
     {
         $alias = Request::input('alias');
-        $widget = $this->makeWidget('Rainlab\Pages\Widgets\MenuItemReferenceSearch', ['alias'=>$alias]);
+
+        $widget = $this->makeFormWidget(
+            'Rainlab\Pages\FormWidgets\MenuItemSearch',
+            [],
+            ['alias' => $alias]
+        );
+
         return $widget->onSearch();
     }
 
