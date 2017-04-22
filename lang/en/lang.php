@@ -47,6 +47,7 @@ return [
         'allow_nested_items_comment' => 'Nested items could be generated dynamically by static page and some other item types',
         'url' => 'URL',
         'reference' => 'Reference',
+        'search_placeholder' => 'Search all references...',
         'title_required' => 'The Title is required',
         'unknown_type' => 'Uknown menu item type',
         'unnamed' => 'Unnamed menu item',

@@ -3,6 +3,9 @@
 # ===================================
 
 fields:
+    
+    search:
+        type: Rainlab\Pages\Widgets\MenuItemReferenceSearch
 
     title:
         span: left

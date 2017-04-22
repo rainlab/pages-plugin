@@ -81,9 +81,17 @@
             self.$popupForm = self.$popupContainer.find('form')
             self.itemSaved = false
 
-            $('input[name=title]', self.$popupContainer).focus().select()
-            $('select[name=type]', self.$popupContainer).change(function(){
+            var $titleField = $('input[name=title]', self.$popupContainer).focus().select()
+            var $typeField = $('select[name=type]', self.$popupContainer).change(function(){
                 self.loadTypeInfo(false, true)
+            })
+
+            $('select[name=reference]', self.$popupContainer).change(function() {
+                var selectedTitle = $(this).find('option:selected').text();
+                // If the saved title is the default new item title, use reference title, removing CMS page [base file name] suffix
+                if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
+                    $titleField.val(selectedTitle.replace(/\s*\[.*\]$/, '')) 
+                }
             })
 
             self.$popupContainer.on('keydown', function(e) {
@@ -107,6 +115,25 @@
                     self.loadTypeInfo(true)
                     return false
                 }
+            })
+            
+            self.$popupContainer.on('change', 'select[name="referenceSearch"]', function() {
+                var $select = $(this),
+                    val = $select.val(),
+                    parts
+                    console.log(val);
+                 
+                if (!val)
+                    return
+                
+                parts = val.split('::', 2) // type::reference ID
+                self.referenceSearchOverride = parts[1];
+                
+                $select.empty().trigger('change.select2');
+                
+                $typeField
+                    .val(parts[0])
+                    .triggerHandler('change')
             })
 
             var $updateCmsPagesBtn = $updateTypeOptionsBtn.clone(true)
@@ -201,6 +228,12 @@
             prevSelectedReference = $optionSelector.val(),
             prevSelectedPage = $cmsPageSelector.val()
 
+        // Search selection
+        if (this.referenceSearchOverride) {
+            prevSelectedReference = this.referenceSearchOverride;
+            this.referenceSearchOverride = null;
+        }
+        
         if (typeInfo.references) {
             $optionSelector.find('option').remove()
             $referenceFormGroup.show()
