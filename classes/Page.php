@@ -426,7 +426,7 @@ class Page extends ContentBase
      */
     public function getTwigContent()
     {
-        return $this->code;
+        return $this->markup;
     }
 
     //
