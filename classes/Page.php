@@ -439,6 +439,10 @@ class Page extends ContentBase
             return [];
         }
 
+		if(!$layout->markup) {
+			return [];
+		}
+
         $syntax = SyntaxParser::parse($layout->markup, ['tagPrefix' => 'page:']);
         $result = $syntax->toEditor();
 
