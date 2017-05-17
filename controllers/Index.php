@@ -434,20 +434,21 @@ class Index extends Controller
                 unset($fieldConfig['fields']);
             }
 
-			$placement = (!empty($fieldConfig['placement']) ? $fieldConfig['placement'] : NULL);
+            /*
+            * Custom fields placement
+            */
+            $placement = (!empty($fieldConfig['placement']) ? $fieldConfig['placement'] : NULL);
 
-			switch($placement) {
+            switch ($placement) {
+                case "primary":
+                    $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+                    break;
 
-				case "primary":
-					$formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
-				break;
-
-				default:
-					$fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
-					$formWidget->secondaryTabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
-				break;
-
-			}
+                default:
+                    $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
+                    $formWidget->secondaryTabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+                    break;
+            }
 
             /*
              * Translation support
