@@ -154,7 +154,7 @@ class Index extends Controller
             if (strlen($parent)) {
                 $parentPage = StaticPage::load($this->theme, $parent);
             }
-            
+
             $object->setDefaultLayout($parentPage);
         }
 
@@ -409,13 +409,13 @@ class Index extends Controller
 
         return $widget;
     }
-    
+
     protected function checkContentField($formWidget, $page)
     {
         if (!($layout = $page->getLayoutObject())) {
             return;
         }
-        
+
         $component = $layout->getComponent('staticPage');
         if (!$component->property('useContent', true)) {
             unset($formWidget->secondaryTabs['fields']['markup']);
@@ -434,8 +434,21 @@ class Index extends Controller
                 unset($fieldConfig['fields']);
             }
 
-            $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
-            $formWidget->secondaryTabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+            /*
+            * Custom fields placement
+            */
+            $placement = (!empty($fieldConfig['placement']) ? $fieldConfig['placement'] : NULL);
+
+            switch ($placement) {
+                case "primary":
+                    $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+                    break;
+
+                default:
+                    $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
+                    $formWidget->secondaryTabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
+                    break;
+            }
 
             /*
              * Translation support
