@@ -1,5 +1,5 @@
 /*
- * The menu item editor. Provides tools for managing the 
+ * The menu item editor. Provides tools for managing the
  * menu items.
  */
 +function ($) { "use strict";
@@ -189,6 +189,95 @@
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
                 })
+
+                /**
+                 * Mediafinder support
+                 */
+                var mediafinderElements = $('[data-control="mediafinder"]');
+                var storageMediaPath = $('[data-storage-media-path]').data('storage-media-path');
+
+                $.each(mediafinderElements, function() {
+
+                      var input = $(this).find('>input');
+                      var propertyName = input.attr('name');
+
+                      if( propertyName.length ) {
+                          var propertyNameSimple = propertyName.substr(8).slice(0,-1);
+                      }
+
+                      var propertyValue = '';
+
+                      $.each(val, function(vbProperty, vbVal) {
+                          if( vbProperty == propertyNameSimple ) {
+                              propertyValue = vbVal;
+                          }
+                      });
+
+                      if( propertyValue != '' ) {
+
+                          $(this).toggleClass('is-populated');
+                          input.attr('value', propertyValue);
+
+                          var image = $(this).find('[data-find-image]');
+
+                          if( image.length ) {
+                              image.attr('src', storageMediaPath + propertyValue );
+                          }
+
+                          var file = $(this).find('[data-find-file-name]');
+
+                          if( file.length ) {
+                              file.text( propertyValue.substr(1) );
+                          }
+
+                      }
+
+                });
+
+                /**
+                 * Colorpicker support
+                 */
+                var colorpickerElements = $('[data-control="colorpicker"]');
+
+                $.each(colorpickerElements, function() {
+
+                    var input = $(this).find('>input');
+                    var propertyName = input.attr('name');
+                    var propertyNameSimple = propertyName.substr(8).slice(0,-1);
+
+                    var propertyValue = '';
+
+                    $.each(val, function(vbProperty, vbVal) {
+                        if( vbProperty == propertyNameSimple ) {
+                            propertyValue = vbVal;
+                        }
+                    });
+
+                    if( propertyValue != '' ) {
+
+                      input.attr('value', propertyValue);
+
+                      $(this).find('[data-hex-color]').removeClass('active');
+
+                      var colorOption = $(this).find('[data-hex-color="' + propertyValue + '"]');
+
+                      if ( colorOption.lenght ) {
+                          colorOption.addClass('active');
+                      } else {
+                          var customColorOption = $(this).find('[data-custom-color]');
+
+                          if ( customColorOption.length ) {
+                              customColorOption.attr('data-hex-color', propertyValue);
+                              customColorOption.find('>span').css('background-color', propertyValue);
+                              customColorOption.addClass('active');
+                              customColorOption.colpickSetColor( propertyValue.substr(1) );
+                          }
+                      }
+
+                    }
+
+                 });
+
             }
             else {
                 var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
@@ -234,7 +323,7 @@
             prevSelectedReference = this.referenceSearchOverride;
             this.referenceSearchOverride = null;
         }
-        
+
         if (typeInfo.references) {
             $optionSelector.find('option').remove()
             $referenceFormGroup.show()
@@ -386,7 +475,7 @@
                     return
 
                 var typeInfoProperty = typeInfoPropertyMap[property] !== undefined ? typeInfoPropertyMap[property] : property
-                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false) 
+                if ((typeInfo[typeInfoProperty] === undefined || typeInfo[typeInfoProperty] === false)
                     && basicProperties[property] === undefined)
                     delete data[property]
             })
