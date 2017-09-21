@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
+use Event;
 use Lang;
 use Cache;
 use Config;
