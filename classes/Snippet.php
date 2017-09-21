@@ -549,7 +549,9 @@ class Snippet
      */
     protected static function getMapCacheKey($theme)
     {
-        return crc32($theme->getPath()).'snippet-map-'.Lang::getLocale();
+        $key = crc32($theme->getPath()).'snippet-map';
+        Event::fire('pages.snippet.getMapCacheKey', [&$key]);
+        return $key;
     }
 
     /**
