@@ -471,7 +471,7 @@ class Snippet
         $map = [];
         $matches = [];
 
-        if (preg_match_all('/\<figure\s+[^\>]+\>[^\<]*\<\/figure\>/i', $markup, $matches)) {
+        if (preg_match_all('/\<figure\s+[^\>]+\>.*\<\/figure\>/i', $markup, $matches)) {
             foreach ($matches[0] as $snippetDeclaration) {
                 $nameMatch = [];
 
