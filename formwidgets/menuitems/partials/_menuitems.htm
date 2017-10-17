@@ -3,7 +3,7 @@
     data-control="menu-item-editor"
     data-alias="<?= $this->alias ?>"
     data-item-properties="<?= e($itemProperties) ?>"
-    data-storage-media-path="<?= substr(Config::get('cms.storage.media.path'),0,1)=='/'? url(substr(Config::get('cms.storage.media.path'),1)) : url(substr(Config::get('cms.storage.media.path'))); ?>"
+    data-storage-media-path="<?= url(Config::get('cms.storage.media.path')); ?>"
 >
     <div class="control-scrollbar" data-control="scrollbar">
         <div class="control-treeview treeview-light"
