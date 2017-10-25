@@ -4,6 +4,7 @@ use Cms;
 use File;
 use Lang;
 use Cache;
+use Event;
 use Route;
 use Config;
 use Validator;
@@ -670,7 +671,9 @@ class Page extends ContentBase
      */
     protected static function getMenuCacheKey($theme)
     {
-        return crc32($theme->getPath()).'static-page-menu-'.Lang::getLocale();
+        $key = crc32($theme->getPath()).'static-page-menu';
+        Event::fire('pages.page.getMenuCacheKey', [&$key]);
+        return $key;
     }
 
     /**
