@@ -107,6 +107,8 @@ class Controller
 
     public function parseSyntaxFields($content)
     {
+        $content = $this->removeCustomFields($content);
+
         try {
             return SyntaxParser::parse($content, [
                 'varPrefix' => 'extraData.',
@@ -116,5 +118,10 @@ class Controller
         catch (Exception $ex) {
             return $content;
         }
+    }
+
+    protected function removeCustomFields($content)
+    {
+        return preg_replace('/{variable[\s\S]*}{\/variable}|{repeater[\s\S]*{\/repeater}/', '', $content);
     }
 }
