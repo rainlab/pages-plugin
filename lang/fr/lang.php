@@ -116,7 +116,7 @@ return [
     'component' => [
         'static_page_name' => 'Page Statique',
         'static_page_description' => 'Affiche une page statique dans une maquette du CMS.',
-        'static_page_use_content_name' => 'Affiche l\' aide à la navigation dans une page statique.',
+        'static_page_use_content_name' => 'Affiche la section de contenu',
         'static_page_use_content_description' => 'Si cette case n\'est pas cochée, la section de contenu n\'apparaîtra pas lors de la modification de la page statique. Le contenu de la page sera déterminé uniquement à l\'aide d\'espaces réservés et de variables.',
         'static_page_default_name' => 'Disposition par défault',
         'static_page_default_description' => 'Définit cette mise en page par défault pour les nouvelles pages',
