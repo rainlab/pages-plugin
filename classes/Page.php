@@ -31,7 +31,7 @@ use ApplicationException;
 class Page extends ContentBase
 {
     public $implement = [
-        '@RainLab.Translate.Behaviors.TranslatablePageUrl',
+        '@RainLab.Translate.Behaviors.TranslatablePage',
         '@RainLab.Translate.Behaviors.TranslatableCmsObject'
     ];
 
