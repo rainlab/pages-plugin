@@ -365,7 +365,9 @@ class Menu extends CmsObject
         };
 
         $iterator($items);
-
+        
+        Event::fire('pages.menu.referencesGenerated', [&$items]);
+        
         return $items;
     }
 }
