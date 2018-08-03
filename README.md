@@ -169,7 +169,7 @@ The static menu component also has the `menuItems` property that you can access 
 
 ##### Breadcrumbs
 
-The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs: 
+The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs:
 
     <ul>
         <li><a href="http://example.com/about">About</a></li>
@@ -398,6 +398,11 @@ If your item type requires a CMS page to resolve item URLs, you might need to re
     $url = Url::to(Str::lower(RouterHelper::normalizeUrl($url)));
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
+
+#### Overriding generated references
+
+In order to override generated references you can listen to  `pages.menu.referencesGenerated` event that fires right before injecting to page object. For example you can filter the unwanted menu entries.
+
 
 #### Snippets
 
