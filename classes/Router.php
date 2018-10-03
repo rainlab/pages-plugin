@@ -8,6 +8,7 @@ use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
+use October\Rain\Router\Router as RainRouter;
 
 /**
  * A router for static pages.
@@ -18,9 +19,20 @@ use October\Rain\Router\Helper as RouterHelper;
 class Router
 {
     /**
+     * @var \October\Rain\Router\Router A reference to the Router
+     */
+    protected $routerObj;
+
+    /**
      * @var \Cms\Classes\Theme A reference to the CMS theme containing the object.
      */
     protected $theme;
+
+
+    /**
+     * @var array An array containing all route parameters
+     */
+    protected $parameters;
 
     /**
      * @var array Contains the URL map - the list of page file names and corresponding URL patterns.
@@ -54,14 +66,15 @@ class Router
             return self::$cache[$url];
         }
 
-        $urlMap = $this->getUrlMap();
-        $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
+        $router = $this->getRouterObject();
 
-        if (!array_key_exists($url, $urlMap)) {
+        if (!$router->match($url)) {
             return null;
         }
 
-        $fileName = $urlMap[$url];
+        $this->parameters = $router->getParameters();
+
+        $fileName = $router->matchedRoute();
 
         if (($page = Page::loadCached($this->theme, $fileName)) === null) {
             /*
@@ -74,6 +87,53 @@ class Router
         }
 
         return self::$cache[$url] = $page;
+    }
+
+    /**
+     * Sets the current routing parameters.
+     * @param  array $parameters
+     * @return array
+     */
+    public function setParameters(array $parameters)
+    {
+        $this->parameters = $parameters;
+    }
+
+    /**
+     * Returns the current routing parameters.
+     * @return array
+     */
+    public function getParameters()
+    {
+        return $this->parameters;
+    }
+
+    /**
+     * Autoloads the URL map only allowing a single execution.
+     * @return array Returns the URL map.
+     */
+    protected function getRouterObject()
+    {
+        if ($this->routerObj !== null) {
+            return $this->routerObj;
+        }
+
+        /*
+         * Load up each route rule
+         */
+        $router = new RainRouter();
+        $urlMap = $this->getUrlMap();
+
+        foreach ($urlMap['urls'] as $pattern => $key) {
+            $router->route($key, $pattern);
+        }
+
+        /*
+         * Sort all the rules
+         */
+        $router->sortRules();
+
+        return $this->routerObj = $router;
     }
 
     /**

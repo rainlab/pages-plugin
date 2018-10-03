@@ -64,7 +64,7 @@ class Page extends ContentBase
      */
     public $rules = [
         'title' => 'required',
-        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
+        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.\:]*$/i', 'uniqueUrl']
     ];
 
     /**

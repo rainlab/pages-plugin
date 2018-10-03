@@ -50,6 +50,7 @@ class Controller
         $cmsPage = CmsPage::inTheme($this->theme);
         $cmsPage->url = $url;
         $cmsPage->apiBag['staticPage'] = $page;
+        $cmsPage->apiBag['parameters'] = $router->getParameters();
 
         /*
          * Transfer specific values from the content view bag to the page settings object.
