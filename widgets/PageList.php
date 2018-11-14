@@ -31,7 +31,7 @@ class PageList extends WidgetBase
     public $deleteConfirmation = 'rainlab.pages::lang.page.delete_confirmation';
 
     public $noRecordsMessage = 'rainlab.pages::lang.page.no_records';
-    
+
     public $addSubpageLabel = 'rainlab.pages::lang.page.add_subpage';
 
 
