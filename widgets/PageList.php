@@ -87,7 +87,7 @@ class PageList extends WidgetBase
     }
 
     /*
-     * Methods for th internal use
+     * Methods for internal use
      */
 
     protected function getData()
