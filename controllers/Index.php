@@ -10,6 +10,7 @@ use Response;
 use BackendMenu;
 use Cms\Classes\Layout;
 use Cms\Classes\Theme;
+use Cms\Classes\CmsObject;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
 use Backend\Classes\Controller;
@@ -98,6 +99,9 @@ class Index extends Controller
         $type = Request::input('type');
         $object = $this->loadObject($type, Request::input('path'));
 
+        $this->vars['canCommit'] = $this->canCommitObject($object);
+        $this->vars['canReset'] = $this->canResetObject($object);
+
         return $this->pushObjectForm($type, $object);
     }
 
@@ -115,17 +119,7 @@ class Index extends Controller
         Event::fire('pages.object.save', [$this, $object, $type]);
         $this->fireEvent('object.save', [$object, $type]);
 
-        $result = [
-            'objectPath'  => $type != 'content' ? $object->getBaseFileName() : $object->fileName,
-            'objectMtime' => $object->mtime,
-            'tabTitle'    => $this->getTabTitle($type, $object)
-        ];
-
-        if ($type == 'page') {
-            $result['pageUrl'] = Url::to($object->getViewBag()->property('url'));
-
-            PagesPlugin::clearCache();
-        }
+        $result = $this->getUpdateResponse($object, $type);
 
         $successMessages = [
             'page' => 'rainlab.pages::lang.page.saved',
@@ -160,6 +154,8 @@ class Index extends Controller
 
         $widget = $this->makeObjectFormWidget($type, $object);
         $this->vars['objectPath'] = '';
+        $this->vars['canCommit'] = $this->canCommitObject($object);
+        $this->vars['canReset'] = $this->canResetObject($object);
 
         $result = [
             'tabTitle' => $this->getTabTitle($type, $object),
@@ -328,9 +324,130 @@ class Index extends Controller
         return $widget->onSearch();
     }
 
+    /**
+     * Commits the DB changes of a object to the filesystem
+     *
+     * @return array $response
+     */
+    public function onCommit()
+    {
+        $this->validateRequestTheme();
+        $type = Request::input('objectType');
+        $object = $this->loadObject($type, trim(Request::input('objectPath')));
+
+        if ($this->canCommitObject($object)) {
+            // Populate the filesystem with the object and then remove it from the db
+            $datasource = $this->getThemeDatasource();
+            $datasource->pushToSource($object, 'filesystem');
+            $datasource->removeFromSource($object, 'database');
+
+            Flash::success(Lang::get('cms::lang.editor.commit_success', ['type' => $type]));
+        }
+
+        return array_merge($this->getUpdateResponse($object, $type), ['forceReload' => true]);
+    }
+
+    /**
+     * Resets a object to the version on the filesystem
+     *
+     * @return array $response
+     */
+    public function onReset()
+    {
+        $this->validateRequestTheme();
+        $type = Request::input('objectType');
+        $object = $this->loadObject($type, trim(Request::input('objectPath')));
+
+        if ($this->canResetObject($object)) {
+            // Remove the object from the DB
+            $datasource = $this->getThemeDatasource();
+            $datasource->removeFromSource($object, 'database');
+
+            Flash::success(Lang::get('cms::lang.editor.reset_success', ['type' => $type]));
+        }
+
+        return array_merge($this->getUpdateResponse($object, $type), ['forceReload' => true]);
+    }
+
     //
-    // Methods for the internal use
+    // Methods for internal use
     //
+
+    /**
+     * Get the response to return in an AJAX request that updates an object
+     *
+     * @param CmsObject $object The object that has been affected
+     * @param string $type The type of object being affected
+     * @return array $result;
+     */
+    protected function getUpdateResponse(CmsObject $object, string $type)
+    {
+        $result = [
+            'objectPath'  => $type != 'content' ? $object->getBaseFileName() : $object->fileName,
+            'objectMtime' => $object->mtime,
+            'tabTitle'    => $this->getTabTitle($type, $object)
+        ];
+
+        if ($type == 'page') {
+            $result['pageUrl'] = Url::to($object->getViewBag()->property('url'));
+            PagesPlugin::clearCache();
+        }
+
+        $result['canCommit'] = $this->canCommitObject($object);
+        $result['canReset'] = $this->canResetObject($object);
+
+        return $result;
+    }
+
+    /**
+     * Get the active theme's datasource
+     *
+     * @return \October\Rain\Halcyon\Datasource\DatasourceInterface
+     */
+    protected function getThemeDatasource()
+    {
+        return $this->theme->getDatasource();
+    }
+
+    /**
+     * Check to see if the provided object can be committed
+     * Only available in debug mode, the DB layer must be enabled, and the object must exist in the database
+     *
+     * @param CmsObject $object
+     * @return boolean
+     */
+    protected function canCommitObject(CmsObject $object)
+    {
+        $result = false;
+
+        if (Config::get('app.debug', false) &&
+            Theme::databaseLayerEnabled() &&
+            $this->getThemeDatasource()->sourceHasModel('database', $object)
+        ) {
+            $result = true;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check to see if the provided object can be reset
+     * Only available when the DB layer is enabled and the object exists in both the DB & Filesystem
+     *
+     * @param CmsObject $object
+     * @return boolean
+     */
+    protected function canResetObject(CmsObject $object)
+    {
+        $result = false;
+
+        if (Theme::databaseLayerEnabled()) {
+            $datasource = $this->getThemeDatasource();
+            $result = $datasource->sourceHasModel('database', $object) && $datasource->sourceHasModel('filesystem', $object);
+        }
+
+        return $result;
+    }
 
     protected function validateRequestTheme()
     {
@@ -374,7 +491,7 @@ class Index extends Controller
         ];
 
         if (!array_key_exists($type, $types)) {
-            throw new ApplicationException(trans('rainlab.pages::lang.object.invalid_type'));
+            throw new ApplicationException(trans('rainlab.pages::lang.object.invalid_type') . ' - type - ' . $type);
         }
 
         return $types[$type];

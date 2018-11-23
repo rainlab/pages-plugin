@@ -8,6 +8,10 @@
         <?= e(trans('backend::lang.form.save')) ?>
     </a>
 
+    <?= $this->makePartial('~/modules/cms/controllers/index/_button_commit.htm'); ?>
+
+    <?= $this->makePartial('~/modules/cms/controllers/index/_button_reset.htm'); ?>
+
     <button
         type="button"
         class="btn btn-default empty oc-icon-trash-o <?php if (!$objectPath): ?>hide<?php endif ?>"
