@@ -18,5 +18,8 @@
         data-request="onDelete"
         data-request-confirm="<?= e(trans('cms::lang.content.delete_confirm_single')) ?>"
         data-request-success="$.oc.pagesPage.updateObjectList('content'); $(this).trigger('close.oc.tab', [{force: true}])"
-        data-control="delete-button"></button>
+        data-control="delete-button">
+    </button>
+
+    <?= $this->makePartial('~/modules/cms/controllers/index/_button_lastmodified.htm'); ?>
 </div>

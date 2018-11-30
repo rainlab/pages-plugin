@@ -13,6 +13,7 @@ use Cms\Classes\Theme;
 use Cms\Classes\CmsObject;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
+use System\Helpers\DateTime;
 use Backend\Classes\Controller;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
@@ -731,6 +732,7 @@ class Index extends Controller
         $widget = $this->makeObjectFormWidget($type, $object);
 
         $this->vars['objectPath'] = Request::input('path');
+        $this->vars['lastModified'] = DateTime::makeCarbon($object->mtime);
 
         if ($type == 'page') {
             $this->vars['pageUrl'] = Url::to($object->getViewBag()->property('url'));
