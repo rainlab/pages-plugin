@@ -13,6 +13,7 @@ use Cms\Classes\Theme;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
 use Backend\Classes\Controller;
+use System\Helpers\DateTime;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
@@ -41,7 +42,7 @@ class Index extends Controller
     public $requiredPermissions = ['rainlab.pages.*'];
 
     /**
-     * Constructor.
+     * Constructor
      */
     public function __construct()
     {
@@ -427,7 +428,9 @@ class Index extends Controller
         $fields = $page->listLayoutSyntaxFields();
 
         foreach ($fields as $fieldCode => $fieldConfig) {
-            if ($fieldConfig['type'] == 'fileupload') continue;
+            if ($fieldConfig['type'] == 'fileupload') {
+                continue;
+            }
 
             if ($fieldConfig['type'] == 'repeater') {
                 $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
@@ -614,6 +617,7 @@ class Index extends Controller
         $widget = $this->makeObjectFormWidget($type, $object);
 
         $this->vars['objectPath'] = Request::input('path');
+        $this->vars['lastModified'] = DateTime::makeCarbon($object->mtime);
 
         if ($type == 'page') {
             $this->vars['pageUrl'] = Url::to($object->getViewBag()->property('url'));
