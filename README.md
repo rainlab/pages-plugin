@@ -457,6 +457,9 @@ There is a special syntax you can use inside your layout to add custom fields to
 
     {variable name="tagline" label="Tagline" tab="Header" type="text"}{/variable}
     {variable name="banner" label="Banner" tab="Header" type="mediafinder" mode="image"}{/variable}
+    {variable name="color" label="Color" tab="Header" type="dropdown"
+        options="blue:Blue | orange:Orange | red:Red"
+    }{/variable}
 
 These act just like regular form field definitions. Accessing the variables inside the markup is just as easy:
 
