@@ -49,12 +49,16 @@ tabs:
         viewBag[meta_title]:
             tab: cms::lang.editor.meta
             label: cms::lang.editor.meta_title
+            preset:
+                field: viewBag[title]
 
         viewBag[meta_description]:
             tab: cms::lang.editor.meta
             label: cms::lang.editor.meta_description
             type: textarea
             size: tiny
+            preset:
+                field: viewBag[title]
 
 secondaryTabs:
     stretch: true
