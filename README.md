@@ -169,7 +169,7 @@ The static menu component also has the `menuItems` property that you can access 
 
 ##### Breadcrumbs
 
-The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs: 
+The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs:
 
     <ul>
         <li><a href="http://example.com/about">About</a></li>
@@ -399,6 +399,11 @@ If your item type requires a CMS page to resolve item URLs, you might need to re
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
 
+#### Overriding generated references
+
+In order to override generated references you can listen to  `pages.menu.referencesGenerated` event that fires right before injecting to page object. For example you can filter the unwanted menu entries.
+
+
 #### Snippets
 
 Snippets are elements that can be added by non-technical user to a Static Page, in the rich text editor. They allow to inject complex (and interactive) areas to pages. There are many possible applications and examples of using Snippets:
@@ -452,6 +457,9 @@ There is a special syntax you can use inside your layout to add custom fields to
 
     {variable name="tagline" label="Tagline" tab="Header" type="text"}{/variable}
     {variable name="banner" label="Banner" tab="Header" type="mediafinder" mode="image"}{/variable}
+    {variable name="color" label="Color" tab="Header" type="dropdown"
+        options="blue:Blue | orange:Orange | red:Red"
+    }{/variable}
 
 These act just like regular form field definitions. Accessing the variables inside the markup is just as easy:
 
