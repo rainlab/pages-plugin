@@ -5,6 +5,7 @@ use Cms\Classes\Page as CmsPage;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\CmsException;
+use Cms\Classes\Controller as CmsController;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
 use Exception;
 
@@ -50,7 +51,13 @@ class Controller
         $cmsPage = CmsPage::inTheme($this->theme);
         $cmsPage->url = $url;
         $cmsPage->apiBag['staticPage'] = $page;
-        $cmsPage->apiBag['parameters'] = $router->getParameters();
+
+        $controller = CmsController::getController() ?: new CmsController;
+        $cmsRouter = $controller->getRouter();
+        $cmsRouter->setParameters(array_merge(
+            $cmsRouter->getParameters(),
+            $router->getParameters()
+        ));
 
         /*
          * Transfer specific values from the content view bag to the page settings object.
