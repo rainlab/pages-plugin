@@ -207,8 +207,10 @@ class Page extends ContentBase
     protected function generateFilenameFromCode()
     {
         $dir = rtrim($this->getFilePath(''), '/');
+        // Remove URL parameters from the url
+        $url = preg_replace('/\\/:[^\\/]+\\/?/', '', $this->getViewBag()->property('url'));
+        $fileName = trim(str_replace('/', '-', $url), '-');
 
-        $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
         if (strlen($fileName) > 200) {
             $fileName = substr($fileName, 0, 200);
         }
