@@ -430,7 +430,7 @@ class Index extends Controller
             if ($fieldConfig['type'] == 'fileupload') continue;
 
             if ($fieldConfig['type'] == 'repeater') {
-                $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
+                $fieldConfig['form']['fields'] = (array) $this->makeConfig(array_get($fieldConfig, 'fields', []));
                 unset($fieldConfig['fields']);
             }
 
