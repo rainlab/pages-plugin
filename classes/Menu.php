@@ -192,6 +192,7 @@ class Menu extends Meta
                                         $reference->url = isset($item['url']) ? $item['url'] : '#';
                                         $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;
                                         $reference->viewBag = isset($item['viewBag']) ? $item['viewBag'] : [];
+                                        $reference->code = isset($item['code']) ? $item['code'] : null;
 
                                         if (!strlen($parentReference->url)) {
                                             $parentReference->url = $reference->url;
@@ -258,6 +259,40 @@ class Menu extends Meta
         };
 
         $iterator($items);
+
+        /*
+         * @event pages.menu.referencesGenerated
+         * Provides opportunity to dynamically change menu entries right after reference generation.
+         *
+         * For example you can use it to filter menu entries for user groups from RainLab.User
+         * Before doing so you have to add custom field 'group' to menu viewBag using backend.form.extendFields event
+         * where the group can be selected by the user. See how to do this here:
+         * https://octobercms.com/docs/backend/forms#extend-form-fields
+         *
+         * Parameter provided is `$items` - a collection of the MenuItemReference objects passed by reference
+         *
+         * For example to hide entries where group is not 'registered' you can use the following code. It can
+         * be used to show different menus for different user groups.
+         *
+         * Event::listen('pages.menu.referencesGenerated', function (&$items) {
+         *     $iterator = function ($menuItems) use (&$iterator, $clusterRepository) {
+         *         $result = [];
+         *         foreach ($menuItems as $item) {
+         *             if (isset($item->viewBag['group']) && $item->viewBag['group'] !== "registered") {
+         *                 $item->viewBag['isHidden'] = "1";
+         *             }
+         *             if ($item->items) {
+         *                 $item->items = $iterator($item->items);
+         *             }
+         *             $result[] = $item;
+         *         }
+         *         return $result;
+         *     };
+         *     $items = $iterator($items);
+         * });
+         */
+
+        Event::fire('pages.menu.referencesGenerated', [&$items]);
 
         return $items;
     }

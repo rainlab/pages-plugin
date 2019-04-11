@@ -21,6 +21,7 @@ use October\Rain\Router\Helper as RouterHelper;
 use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
 use ApplicationException;
+use Twig\Node\Node as TwigNode;
 
 /**
  * Represents a static page.
@@ -497,7 +498,7 @@ class Page extends ContentBase
     protected function flattenTwigNode($node)
     {
         $result = [];
-        if (!$node instanceof \Twig_Node) {
+        if (!$node instanceof TwigNode) {
             return $result;
         }
 
