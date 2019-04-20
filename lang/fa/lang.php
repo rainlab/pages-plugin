@@ -1,6 +1,4 @@
-<?php 
-
-return [
+<?php return [
     'plugin' => [
         'name' => 'صفحات',
         'description' => 'مدیریت صفحات و فهرست ها',
