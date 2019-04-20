@@ -587,6 +587,13 @@ class Index extends Controller
             }
         }
 
+        if ($type == 'menu') {
+            // If no item data is sent through POST, this means the menu is empty
+            if (!isset($objectData['itemData'])) {
+                $objectData['itemData'] = [];
+            }
+        }
+
         if (!empty($objectData['markup']) && Config::get('cms.convertLineEndings', false) === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
         }
