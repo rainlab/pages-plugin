@@ -45,3 +45,4 @@
 1.2.18: Fixes cache-invalidation issues when RainLab.Translate is not installed. Added Greek & Simplified Chinese translations. Removed deprecated calls. Allowed saving HTML in snippet properties. Added support for the MediaFinder in menu items.
 1.2.19: Catch exception with corrupted menu file.
 1.2.20: StaticMenu component now exposes menuName property; added pages.menu.referencesGenerated event.
+1.2.21: Fixes a bug where last Static Menu item cannot be deleted. Improved Persian, Slovak and Turkish translations.
