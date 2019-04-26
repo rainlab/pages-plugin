@@ -26,12 +26,16 @@ class PageList extends WidgetBase
     protected $dataIdPrefix;
 
     /**
+     * @var string Message to display when the Clone button is clicked.
+     */
+    public $cloneConfirmation = 'rainlab.pages::lang.page.clone_confirmation';
+    /**
      * @var string Message to display when the Delete button is clicked.
      */
     public $deleteConfirmation = 'rainlab.pages::lang.page.delete_confirmation';
 
     public $noRecordsMessage = 'rainlab.pages::lang.page.no_records';
-    
+
     public $addSubpageLabel = 'rainlab.pages::lang.page.add_subpage';
 
 
