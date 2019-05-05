@@ -26,9 +26,9 @@ class PageList extends WidgetBase
     protected $dataIdPrefix;
 
     /**
-     * @var string Message to display when the Clone button is clicked.
+     * @var string Message to display when the Duplicate button is clicked.
      */
-    public $cloneConfirmation = 'rainlab.pages::lang.page.clone_confirmation';
+    public $duplicateConfirmation = 'rainlab.pages::lang.page.duplicate_confirmation';
     /**
      * @var string Message to display when the Delete button is clicked.
      */

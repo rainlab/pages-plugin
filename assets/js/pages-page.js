@@ -268,6 +268,19 @@
     }
 
     /*
+     * Creates a new tab from an AJAX request
+     */
+    PagesPage.prototype.newTab = function(data, type) {
+        var self = this,
+            $form = $('form[data-object-type="' + type + '"]'),
+            theme = $('input[name=theme]', $form).val(),
+            icon = $form.data('type-icon'),
+            tabId = type + '-' + theme + '-' + data.path
+
+        self.$masterTabs.ocTab('addTab', data.newTabTitle, data.newTab, tabId, icon)
+    }
+
+    /*
      * Closes deleted page tabs in the editor area.
      */
     PagesPage.prototype.closeTabs = function(data, type) {

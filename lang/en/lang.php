@@ -10,8 +10,8 @@ return [
         'new' => 'New page',
         'no_records' => 'No pages found',
         'add_subpage' => 'Add subpage',
-        'clone_confirmation' => 'Do you really want to clone the selected pages? This will not clone any sub-pages.',
-        'clone_confirm_single' => 'Do you really want to clone this page? This will not clone any sub-pages.',
+        'duplicate_confirmation' => 'Do you really want to duplicate the selected pages? This will not duplicate any sub-pages.',
+        'duplicate_confirm_single' => 'Do you really want to duplicate this page? This will not duplicate any sub-pages.',
         'delete_confirmation' => 'Do you really want to delete the selected pages? This will also delete the subpages, if any.',
         'delete_confirm_single' => 'Do you really want to delete this page? This will also delete the subpages, if any.',
         'invalid_url' => 'Invalid URL format. The URL should start with the forward slash symbol and can contain digits, Latin letters and the following symbols: _-/.',
@@ -24,6 +24,7 @@ return [
         'manage_menus' => 'Manage static menus',
         'access_snippets' => 'Access snippets',
         'manage_content' => 'Manage static content',
+        'duplicate_suffix' => 'copy :num',
     ],
     'menu' => [
         'menu_label' => 'Menus',
@@ -86,6 +87,7 @@ return [
     'object' => [
         'invalid_type' => 'Unknown object type',
         'not_found' => 'The requested object was not found.',
+        'only_duplicate_pages' => 'Only pages can be duplicated.',
     ],
     'editor' => [
         'title' => 'Title',

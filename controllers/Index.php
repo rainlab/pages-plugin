@@ -9,6 +9,7 @@ use Request;
 use Response;
 use BackendMenu;
 use Cms\Classes\Layout;
+use Cms\Classes\Content as ContentBase;
 use Cms\Classes\Theme;
 use Cms\Classes\CmsCompoundObject;
 use Cms\Widgets\TemplateList;
@@ -174,6 +175,26 @@ class Index extends Controller
         ];
 
         return $result;
+    }
+
+    public function onDuplicate()
+    {
+        $this->validateRequestTheme();
+
+        $type = Request::input('objectType');
+
+        // Only page duplication is supported for now
+        if ($type !== 'page') {
+            throw new ApplicationException(trans('rainlab.pages::lang.object.only_duplicate_pages'));
+        }
+
+        // Load source and create new instance for duplicate
+        $source = $this->loadObject($type, trim(Request::input('objectPath')));
+
+        $duplicate = $this->processDuplicate($type, $source);
+        $duplicate->save();
+
+        return $this->pushObjectForm($type, $duplicate);
     }
 
     public function onDelete()
@@ -614,6 +635,56 @@ class Index extends Controller
         }
 
         return $object;
+    }
+
+    /**
+     * Processes the filename and title of a duplicate object based on the source.
+     *
+     * This will suffix the filename of the duplicate with "-copy-1" and the title with " (copy 1)"
+     * to indicate a duplication. If a previous duplicate of the source exists, then a number
+     * will also be suffixed, ie. (copy 2), (copy 3), etc.
+     *
+     * @param string $type
+     * @param \Cms\Classes\Content $source
+     * @return \Cms\Classes\Content
+     */
+    protected function processDuplicate(string $type, ContentBase $source): ContentBase
+    {
+        $duplicate = $this->createObject($type);
+        $sourceData = $source->toArray();
+
+        // Get existing content list
+        $existing = $this->resolveTypeClassName($type)::listInTheme($this->theme, true);
+
+        // Determine next available suffix
+        $suffixNum = 0;
+        do {
+            if (preg_match(
+                '/\((' . trans('rainlab.pages::lang.page.duplicate_suffix', ['num' => '[0-9]+']) . ')\)$/i',
+                $source->title,
+                $matches
+            )) {
+                $suffixNum = (int) $matches[1];
+            }
+
+            ++$suffixNum;
+            $titleSuffix = '(' . trans('rainlab.pages::lang.page.duplicate_suffix', ['num' => $suffixNum]) . ')';
+
+            $available = true;
+            foreach ($existing as $filename => $content) {
+                if ($content->title === $source['viewBag']['title'] . ' ' . $titleSuffix) {
+                    $available = false;
+                }
+            }
+        } while ($available === false);
+
+        // Set duplicate suffix
+        $sourceData['settings']['viewBag']['title'] = $sourceData['viewBag']['title'] . ' ' . $titleSuffix;
+        $sourceData['settings']['viewBag']['url'] = $sourceData['viewBag']['url'] . '-' . $suffixNum;
+
+        $duplicate->fill($sourceData);
+
+        return $duplicate;
     }
 
     protected function pushObjectForm($type, $object)

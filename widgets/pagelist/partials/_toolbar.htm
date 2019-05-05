@@ -8,9 +8,9 @@
                     data-control="create-object"
                     ><?= e(trans('rainlab.pages::lang.sidebar.add')) ?></button>
                 <button type="button" class="btn btn-default empty oc-icon-clone hide"
-                    id="<?= $this->getId('clone-button') ?>"
-                    data-control="clone-object"
-                    data-confirmation="<?= e(trans($this->cloneConfirmation)) ?>"
+                    id="<?= $this->getId('duplicate-button') ?>"
+                    data-control="duplicate-object"
+                    data-confirmation="<?= e(trans($this->duplcateConfirmation)) ?>"
                     data-trigger-action="show"
                     data-trigger="<?= '#'.$this->getId('page-list') ?> input[type=checkbox]"
                     data-trigger-condition="checked"></button>

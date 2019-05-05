@@ -22,10 +22,10 @@
     <button
         type="button"
         class="btn btn-default empty oc-icon-clone <?php if (!$objectPath): ?>hide<?php endif ?>"
-        data-request="onClone"
-        data-request-confirm="<?= e(trans('rainlab.pages::lang.page.clone_confirm_single')) ?>"
-        data-request-success="$.oc.pagesPage.updateObjectList('page')"
-        data-control="clone-button"></button>
+        data-request="onDuplicate"
+        data-request-confirm="<?= e(trans('rainlab.pages::lang.page.duplicate_confirm_single')) ?>"
+        data-request-success="$.oc.pagesPage.newTab(data, 'page'); $.oc.pagesPage.updateObjectList('page')"
+        data-control="duplicate-button"></button>
 
     <button
         type="button"

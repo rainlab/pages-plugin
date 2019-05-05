@@ -292,7 +292,7 @@ class Page extends ContentBase
 
         return Cms::url($url);
     }
-    
+
     /**
      * Determine the default layout for a new page
      * @param \RainLab\Pages\Classes\Page $parentPage
@@ -310,7 +310,7 @@ class Page extends ContentBase
                 return;
             }
         }
-        
+
         // Check theme layouts for one marked as the default
         foreach (Layout::listInTheme($this->theme) as $layout) {
             $component = $layout->getComponent('staticPage');
@@ -706,7 +706,7 @@ class Page extends ContentBase
      *   false if omitted.
      * - dynamicItems - Boolean value indicating whether the item type could generate new menu items.
      *   Optional, false if omitted.
-     * - cmsPages - a list of CMS pages (objects of the Cms\Classes\Page class), if the item type requires a CMS page reference to 
+     * - cmsPages - a list of CMS pages (objects of the Cms\Classes\Page class), if the item type requires a CMS page reference to
      *   resolve the item URL.
      * @param string $type Specifies the menu item type
      * @return array Returns an array
@@ -735,9 +735,9 @@ class Page extends ContentBase
      * - url - the menu item URL. Not required for menu item types that return all available records.
      *   The URL should be returned relative to the website root and include the subdirectory, if any.
      *   Use the Cms::url() helper to generate the URLs.
-     * - isActive - determines whether the menu item is active. Not required for menu item types that 
+     * - isActive - determines whether the menu item is active. Not required for menu item types that
      *   return all available records.
-     * - items - an array of arrays with the same keys (url, isActive, items) + the title key. 
+     * - items - an array of arrays with the same keys (url, isActive, items) + the title key.
      *   The items array should be added only if the $item's $nesting property value is TRUE.
      * @param \RainLab\Pages\Classes\MenuItem $item Specifies the menu item.
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
