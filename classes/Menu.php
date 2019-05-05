@@ -269,7 +269,7 @@ class Menu extends CmsObject
                  */
                 if ($item->type == 'url') {
                     $parentReference->url = $item->url;
-                    $parentReference->isActive = $currentUrl == Str::lower($item->url) || $activeMenuItem === $item->code;
+                    $parentReference->isActive = $currentUrl == Str::lower(Url::to($item->url)) || $activeMenuItem === $item->code;
                 }
                 else {
                     /*
