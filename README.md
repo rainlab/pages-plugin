@@ -494,8 +494,7 @@ For more details on syntax fields, see the [Parser section](https://octobercms.c
 
 Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
 
-    Event::listen('backend.form.extendFields', function ($widget)
-    {
+    Event::listen('backend.form.extendFields', function ($widget) {
         if (
             !$widget->getController() instanceof \RainLab\Pages\Controllers\Index ||
             !$widget->model instanceof \RainLab\Pages\Classes\MenuItem
