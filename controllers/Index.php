@@ -84,7 +84,7 @@ class Index extends Controller
 
         $this->bodyClass = 'compact-container';
         $this->pageTitle = 'rainlab.pages::lang.plugin.name';
-        $this->pageTitleTemplate = '%s Pages';
+        $this->pageTitleTemplate = '%s '.Lang::get('rainlab.pages::lang.plugin.name');
 
         if (Request::ajax() && Request::input('formWidgetAlias')) {
             $this->bindFormWidgetToController();
