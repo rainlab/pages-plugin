@@ -7,6 +7,7 @@ return [
     ],
     'page' => [
         'menu_label' => 'Strony',
+        'template_title' => '%s Strony',
         'delete_confirmation' => 'Czy na pewno chcesz usunąć wybrane strony? Podstrony również zostaną usnięte.',
         'no_records' => 'Nie znaleziono stron',
         'delete_confirm_single' => 'Czy na pewno chcesz usunąć stronę? Podstrony również zostaną usnięte.',

@@ -7,6 +7,7 @@ return [
     ],
     'page' => [
         'menu_label' => 'Sayfalar',
+        'template_title' => '%s Sayfalar',
         'delete_confirmation' => 'Seçili sayfaları silmek istiyor musunuz? Alt sayfalar da silinecektir.',
         'no_records' => 'Sayfa bulunamadı',
         'delete_confirm_single' => 'Bu sayfayı silmek istiyor musunuz? Alt sayfalar da silinecektir',
