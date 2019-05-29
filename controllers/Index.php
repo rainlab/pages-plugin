@@ -84,7 +84,7 @@ class Index extends Controller
 
         $this->bodyClass = 'compact-container';
         $this->pageTitle = 'rainlab.pages::lang.plugin.name';
-        $this->pageTitleTemplate = '%s Pages';
+        $this->pageTitleTemplate = Lang::get('rainlab.pages::lang.page.template_title');
 
         if (Request::ajax() && Request::input('formWidgetAlias')) {
             $this->bindFormWidgetToController();
@@ -440,7 +440,7 @@ class Index extends Controller
             $placement = (!empty($fieldConfig['placement']) ? $fieldConfig['placement'] : NULL);
 
             switch ($placement) {
-                case "primary":
+                case 'primary':
                     $formWidget->tabs['fields']['viewBag[' . $fieldCode . ']'] = $fieldConfig;
                     break;
 

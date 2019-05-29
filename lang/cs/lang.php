@@ -7,6 +7,7 @@ return [
     ],
     'page' => [
         'menu_label' => 'Stránky',
+        'template_title' => '%s Stránky',
         'delete_confirmation' => 'Opravdu chcete odstranit vybrané stránky? Budou odstraněny i případné podstránky.',
         'no_records' => 'Stránky nenalezeny',
         'delete_confirm_single' => 'Opravu chcete odstranit tuto stránku? Budou odstraněny i případné podstránky.',
