@@ -209,6 +209,13 @@ class Plugin extends PluginBase
                 return StaticPage::getRichEditorTypeInfo($type);
             }
         });
+
+        Event::listen('system.console.theme.sync.getAvailableModelClasses', function () {
+            return [
+                Classes\Menu::class,
+                Classes\Page::class,
+            ];
+        });
     }
 
     /**
