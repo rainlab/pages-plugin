@@ -893,7 +893,8 @@ class Page extends ContentBase
         $iterator($pageList->getPageTree(), null, 0);
 
         self::$menuTreeCache = $menuTree;
-        Cache::put($key, serialize($menuTree), Config::get('cms.parsedPageCacheTTL', 10));
+        $expiresAt = now()->addMinutes(Config::get('cms.parsedPageCacheTTL', 10));
+        Cache::put($key, serialize($menuTree), $expiresAt);
 
         return self::$menuTreeCache;
     }
