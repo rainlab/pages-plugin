@@ -100,9 +100,6 @@ class Index extends Controller
         $type = Request::input('type');
         $object = $this->loadObject($type, Request::input('path'));
 
-        $this->vars['canCommit'] = $this->canCommitObject($object);
-        $this->vars['canReset'] = $this->canResetObject($object);
-
         return $this->pushObjectForm($type, $object);
     }
 
@@ -738,6 +735,8 @@ class Index extends Controller
     {
         $widget = $this->makeObjectFormWidget($type, $object);
 
+        $this->vars['canCommit'] = $this->canCommitObject($object);
+        $this->vars['canReset'] = $this->canResetObject($object);
         $this->vars['objectPath'] = Request::input('path');
         $this->vars['lastModified'] = DateTime::makeCarbon($object->mtime);
 
