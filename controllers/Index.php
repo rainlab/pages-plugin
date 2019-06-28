@@ -532,6 +532,11 @@ class Index extends Controller
         }
 
         $component = $layout->getComponent('staticPage');
+
+        if (!$component) {
+            return;
+        }
+
         if (!$component->property('useContent', true)) {
             unset($formWidget->secondaryTabs['fields']['markup']);
         }
