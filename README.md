@@ -4,7 +4,7 @@ This plugin allows end users to create and edit static pages and menus with a si
 
 ## Managing static pages
 
-Static pages are managed on the Pages tab of the Static Pages plugin. Static pages have three required parameters - **Title**, **URL** and **Layout**. The URL is generated automatically when the Title is entered, but it could be changed manually. URLs must start with the forward slash character. The Layout drop-down allows to select a layout created with the CMS. Only layouts that host the `staticPage` component are displayed in the drop-down.
+Static pages are managed on the Pages tab of the Static Pages plugin. Static pages have three required parameters - **Title**, **URL** and **Layout**. The URL is generated automatically when the Title is entered, but it could be changed manually. URLs must start with the forward slash character. The Layout drop-down allows to select a layout created with the CMS. Only layouts that include the `staticPage` component are displayed in the drop-down.
 
 ![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-page.png) {.img-responsive .frame}
 
@@ -32,9 +32,9 @@ Snippets are displayed in the sidebar list on the Static Pages and can be added 
 
 ## Managing menus
 
-You can manage menus on the Menus tab of the Static Pages plugin. A website can contain multiple menus, for example the main menu, footer menu, sidebar menu, etc. A theme developer can place menus to a page layout with the `staticMenu` component.
+You can manage menus on the Menus tab of the Static Pages plugin. A website can contain multiple menus, for example the main menu, footer menu, sidebar menu, etc. A theme developer can include menus on a page layout with the `staticMenu` component.
 
-Menus have two required parameters - the menu **Name** and menu **Code**. The menu name is displayed in the menu list in the back-end. The menu code is required for referring menus in the layout code, it's the API parameter.
+Menus have two required properties - the menu **Name** and menu **Code**. The menu name is displayed in the menu list in the back-end. The menu code is required for referring menus in the layout code, it's the API parameter.
 
 ![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-management.png) {.img-responsive .frame}
 
@@ -94,7 +94,7 @@ The plugin currently includes three components: Static Page, Static Menu and Sta
 
 ### Integrating the Static Pages plugin
 
-In the simplest case you could create a [layout](https://octobercms.com/docs/cms/layouts) in the CMS area and drop the plugin's components to its body. The next example layout outputs a menu, breadcrumbs and a static page:
+In the simplest case you could create a [layout](https://octobercms.com/docs/cms/layouts) in the CMS area and include the plugin's components in its body. The next example layout outputs a menu, breadcrumbs and a static page:
 
     <html>
         <head>
@@ -107,85 +107,7 @@ In the simplest case you could create a [layout](https://octobercms.com/docs/cms
         </body>
     </html>
 
-![http://oi58.tinypic.com/6gbnsn.jpg](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-layout.png)  {.img-responsive .frame}
-
-##### Static pages
-
-Include the Static Page [component](https://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
-
-* `title` - specifies the static page title.
-* `content` - the static page content.
-
-If your layout does not need static page content entry, that section can be removed from the page form using the Inspector or manually with the `useContent` component property.
-
-###### Default page layout
-
-If adding a new subpage, the parent page's layout is checked for a `childLayout` property, and the new subpage's layout will default to that property value. Otherwise, the theme layouts will be searched for the `default` component property and that layout will be selected by default.
-
-Example:
-```
-# /themes/mytheme/layouts/layout1.htm
-[staticPage]
-default = true
-childLayout = "child"
-
-# /themes/mytheme/layouts/child.htm
-[staticPage]
-```
-
-##### Static menus
-
-Add the staticMenu component to the static page layout to output a menu. The static menu component has the `code` property that should refer a code of a static menu the component should display. In the Inspector the `code` field is displayed as Menu.
-
-The static menu component injects the `menuItems` page variable. The default component partial outputs a simple nested unordered list for menus:
-
-    <ul>
-        <li>
-            <a href="https://example.com">Home</a>
-        </li>
-        <li class="child-active">
-            <a href="https://example.com/about">About</a>
-            <ul>
-                <li class="active">
-                    <a href="https://example.com/about/directions">Directions</a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-
-You might want to render the menus with your own code. The `menuItems` variable is an array of the `RainLab\Pages\Classes\MenuItemReference` objects. Each object has the following properties:
-
-* `title` - specifies the menu item title.
-* `url` - specifies the absolute menu item URL.
-* `isActive` - indicates whether the item corresponds to a page currently being viewed.
-* `isChildActive` - indicates whether the item contains an active subitem.
-* `items` - an array of the menu item subitems, if any. If there are no subitems, the array is empty
-
-The static menu component also has the `menuItems` property that you can access in the Twig code using the component's alias, for example:
-
-    {% for item in staticMenu.menuItems %}
-       <li><a href="{{ item.url }}">{{ item.title }}</a></li>
-    {% endfor %}
-
-##### Breadcrumbs
-
-The staticBreadcrumbs component outputs breadcrumbs for static pages. This component doesn't have any properties. The default component partial outputs a simple unordered list for the breadcrumbs:
-
-    <ul>
-        <li><a href="https://example.com/about">About</a></li>
-        <li class="active"><a href="https://example.com/about/directions">Directions</a></li>
-    </ul>
-
-The component injects the `breadcrumbs` page variable that contains an array of the `MenuItemReference` objects described above.
-
-##### Setting the active menu item explicitly
-
-In some cases you might want to mark a specific menu item as active explicitly. You can do that in the page's [`onInit()`](https://octobercms.com/docs/cms/pages#dynamic-pages) function with assigning the `activeMenuItem` page variable a value matching the menu item code you want to make active. Menu item codes are managed in the Edit Menu Item popup.
-
-    function onInit()
-    {
-        $this['activeMenuItem'] = 'blog';
-    }
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-layout.png)  {.img-responsive .frame}
 
 ##### Linking to static pages
 
