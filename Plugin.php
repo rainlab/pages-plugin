@@ -27,6 +27,7 @@ class Plugin extends PluginBase
     public function registerComponents()
     {
         return [
+            '\RainLab\Pages\Components\ChildPages' => 'childPages',
             '\RainLab\Pages\Components\StaticPage' => 'staticPage',
             '\RainLab\Pages\Components\StaticMenu' => 'staticMenu',
             '\RainLab\Pages\Components\StaticBreadcrumbs' => 'staticBreadcrumbs'

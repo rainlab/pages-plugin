@@ -137,5 +137,7 @@ return [
         'static_menu_code_description' => 'Specify a code of the menu the component should output.',
         'static_breadcrumbs_name' => 'Static breadcrumbs',
         'static_breadcrumbs_description' => 'Outputs breadcrumbs for a static page.',
+        'child_pages_name' => 'Child pages',
+        'child_pages_description' => 'Displays a list of child pages for the current page',
     ]
 ];
