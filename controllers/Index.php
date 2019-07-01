@@ -111,8 +111,26 @@ class Index extends Controller
         $object = $this->fillObjectFromPost($type);
         $object->save();
 
-        /*
-         * Extensibility
+        /**
+         * @event pages.object.save
+         * Provides the opportunity to trigger actions after an object (page, menu) has been created or updated
+         *
+         * Parameters provided are
+         *  `$controller` (this class),
+         *  `$object` (the object that got deleted. you can, for example, query it's path with $object->getFilePath())
+         *  `$type` (type of object that has been deleted. page/menu).
+         *
+         * Example usage (forwards content updates to a 3rd party service):
+         *
+         *     Page::extend(function($controller) {
+         *         \Event::listen('pages.object.save', function ($controller, $object, $type) {
+         *              $repository = new ContentRepository();
+         *              $path = $object->getFilePath();
+         *              if ($repository->contentHasChanged($path)) {
+         *                  $repository->updateObject($path);
+         *              }
+         *         });
+         *     });
          */
         Event::fire('pages.object.save', [$this, $object, $type]);
         $this->fireEvent('object.save', [$object, $type]);
@@ -179,8 +197,27 @@ class Index extends Controller
 
         $deletedObjects = $object->delete();
 
-        /*
-         * Extensibility
+        /**
+         * @event pages.object.delete
+         * Provides the opportunity to trigger actions after an object (page, menu) has been deleted
+         *
+         * Parameters provided are
+         *  `$controller` (this class),
+         *  `$object` (the object that got deleted. you can, for example, query it's path with $object->getFilePath())
+         *  `$type` (type of object that has been deleted. page/menu).
+         *
+         * Example usage (forwards the deletion to a 3rd party service):
+         *
+         *     Page::extend(function($controller) {
+         *         \Event::listen('pages.object.delete', function ($controller, $object, $type) {
+         *              $repository = new ContentRepository();
+         *              if ($type === 'page') {
+         *                  $repository->removePage($object->getFilePath());
+         *              } else {
+         *                  $repository->removeMenu($object->getFilePath());
+         *              }
+         *         });
+         *     });
          */
         Event::fire('pages.object.delete', [$this, $object, $type]);
         $this->fireEvent('object.delete', [$object, $type]);
@@ -219,6 +256,11 @@ class Index extends Controller
 
                 $deletedObjects = $object->delete();
 
+                /*
+                * @event pages.object.delete
+                * Fired for every page/menu that gets deleted via the 'delete selected' action (trashcan icon)
+                * Same parameters as the single delete version above
+                */
                 Event::fire('pages.object.delete', [$this, $object, $type]);
                 $this->fireEvent('object.delete', [$object, $type]);
 
