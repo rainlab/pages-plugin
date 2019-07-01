@@ -175,8 +175,15 @@ class Index extends Controller
         $this->validateRequestTheme();
 
         $type = Request::input('objectType');
+        $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
-        $deletedObjects = $this->loadObject($type, trim(Request::input('objectPath')))->delete();
+        $deletedObjects = $object->delete();
+
+        /*
+         * Extensibility
+         */
+        Event::fire('pages.object.delete', [$this, $object, $type]);
+        $this->fireEvent('object.delete', [$object, $type]);
 
         $result = [
             'deletedObjects' => $deletedObjects,
@@ -211,6 +218,10 @@ class Index extends Controller
                 }
 
                 $deletedObjects = $object->delete();
+
+                Event::fire('pages.object.delete', [$this, $object, $type]);
+                $this->fireEvent('object.delete', [$object, $type]);
+
                 if (is_array($deletedObjects)) {
                     $deleted = array_merge($deleted, $deletedObjects);
                 }
