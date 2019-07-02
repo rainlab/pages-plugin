@@ -255,12 +255,7 @@ class Index extends Controller
                 }
 
                 $deletedObjects = $object->delete();
-
-                /*
-                * @event pages.object.delete
-                * Fired for every page/menu that gets deleted via the "Delete selected" action. This receives the same parameters
-                * as the single deletion event fired above.
-                */
+                
                 Event::fire('pages.object.delete', [$this, $object, $type]);
                 $this->fireEvent('object.delete', [$object, $type]);
 
