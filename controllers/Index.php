@@ -203,7 +203,7 @@ class Index extends Controller
          *
          * Parameters provided are
          * - `$controller`: the controller class.
-         * - `$object`: the object that was created or modified.
+         * - `$object`: the object that was deleted.
          * - `$type`: the type of object that has been deleted, eg. `page` or `menu`.
          *
          * Example usage (forwards the deletion to a 3rd party service):
@@ -258,8 +258,8 @@ class Index extends Controller
 
                 /*
                 * @event pages.object.delete
-                * Fired for every page/menu that gets deleted via the 'delete selected' action (trashcan icon)
-                * Same parameters as the single delete version above
+                * Fired for every page/menu that gets deleted via the "Delete selected" action. This receives the same parameters
+                * as the single deletion event fired above.
                 */
                 Event::fire('pages.object.delete', [$this, $object, $type]);
                 $this->fireEvent('object.delete', [$object, $type]);
