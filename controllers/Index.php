@@ -113,17 +113,17 @@ class Index extends Controller
 
         /**
          * @event pages.object.save
-         * Provides the opportunity to trigger actions after an object (page, menu) has been created or updated
+         * Provides the opportunity to trigger actions after an object (eg. a page or menu) has been created or modified.
          *
          * Parameters provided are
-         *  `$controller` (this class),
-         *  `$object` (the object that got deleted. you can, for example, query it's path with $object->getFilePath())
-         *  `$type` (type of object that has been deleted. page/menu).
+         * - `$controller`: the controller class.
+         * - `$object`: the object that was created or modified.
+         * - `$type`: the type of object that has been deleted, eg. `page` or `menu`.
          *
          * Example usage (forwards content updates to a 3rd party service):
          *
-         *     Page::extend(function($controller) {
-         *         \Event::listen('pages.object.save', function ($controller, $object, $type) {
+         *     Page::extend(function ($controller) {
+         *         Event::listen('pages.object.save', function ($controller, $object, $type) {
          *              $repository = new ContentRepository();
          *              $path = $object->getFilePath();
          *              if ($repository->contentHasChanged($path)) {
@@ -199,17 +199,17 @@ class Index extends Controller
 
         /**
          * @event pages.object.delete
-         * Provides the opportunity to trigger actions after an object (page, menu) has been deleted
+         * Provides the opportunity to trigger actions after an object (eg. a page or menu) has been deleted.
          *
          * Parameters provided are
-         *  `$controller` (this class),
-         *  `$object` (the object that got deleted. you can, for example, query it's path with $object->getFilePath())
-         *  `$type` (type of object that has been deleted. page/menu).
+         * - `$controller`: the controller class.
+         * - `$object`: the object that was created or modified.
+         * - `$type`: the type of object that has been deleted, eg. `page` or `menu`.
          *
          * Example usage (forwards the deletion to a 3rd party service):
          *
-         *     Page::extend(function($controller) {
-         *         \Event::listen('pages.object.delete', function ($controller, $object, $type) {
+         *     Page::extend(function ($controller) {
+         *         Event::listen('pages.object.delete', function ($controller, $object, $type) {
          *              $repository = new ContentRepository();
          *              if ($type === 'page') {
          *                  $repository->removePage($object->getFilePath());
