@@ -284,7 +284,7 @@ class Page extends ContentBase
      */
     public static function url($name)
     {
-        if (!$page = static::find($name)) {
+        if (empty($name) || !$page = static::find($name)) {
             return null;
         }
 
