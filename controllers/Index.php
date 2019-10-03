@@ -550,7 +550,7 @@ class Index extends Controller
             if ($fieldConfig['type'] == 'fileupload') continue;
 
             if ($fieldConfig['type'] == 'repeater') {
-                if (!is_string($fieldConfig['form'])) {
+                if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
                     $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
                     unset($fieldConfig['fields']);
                 }
