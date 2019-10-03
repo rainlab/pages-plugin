@@ -1,6 +1,6 @@
 <?php foreach ($items as $pageObj): ?>
     <?php
-        $fileName = $pageObj->page->getBaseFileName();
+        $fileName = $pageObj->page->getFileName();
         $groupStatus = $this->getCollapseStatus($fileName);
         $dataId = $this->dataIdPrefix.'-'.$fileName;
         $searchMode = strlen($this->getSearchTerm()) > 0;
