@@ -509,7 +509,7 @@ class Index extends Controller
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
-        $widgetConfig->alias = $alias ?: 'form' . studly_case($type) . (!$object->exists ? uniqid() : md5($object->getFileName());
+        $widgetConfig->alias = $alias ?: 'form' . studly_case($type) . (!$object->exists ? uniqid() : md5($object->getFileName()));
         $widgetConfig->context = !$object->exists ? 'create' : 'update';
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
