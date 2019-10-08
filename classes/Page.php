@@ -209,7 +209,7 @@ class Page extends ContentBase
     {
         $dir = rtrim($this->getFilePath(''), '/');
 
-        $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
+        $fileName = trim(str_slug(str_replace('/', '-', $this->getViewBag()->property('url')), '-'));
         if (strlen($fileName) > 200) {
             $fileName = substr($fileName, 0, 200);
         }

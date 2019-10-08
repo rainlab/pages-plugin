@@ -1,13 +1,13 @@
 <?php foreach ($items as $pageObj): ?>
     <?php
-        $fileName = $pageObj->page->getFileName();
+        $fileName = $pageObj->page->getBaseFileName();
         $groupStatus = $this->getCollapseStatus($fileName);
         $dataId = $this->dataIdPrefix.'-'.$fileName;
         $searchMode = strlen($this->getSearchTerm()) > 0;
         $cbId = 'cb'.md5($fileName);
     ?>
     <li
-        class="<?= $pageObj->subpages ? 'has-subitems' : null ?>" 
+        class="<?= $pageObj->subpages ? 'has-subitems' : null ?>"
         data-status="<?= $groupStatus || !$pageObj->subpages ? 'expanded' : 'collapsed' ?>"
         data-group-id="<?= e($fileName) ?>"
         data-item-path="<?= e($fileName) ?>"
