@@ -54,7 +54,16 @@ class Controller
         /*
          * Transfer specific values from the content view bag to the page settings object.
          */
-        $viewBagToSettings = ['title', 'layout', 'meta_title', 'meta_description', 'is_hidden'];
+        $viewBagToSettings = [
+            'title',
+            'layout',
+            'meta_title',
+            'meta_description',
+            'meta_robots_noindex',
+            'meta_robots_nofollow',
+            'meta_robots_noarchive',
+            'is_hidden'
+        ];
 
         foreach ($viewBagToSettings as $property) {
             $cmsPage->settings[$property] = array_get($viewBag, $property);
