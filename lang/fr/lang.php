@@ -62,7 +62,7 @@ return [
         'url_required' => 'L’URL est requise',
         'cms_page_required' => 'Sélectionnez une page CMS s’il vous plaît',
         'display_tab' => 'Affichage',
-        'hidden' => 'Café',
+        'hidden' => 'Caché',
         'hidden_comment' => "Empêcher ce menu d'apparaître sur le site web.",
         'attributes_tab' => 'Attributs',
         'code' => 'Code',
