@@ -300,7 +300,7 @@ class Page extends ContentBase
     public function setDefaultLayout($parentPage)
     {
         // Check parent page for a defined child layout
-        if ($parentPage) {
+        if ($parentPage && $parentPage->layout) {
             $layout = Layout::load($this->theme, $parentPage->layout);
             $component = $layout ? $layout->getComponent('staticPage') : null;
             $childLayoutName = $component ? $component->property('childLayout', null) : null;
