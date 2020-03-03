@@ -117,8 +117,8 @@ class Page extends ContentBase
         parent::__construct($attributes);
 
         $this->customMessages = [
-            'url.regex'      => Lang::get('rainlab.pages::lang.page.invalid_url'),
-            'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
+            'url.regex'      => 'rainlab.pages::lang.page.invalid_url',
+            'url.unique_url' => 'rainlab.pages::lang.page.url_not_unique',
         ];
     }
 
