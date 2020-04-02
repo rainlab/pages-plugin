@@ -554,7 +554,7 @@
     }
 
     /*
-     * Updates the content editor to correspond the conten file extension
+     * Updates the content editor to correspond to the content file extension
      */
     PagesPage.prototype.updateContentEditorMode = function(pane, initialization) {
         if ($('[data-toolbar-type]', pane).data('toolbar-type') !== 'content')

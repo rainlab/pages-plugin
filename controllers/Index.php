@@ -49,24 +49,45 @@ class Index extends Controller
     {
         parent::__construct();
 
-        BackendMenu::setContext('RainLab.Pages', 'pages', 'pages');
-
         try {
             if (!($this->theme = Theme::getEditTheme())) {
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
             }
 
-            new PageList($this, 'pageList');
-            new MenuList($this, 'menuList');
-            new SnippetList($this, 'snippetList');
+            // if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
+                new PageList($this, 'pageList');
+                $this->vars['activeWidgets'][] = 'pageList';
+            // }
 
-            new TemplateList($this, 'contentList', function() {
-                return $this->getContentTemplateList();
-            });
+            if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
+                new MenuList($this, 'menuList');
+                $this->vars['activeWidgets'][] = 'menuList';
+            }
+
+            if ($this->user->hasAccess('rainlab.pages.manage_content')) {
+                new TemplateList($this, 'contentList', function() {
+                    return $this->getContentTemplateList();
+                });
+                $this->vars['activeWidgets'][] = 'contentList';
+            }
+
+            if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
+                new SnippetList($this, 'snippetList');
+                $this->vars['activeWidgets'][] = 'snippetList';
+            }
         }
         catch (Exception $ex) {
             $this->handleError($ex);
         }
+
+        $context = [
+            'pageList' => 'pages',
+            'menuList' => 'menus',
+            'contentList' => 'content',
+            'snippetList' => 'snippets',
+        ];
+
+        BackendMenu::setContext('RainLab.Pages', 'pages', @$context[$this->vars['activeWidgets'][0]]);
     }
 
     //
@@ -121,7 +142,8 @@ class Index extends Controller
 
         $successMessages = [
             'page' => 'rainlab.pages::lang.page.saved',
-            'menu' => 'rainlab.pages::lang.menu.saved'
+            'menu' => 'rainlab.pages::lang.menu.saved',
+            'content' => 'rainlab.pages::lang.content.saved',
         ];
 
         $successMessage = isset($successMessages[$type])
@@ -489,7 +511,18 @@ class Index extends Controller
         ];
 
         if (!array_key_exists($type, $types)) {
-            throw new ApplicationException(trans('rainlab.pages::lang.object.invalid_type') . ' - type - ' . $type);
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.invalid_type') . ' - type - ' . $type);
+        }
+
+        $allowed = false;
+        if ($type === 'content') {
+            $allowed = $this->user->hasAccess('rainlab.pages.manage_content');
+        } else {
+            $allowed = $this->user->hasAccess("rainlab.pages.manage_{$type}s");
+        }
+
+        if (!$allowed) {
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.unauthorized_type', ['type' => $type]));
         }
 
         return $types[$type];
@@ -504,7 +537,7 @@ class Index extends Controller
         ];
 
         if (!array_key_exists($type, $formConfigs)) {
-            throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.not_found'));
         }
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);

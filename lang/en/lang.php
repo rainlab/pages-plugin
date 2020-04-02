@@ -76,6 +76,7 @@ return [
     ],
     'content' => [
         'menu_label' => 'Content',
+        'saved' => 'The content has been successfully saved.',
         'cant_save_to_dir' => 'Saving content files to the static-pages directory is not allowed.',
     ],
     'sidebar' => [
@@ -84,6 +85,7 @@ return [
     ],
     'object' => [
         'invalid_type' => 'Unknown object type',
+        'unauthorized_type' => 'You are not authorized to manage :type objects',
         'not_found' => 'The requested object was not found.',
     ],
     'editor' => [
