@@ -54,10 +54,10 @@ class Index extends Controller
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
             }
 
-            // if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
+            if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
                 new PageList($this, 'pageList');
                 $this->vars['activeWidgets'][] = 'pageList';
-            // }
+            }
 
             if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
                 new MenuList($this, 'menuList');
