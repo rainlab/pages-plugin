@@ -88,4 +88,4 @@ The Code field allows to assign the API code that you can use to set the active 
 
 Read the [Getting started with Static Pages](https://octobercms.com/blog/post/getting-started-static-pages) tutorial in the Blog.
 
-Read the [RainLab.Translate documentation](/docs/documentation.md).
+Read the [documentation](/docs/documentation.md).
