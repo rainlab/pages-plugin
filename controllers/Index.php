@@ -274,7 +274,7 @@ class Index extends Controller
 
         $object = $this->fillObjectFromPost($type);
 
-        return $this->pushObjectForm($type, $object);
+        return $this->pushObjectForm($type, $object, Request::input('formWidgetAlias'));
     }
 
     public function onGetInspectorConfiguration()
@@ -542,7 +542,7 @@ class Index extends Controller
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
-        $widgetConfig->alias = $alias ?: 'form'.studly_case($type).md5($object->exists ? $object->getFileName() : uniqid());
+        $widgetConfig->alias = $alias ?: 'form' . studly_case($type) . md5($object->exists ? $object->getFileName() : uniqid());
         $widgetConfig->context = !$object->exists ? 'create' : 'update';
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
@@ -693,7 +693,7 @@ class Index extends Controller
     {
         $objectPath = trim(Request::input('objectPath'));
         $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
-        $formWidget = $this->makeObjectFormWidget($type, $object);
+        $formWidget = $this->makeObjectFormWidget($type, $object, Request::input('formWidgetAlias'));
 
         $saveData = $formWidget->getSaveData();
         $postData = post();
@@ -771,9 +771,9 @@ class Index extends Controller
         return $object;
     }
 
-    protected function pushObjectForm($type, $object)
+    protected function pushObjectForm($type, $object, $alias = null)
     {
-        $widget = $this->makeObjectFormWidget($type, $object);
+        $widget = $this->makeObjectFormWidget($type, $object, $alias);
 
         $this->vars['canCommit'] = $this->canCommitObject($object);
         $this->vars['canReset'] = $this->canResetObject($object);
