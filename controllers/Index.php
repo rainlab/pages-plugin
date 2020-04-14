@@ -54,26 +54,28 @@ class Index extends Controller
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
             }
 
-            if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
-                new PageList($this, 'pageList');
-                $this->vars['activeWidgets'][] = 'pageList';
-            }
-
-            if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
-                new MenuList($this, 'menuList');
-                $this->vars['activeWidgets'][] = 'menuList';
-            }
-
-            if ($this->user->hasAccess('rainlab.pages.manage_content')) {
-                new TemplateList($this, 'contentList', function() {
-                    return $this->getContentTemplateList();
-                });
-                $this->vars['activeWidgets'][] = 'contentList';
-            }
-
-            if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
-                new SnippetList($this, 'snippetList');
-                $this->vars['activeWidgets'][] = 'snippetList';
+            if ($this->user) {
+                if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
+                    new PageList($this, 'pageList');
+                    $this->vars['activeWidgets'][] = 'pageList';
+                }
+    
+                if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
+                    new MenuList($this, 'menuList');
+                    $this->vars['activeWidgets'][] = 'menuList';
+                }
+    
+                if ($this->user->hasAccess('rainlab.pages.manage_content')) {
+                    new TemplateList($this, 'contentList', function() {
+                        return $this->getContentTemplateList();
+                    });
+                    $this->vars['activeWidgets'][] = 'contentList';
+                }
+    
+                if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
+                    new SnippetList($this, 'snippetList');
+                    $this->vars['activeWidgets'][] = 'snippetList';
+                }
             }
         }
         catch (Exception $ex) {
