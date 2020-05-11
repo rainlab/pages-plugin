@@ -750,7 +750,7 @@ class Index extends Controller
                 $objectData['itemData'] = [];
             } else {
                 $objectData['itemData'] = json_decode($objectData['itemData'], true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
+                if (json_last_error() !== JSON_ERROR_NONE || !is_array($objectData['itemData'])) {
                     $objectData['itemData'] = [];
                 }
             }
