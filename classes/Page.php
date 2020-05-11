@@ -117,8 +117,8 @@ class Page extends ContentBase
         parent::__construct($attributes);
 
         $this->customMessages = [
-            'url.regex'      => Lang::get('rainlab.pages::lang.page.invalid_url'),
-            'url.unique_url' => Lang::get('rainlab.pages::lang.page.url_not_unique')
+            'url.regex'      => 'rainlab.pages::lang.page.invalid_url',
+            'url.unique_url' => 'rainlab.pages::lang.page.url_not_unique',
         ];
     }
 
@@ -209,7 +209,7 @@ class Page extends ContentBase
     {
         $dir = rtrim($this->getFilePath(''), '/');
 
-        $fileName = trim(str_replace('/', '-', $this->getViewBag()->property('url')), '-');
+        $fileName = trim(str_slug(str_replace('/', '-', $this->getViewBag()->property('url')), '-'));
         if (strlen($fileName) > 200) {
             $fileName = substr($fileName, 0, 200);
         }
@@ -300,7 +300,7 @@ class Page extends ContentBase
     public function setDefaultLayout($parentPage)
     {
         // Check parent page for a defined child layout
-        if ($parentPage) {
+        if ($parentPage && $parentPage->layout) {
             $layout = Layout::load($this->theme, $parentPage->layout);
             $component = $layout ? $layout->getComponent('staticPage') : null;
             $childLayoutName = $component ? $component->property('childLayout', null) : null;
@@ -757,9 +757,6 @@ class Page extends ContentBase
 
         if ($item->type == 'static-page') {
             $pageInfo = $tree[$item->reference];
-            if ($pageInfo['is_hidden'] || $pageInfo['navigation_hidden']) {
-                return;
-            }
             $result['url'] = Cms::url($pageInfo['url']);
             $result['mtime'] = $pageInfo['mtime'];
             $result['isActive'] = self::urlsAreEqual($result['url'], $url);
@@ -776,7 +773,7 @@ class Page extends ContentBase
 
                     $itemInfo = $tree[$itemName];
 
-                    if ($itemInfo['is_hidden'] || $itemInfo['navigation_hidden']) {
+                    if ($itemInfo['navigation_hidden']) {
                         continue;
                     }
 
@@ -878,8 +875,7 @@ class Page extends ContentBase
                     'mtime'  => $item->page->mtime,
                     'items'  => $iterator($item->subpages, $pageCode, $level+1),
                     'parent' => $parent,
-                    'navigation_hidden' => array_get($viewBag, 'navigation_hidden'),
-                    'is_hidden' => array_get($viewBag, 'is_hidden')
+                    'navigation_hidden' => array_get($viewBag, 'navigation_hidden')
                 ];
 
                 if ($level == 0) {

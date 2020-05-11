@@ -49,24 +49,47 @@ class Index extends Controller
     {
         parent::__construct();
 
-        BackendMenu::setContext('RainLab.Pages', 'pages', 'pages');
-
         try {
             if (!($this->theme = Theme::getEditTheme())) {
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
             }
 
-            new PageList($this, 'pageList');
-            new MenuList($this, 'menuList');
-            new SnippetList($this, 'snippetList');
+            if ($this->user) {
+                if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
+                    new PageList($this, 'pageList');
+                    $this->vars['activeWidgets'][] = 'pageList';
+                }
 
-            new TemplateList($this, 'contentList', function() {
-                return $this->getContentTemplateList();
-            });
+                if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
+                    new MenuList($this, 'menuList');
+                    $this->vars['activeWidgets'][] = 'menuList';
+                }
+
+                if ($this->user->hasAccess('rainlab.pages.manage_content')) {
+                    new TemplateList($this, 'contentList', function() {
+                        return $this->getContentTemplateList();
+                    });
+                    $this->vars['activeWidgets'][] = 'contentList';
+                }
+
+                if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
+                    new SnippetList($this, 'snippetList');
+                    $this->vars['activeWidgets'][] = 'snippetList';
+                }
+            }
         }
         catch (Exception $ex) {
             $this->handleError($ex);
         }
+
+        $context = [
+            'pageList' => 'pages',
+            'menuList' => 'menus',
+            'contentList' => 'content',
+            'snippetList' => 'snippets',
+        ];
+
+        BackendMenu::setContext('RainLab.Pages', 'pages', @$context[$this->vars['activeWidgets'][0]]);
     }
 
     //
@@ -121,7 +144,8 @@ class Index extends Controller
 
         $successMessages = [
             'page' => 'rainlab.pages::lang.page.saved',
-            'menu' => 'rainlab.pages::lang.menu.saved'
+            'menu' => 'rainlab.pages::lang.menu.saved',
+            'content' => 'rainlab.pages::lang.content.saved',
         ];
 
         $successMessage = isset($successMessages[$type])
@@ -252,7 +276,7 @@ class Index extends Controller
 
         $object = $this->fillObjectFromPost($type);
 
-        return $this->pushObjectForm($type, $object);
+        return $this->pushObjectForm($type, $object, Request::input('formWidgetAlias'));
     }
 
     public function onGetInspectorConfiguration()
@@ -489,7 +513,18 @@ class Index extends Controller
         ];
 
         if (!array_key_exists($type, $types)) {
-            throw new ApplicationException(trans('rainlab.pages::lang.object.invalid_type') . ' - type - ' . $type);
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.invalid_type') . ' - type - ' . $type);
+        }
+
+        $allowed = false;
+        if ($type === 'content') {
+            $allowed = $this->user->hasAccess('rainlab.pages.manage_content');
+        } else {
+            $allowed = $this->user->hasAccess("rainlab.pages.manage_{$type}s");
+        }
+
+        if (!$allowed) {
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.unauthorized_type', ['type' => $type]));
         }
 
         return $types[$type];
@@ -504,12 +539,12 @@ class Index extends Controller
         ];
 
         if (!array_key_exists($type, $formConfigs)) {
-            throw new ApplicationException(trans('rainlab.pages::lang.object.not_found'));
+            throw new ApplicationException(Lang::get('rainlab.pages::lang.object.not_found'));
         }
 
         $widgetConfig = $this->makeConfig($formConfigs[$type]);
         $widgetConfig->model = $object;
-        $widgetConfig->alias = $alias ?: 'form'.studly_case($type).md5($object->getFileName());
+        $widgetConfig->alias = $alias ?: 'form' . studly_case($type) . md5($object->exists ? $object->getFileName() : uniqid());
         $widgetConfig->context = !$object->exists ? 'create' : 'update';
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
@@ -550,8 +585,10 @@ class Index extends Controller
             if ($fieldConfig['type'] == 'fileupload') continue;
 
             if ($fieldConfig['type'] == 'repeater') {
-                $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
-                unset($fieldConfig['fields']);
+                if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
+                    $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
+                    unset($fieldConfig['fields']);
+                }
             }
 
             /*
@@ -658,7 +695,7 @@ class Index extends Controller
     {
         $objectPath = trim(Request::input('objectPath'));
         $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
-        $formWidget = $this->makeObjectFormWidget($type, $object);
+        $formWidget = $this->makeObjectFormWidget($type, $object, Request::input('formWidgetAlias'));
 
         $saveData = $formWidget->getSaveData();
         $postData = post();
@@ -711,6 +748,11 @@ class Index extends Controller
             // If no item data is sent through POST, this means the menu is empty
             if (!isset($objectData['itemData'])) {
                 $objectData['itemData'] = [];
+            } else {
+                $objectData['itemData'] = json_decode($objectData['itemData'], true);
+                if (json_last_error() !== JSON_ERROR_NONE || !is_array($objectData['itemData'])) {
+                    $objectData['itemData'] = [];
+                }
             }
         }
 
@@ -736,9 +778,9 @@ class Index extends Controller
         return $object;
     }
 
-    protected function pushObjectForm($type, $object)
+    protected function pushObjectForm($type, $object, $alias = null)
     {
-        $widget = $this->makeObjectFormWidget($type, $object);
+        $widget = $this->makeObjectFormWidget($type, $object, $alias);
 
         $this->vars['canCommit'] = $this->canCommitObject($object);
         $this->vars['canReset'] = $this->canResetObject($object);
