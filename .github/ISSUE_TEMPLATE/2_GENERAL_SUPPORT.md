@@ -7,7 +7,7 @@ This repository is only for reporting bugs or problems with the RainLab Pages pl
 the following options:
 
 - Forum: https://octobercms.com/forum
-- Slack: https://octobercms.slack.com (Get an invite: https://octobercms-slack.herokuapp.com/)
+- Discord: https://discord.com/invite/gEKgwSZ
 - Stack Overflow: https://stackoverflow.com/questions/tagged/octobercms
 
 Thanks!
