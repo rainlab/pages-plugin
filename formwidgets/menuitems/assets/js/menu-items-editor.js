@@ -188,6 +188,10 @@
                 $.each(val, function(vbProperty, vbVal) {
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
+                    if (vbProperty.startsWith('localeTitle')) {
+                        var locale = $input.data('locale');
+                        $('[name="RLTranslate['+locale+'][title]"]', $popupContainer).val(vbVal);
+                    }
                 })
 
                 /**
@@ -384,9 +388,23 @@
             typeInfo = {},
             validationErrorFound = false
 
+        $('[name^="viewBag[localeTitle"]', self.$popupContainer).each(function() {
+            var locale = $(this).data('locale');
+            var RLTitle = $('[name="RLTranslate['+locale+'][title]"]', self.$popupContainer);
+            $(this).val(RLTitle.val());
+        });
+
         $.each(propertyNames, function() {
             var propertyName = this,
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
+
+            if (propertyName === 'title') {
+                var defaultLocale = $('[data-control="multilingual"]').data('default-locale');
+                if (defaultLocale) {
+                    var RLTitle = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer);
+                    $input.val(RLTitle.val());
+                }
+            }
 
             if ($input.prop('type') !== 'checkbox') {
                 data[propertyName] = $.trim($input.val())
@@ -582,4 +600,5 @@
     $(document).on('render', function() {
         $('[data-control="menu-item-editor"]').menuItemsEditor()
     });
+
 }(window.jQuery);

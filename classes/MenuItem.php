@@ -14,7 +14,7 @@ use Event;
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges
  */
-class MenuItem
+class MenuItem extends \October\Rain\Extension\Extendable
 {
     /**
      * @var string Specifies the menu title

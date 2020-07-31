@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
+use App;
 use Url;
 use Event;
 use Request;
@@ -152,6 +153,11 @@ class Menu extends Meta
             $result = [];
 
             foreach ($items as $item) {
+                $locale = App::getLocale();
+                if ($title = array_get($item->viewBag, "localeTitle.$locale")) {
+                    $item->title = $title;
+                }
+
                 $parentReference = new MenuItemReference;
                 $parentReference->title = $item->title;
                 $parentReference->code = $item->code;

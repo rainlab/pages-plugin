@@ -4,12 +4,15 @@ use Event;
 use Backend;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
+use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\SnippetManager;
+use RainLab\Translate\Models\Locale;
 use Cms\Classes\Theme;
 use Cms\Classes\Controller as CmsController;
 use System\Classes\PluginBase;
+use System\Classes\PluginManager;
 
 class Plugin extends PluginBase
 {
@@ -114,6 +117,24 @@ class Plugin extends PluginBase
 
     public function boot()
     {
+        if (PluginManager::instance()->exists('RainLab.Translate')) {
+            Event::listen('backend.form.extendFieldsBefore', function ($widget) {
+                // add localeTitle[lang] fields to MenuItem form
+                if ($widget->model instanceof MenuItem) {
+                    // change type of formwidget for MenuItem form title to mltext
+                    $widget->fields['title']['type'] = 'mltext';
+
+                    $defaultLocale = Locale::getDefault();
+                    foreach (Locale::listAvailable() as $code => $locale) {
+                        $widget->fields["viewBag[localeTitle.$code]"] = [
+                            'cssClass' => 'hidden',
+                            'attributes' => ['data-locale' => $code],
+                        ];
+                    }
+                }
+            });
+        }
+
         Event::listen('cms.router.beforeRoute', function($url) {
             return Controller::instance()->initCmsPage($url);
         });
