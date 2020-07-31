@@ -124,7 +124,6 @@ class Plugin extends PluginBase
                     // change type of formwidget for MenuItem form title to mltext
                     $widget->fields['title']['type'] = 'mltext';
 
-                    $defaultLocale = Locale::getDefault();
                     foreach (Locale::listAvailable() as $code => $locale) {
                         $widget->fields["viewBag[localeTitle.$code]"] = [
                             'cssClass' => 'hidden',
