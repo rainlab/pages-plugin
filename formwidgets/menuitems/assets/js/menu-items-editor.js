@@ -600,5 +600,4 @@
     $(document).on('render', function() {
         $('[data-control="menu-item-editor"]').menuItemsEditor()
     });
-
 }(window.jQuery);
