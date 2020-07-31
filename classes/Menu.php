@@ -152,8 +152,8 @@ class Menu extends Meta
         $iterator = function($items) use ($currentUrl, &$iterator, $activeMenuItem) {
             $result = [];
 
+            $locale = App::getLocale();
             foreach ($items as $item) {
-                $locale = App::getLocale();
                 if ($title = array_get($item->viewBag, "localeTitle.$locale")) {
                     $item->title = $title;
                 }
