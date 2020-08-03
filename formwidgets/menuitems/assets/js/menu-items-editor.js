@@ -389,9 +389,9 @@
             validationErrorFound = false
 
         $('[name^="viewBag[localeTitle"]', self.$popupContainer).each(function() {
-            var locale = $(this).data('locale');
-            var RLTitle = $('[name="RLTranslate['+locale+'][title]"]', self.$popupContainer);
-            $(this).val(RLTitle.val());
+            var locale = $(this).data('locale')
+            var RLTitle = $('[name="RLTranslate['+locale+'][title]"]', self.$popupContainer)
+            $(this).val(RLTitle.val())
         });
 
         $.each(propertyNames, function() {
