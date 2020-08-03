@@ -14,8 +14,10 @@ use Event;
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges
  */
-class MenuItem extends \October\Rain\Extension\Extendable
+class MenuItem
 {
+    use \October\Rain\Extension\ExtendableTrait;
+
     /**
      * @var string Specifies the menu title
      */
