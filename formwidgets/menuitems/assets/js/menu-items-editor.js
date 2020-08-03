@@ -189,8 +189,8 @@
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
                     if (vbProperty.startsWith('localeTitle')) {
-                        var locale = $input.data('locale');
-                        $('[name="RLTranslate['+locale+'][title]"]', $popupContainer).val(vbVal);
+                        var locale = $input.data('locale')
+                        $('[name="RLTranslate['+locale+'][title]"]', $popupContainer).val(vbVal)
                     }
                 })
 
