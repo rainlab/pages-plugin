@@ -188,9 +188,10 @@
                 $.each(val, function(vbProperty, vbVal) {
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
-                    if (vbProperty.startsWith('localeTitle')) {
+                    if (vbProperty.startsWith('locale')) {
                         var locale = $input.data('locale')
-                        $('[name="RLTranslate['+locale+'][title]"]', $popupContainer).val(vbVal)
+                        var fieldName = $input.data('field-name')
+                        $('[name="RLTranslate['+locale+']['+fieldName+']"]', $popupContainer).val(vbVal)
                     }
                 })
 
@@ -388,21 +389,22 @@
             typeInfo = {},
             validationErrorFound = false
 
-        $('[name^="viewBag[localeTitle"]', self.$popupContainer).each(function() {
+        $('[name^="viewBag[locale"]', self.$popupContainer).each(function() {
             var locale = $(this).data('locale')
-            var RLTitle = $('[name="RLTranslate['+locale+'][title]"]', self.$popupContainer)
-            $(this).val(RLTitle.val())
+            var fieldName = $(this).data('field-name')
+            var RLField = $('[name="RLTranslate['+locale+']['+fieldName+']"]', self.$popupContainer)
+            $(this).val(RLField.val())
         });
 
         $.each(propertyNames, function() {
             var propertyName = this,
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
-            if (propertyName === 'title') {
+            if (['title', 'url'].includes(propertyName)) {
                 var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                 if (defaultLocale) {
-                    var RLTitle = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer)
-                    $input.val(RLTitle.val())
+                    var RLField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
+                    $input.val(RLField.val())
                 }
             }
 
