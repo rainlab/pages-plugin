@@ -243,6 +243,12 @@
             else {
                 var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
                 setPropertyOnElement($input, val)
+                if (['title', 'url'].includes(property)) {
+                    var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
+                    var RLField = $('[name="RLTranslate['+defaultLocale+']['+property+']"]', self.$popupContainer)
+                    RLField.val($input.val());
+                }
+
             }
         })
     }
