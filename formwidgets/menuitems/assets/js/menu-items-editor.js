@@ -399,10 +399,10 @@
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
             if (propertyName === 'title') {
-                var defaultLocale = $('[data-control="multilingual"]').data('default-locale');
+                var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                 if (defaultLocale) {
-                    var RLTitle = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer);
-                    $input.val(RLTitle.val());
+                    var RLTitle = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer)
+                    $input.val(RLTitle.val())
                 }
             }
 
