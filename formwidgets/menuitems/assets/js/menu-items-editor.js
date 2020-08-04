@@ -189,6 +189,7 @@
                 $.each(val, function(vbProperty, vbVal) {
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
+                    // copy MenuItem viewBag locale properties to MLText locale field elements
                     if (vbProperty === 'locale') {
                         $.each(vbVal, function(locale, fields) {
                             $.each(fields, function(fieldName, fieldValue) {
@@ -248,6 +249,7 @@
                 setPropertyOnElement($input, val)
                 var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+property+']"]', self.$popupContainer)
                 if ($defaultLocaleField) {
+                    // copy MenuItem property values to MLText default locale elements
                     $defaultLocaleField.val($input.val());
                 }
 
@@ -397,6 +399,7 @@
             typeInfo = {},
             validationErrorFound = false
 
+        // copy MLText locale values to MenuItem viewBag locale properties
         $('[name^="viewBag[locale]"]', self.$popupContainer).each(function() {
             var locale = $(this).data('locale')
             var fieldName = $(this).data('field-name')
@@ -411,6 +414,7 @@
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
             if (defaultLocale) {
+                // copy MLText default locale values to MenuItem properties
                 var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
                 if ($defaultLocaleField && $defaultLocaleField.val()) {
                     $input.val($defaultLocaleField.val())
