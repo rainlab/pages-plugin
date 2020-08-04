@@ -188,10 +188,12 @@
                 $.each(val, function(vbProperty, vbVal) {
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
-                    if (vbProperty.startsWith('locale')) {
-                        var locale = $input.data('locale')
-                        var fieldName = $input.data('field-name')
-                        $('[name="RLTranslate['+locale+']['+fieldName+']"]', $popupContainer).val(vbVal)
+                    if (vbProperty === 'locale') {
+                        $.each(vbVal, function(locale, fields) {
+                            $.each(fields, function(fieldName, fieldValue) {
+                                $('[name="RLTranslate['+locale+']['+fieldName+']"]', $popupContainer).val(fieldValue)
+                            })
+                        })
                     }
                 })
 
@@ -395,7 +397,7 @@
             typeInfo = {},
             validationErrorFound = false
 
-        $('[name^="viewBag[locale"]', self.$popupContainer).each(function() {
+        $('[name^="viewBag[locale]"]', self.$popupContainer).each(function() {
             var locale = $(this).data('locale')
             var fieldName = $(this).data('field-name')
             var RLField = $('[name="RLTranslate['+locale+']['+fieldName+']"]', self.$popupContainer)
