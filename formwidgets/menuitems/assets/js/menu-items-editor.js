@@ -246,9 +246,9 @@
             else {
                 var $input = $('[name="'+property+'"]', $popupContainer).not('[type=hidden]')
                 setPropertyOnElement($input, val)
-                var RLField = $('[name="RLTranslate['+defaultLocale+']['+property+']"]', self.$popupContainer)
-                if (RLField) {
-                    RLField.val($input.val());
+                var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+property+']"]', self.$popupContainer)
+                if ($defaultLocaleField) {
+                    $defaultLocaleField.val($input.val());
                 }
 
             }
@@ -400,8 +400,8 @@
         $('[name^="viewBag[locale]"]', self.$popupContainer).each(function() {
             var locale = $(this).data('locale')
             var fieldName = $(this).data('field-name')
-            var RLField = $('[name="RLTranslate['+locale+']['+fieldName+']"]', self.$popupContainer)
-            $(this).val(RLField.val())
+            var $localeField = $('[name="RLTranslate['+locale+']['+fieldName+']"]', self.$popupContainer)
+            $(this).val($localeField.val())
         });
 
         var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
@@ -411,9 +411,9 @@
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
             if (defaultLocale) {
-                var RLField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
-                if (RLField && RLField.val()) {
-                    $input.val(RLField.val())
+                var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
+                if ($defaultLocaleField && $defaultLocaleField.val()) {
+                    $input.val($defaultLocaleField.val())
                 }
             }
 
