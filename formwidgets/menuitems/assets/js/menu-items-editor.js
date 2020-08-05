@@ -193,7 +193,10 @@
                     if (vbProperty === 'locale') {
                         $.each(vbVal, function(locale, fields) {
                             $.each(fields, function(fieldName, fieldValue) {
-                                $('[name="RLTranslate['+locale+']['+fieldName+']"]', $popupContainer).val(fieldValue)
+                                var $locker = $('[name="RLTranslate['+locale+']['+fieldName+']"]', $popupContainer)
+                                if ($locker) {
+                                    $locker.val(fieldValue)
+                                }
                             })
                         })
                     }
