@@ -415,8 +415,8 @@
             var propertyName = this,
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
+            // If the RainLab.Translate default locale data locker fields are available make sure the regular inputs are properly populated
             if (defaultLocale) {
-                // copy MLText default locale values to MenuItem properties
                 var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
                 if ($defaultLocaleField && $defaultLocaleField.val()) {
                     $input.val($defaultLocaleField.val())
