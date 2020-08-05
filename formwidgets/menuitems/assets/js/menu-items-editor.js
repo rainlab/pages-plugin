@@ -189,7 +189,7 @@
                 $.each(val, function(vbProperty, vbVal) {
                     var $input = $('[name="viewBag['+vbProperty+']"]', $popupContainer).not('[type=hidden]')
                     setPropertyOnElement($input, vbVal)
-                    // copy MenuItem viewBag locale properties to MLText locale field elements
+                    // Ensure that locale specific data is made available in the RainLab.Translate data holders
                     if (vbProperty === 'locale') {
                         $.each(vbVal, function(locale, fields) {
                             $.each(fields, function(fieldName, fieldValue) {
