@@ -401,7 +401,7 @@
             typeInfo = {},
             validationErrorFound = false
 
-        // copy MLText locale values to MenuItem viewBag locale properties
+        // Ensure that locale specific data is made available in the RainLab.Translate data holders
         $('[name^="viewBag[locale]"]', self.$popupContainer).each(function() {
             var locale = $(this).data('locale')
             var fieldName = $(this).data('field-name')
