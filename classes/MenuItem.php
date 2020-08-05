@@ -16,8 +16,6 @@ use Event;
  */
 class MenuItem
 {
-    use \October\Rain\Extension\ExtendableTrait;
-
     /**
      * @var string Specifies the menu title
      */
