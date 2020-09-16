@@ -153,6 +153,7 @@ class Menu extends Meta
 
             foreach ($items as $item) {
                 $parentReference = new MenuItemReference;
+                $parentReference->type = $item->type;
                 $parentReference->title = $item->title;
                 $parentReference->code = $item->code;
                 $parentReference->viewBag = $item->viewBag;
