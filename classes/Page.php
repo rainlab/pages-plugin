@@ -379,7 +379,8 @@ class Page extends ContentBase
     public function getLayoutOptions()
     {
         $result = [];
-        $layouts = Layout::listInTheme($this->theme, true);
+        $sortKey = Config::get('rainlab.pages::layoutOptionsSortKey', 'created_at');
+        $layouts = Layout::listInTheme($this->theme, true)->sortBy($sortKey);
 
         foreach ($layouts as $layout) {
             if (!$layout->hasComponent('staticPage')) {
