@@ -345,6 +345,23 @@ Any component can be registered as a snippet and be used in Static Pages. To reg
 
 A same component can be registered with registerPageSnippets() and registerComponents() and used in CMS pages and Static Pages.
 
+###### Extending the list of snippets
+
+If you want to extend the list of the snippets you can bind to the `pages.snippets.getSnippetsList` event as follows:
+
+```php
+    Event::listen('pages.snippet.getSnippetList', function(&$snippets) {
+        // Remove unneededSnippet from the list of snippets
+        $newSnippets = [];
+        foreach ($snippets as $snippet) {
+            if ($snippet->code !== 'unneededSnippet') {
+                $newSnippets[] = $snippet;
+            }
+        }
+        $snippets = $newSnippets;
+    });
+```
+
 ##### Custom page fields
 
 There is a special syntax you can use inside your layout to add custom fields to the page editor form, called *Syntax Fields*. For example, if you add the following markup to a Layout that uses Static Pages:

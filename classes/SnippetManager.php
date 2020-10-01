@@ -35,7 +35,13 @@ class SnippetManager
         $themeSnippets = $this->listThemeSnippets($theme);
         $componentSnippets = $this->listComponentSnippets();
 
-        return $this->snippets = array_merge($themeSnippets, $componentSnippets);
+        $snippets = array_merge($themeSnippets, $componentSnippets);
+
+        Event::fire('pages.snippet.getSnippetList', [&$snippets]);
+
+        $this->snippets = $snippets;
+
+        return $snippets;
     }
 
     /**
