@@ -550,7 +550,7 @@
             return result
         }
 
-        data.options.data['itemData'] = iterator($items)
+        data.options.data['itemData'] = JSON.stringify(iterator($items))
     }
 
     /*

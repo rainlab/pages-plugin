@@ -244,18 +244,19 @@ class Page extends ContentBase
         foreach ($this->getChildren() as $subPage) {
             $result = array_merge($result, $subPage->delete());
         }
-
-        /*
-         * Remove from meta
-         */
-        $this->removeFromMeta();
-
+        
         /*
          * Delete the object
          */
         $result = array_merge($result, [$this->getBaseFileName()]);
 
         parent::delete();
+        
+        /*
+         * Remove from meta
+         */
+        $this->removeFromMeta();
+
 
         return $result;
     }

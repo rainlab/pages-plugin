@@ -54,26 +54,28 @@ class Index extends Controller
                 throw new ApplicationException(Lang::get('cms::lang.theme.edit.not_found'));
             }
 
-            if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
-                new PageList($this, 'pageList');
-                $this->vars['activeWidgets'][] = 'pageList';
-            }
+            if ($this->user) {
+                if ($this->user->hasAccess('rainlab.pages.manage_pages')) {
+                    new PageList($this, 'pageList');
+                    $this->vars['activeWidgets'][] = 'pageList';
+                }
 
-            if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
-                new MenuList($this, 'menuList');
-                $this->vars['activeWidgets'][] = 'menuList';
-            }
+                if ($this->user->hasAccess('rainlab.pages.manage_menus')) {
+                    new MenuList($this, 'menuList');
+                    $this->vars['activeWidgets'][] = 'menuList';
+                }
 
-            if ($this->user->hasAccess('rainlab.pages.manage_content')) {
-                new TemplateList($this, 'contentList', function() {
-                    return $this->getContentTemplateList();
-                });
-                $this->vars['activeWidgets'][] = 'contentList';
-            }
+                if ($this->user->hasAccess('rainlab.pages.manage_content')) {
+                    new TemplateList($this, 'contentList', function() {
+                        return $this->getContentTemplateList();
+                    });
+                    $this->vars['activeWidgets'][] = 'contentList';
+                }
 
-            if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
-                new SnippetList($this, 'snippetList');
-                $this->vars['activeWidgets'][] = 'snippetList';
+                if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
+                    new SnippetList($this, 'snippetList');
+                    $this->vars['activeWidgets'][] = 'snippetList';
+                }
             }
         }
         catch (Exception $ex) {
@@ -97,9 +99,9 @@ class Index extends Controller
     public function index()
     {
         $this->addJs('/modules/backend/assets/js/october.treeview.js', 'core');
-        $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js');
-        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js');
-        $this->addCss('/plugins/rainlab/pages/assets/css/pages.css');
+        $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js', 'RainLab.Pages');
+        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js', 'RainLab.Pages');
+        $this->addCss('/plugins/rainlab/pages/assets/css/pages.css', 'RainLab.Pages');
 
         // Preload the code editor class as it could be needed
         // before it loads dynamically.
@@ -746,6 +748,11 @@ class Index extends Controller
             // If no item data is sent through POST, this means the menu is empty
             if (!isset($objectData['itemData'])) {
                 $objectData['itemData'] = [];
+            } else {
+                $objectData['itemData'] = json_decode($objectData['itemData'], true);
+                if (json_last_error() !== JSON_ERROR_NONE || !is_array($objectData['itemData'])) {
+                    $objectData['itemData'] = [];
+                }
             }
         }
 
