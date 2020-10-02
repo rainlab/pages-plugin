@@ -673,6 +673,17 @@ class Page extends ContentBase
     protected static function getMenuCacheKey($theme)
     {
         $key = crc32($theme->getPath()).'static-page-menu';
+        /**
+         * @event pages.page.getMenuCacheKey
+         * Enables modifying the key used to reference cached RainLab.Pages menu trees
+         *
+         * Example usage:
+         *
+         *     Event::listen('pages.page.getMenuCacheKey', function (&$key) {
+         *          $key = $key . '-' . App::getLocale();
+         *     });
+         *
+         */
         Event::fire('pages.page.getMenuCacheKey', [&$key]);
         return $key;
     }
@@ -802,8 +813,9 @@ class Page extends ContentBase
     /**
      * Handler for the backend.richeditor.getTypeInfo event.
      * Returns a menu item type information. The type information is returned as array
+     *
      * @param string $type Specifies the page link type
-     * @return array
+     * @return array Array of available link targets keyed by URL ['https://example.com/' => 'Homepage]
      */
     public static function getRichEditorTypeInfo($type)
     {

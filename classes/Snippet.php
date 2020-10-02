@@ -552,6 +552,17 @@ class Snippet
     protected static function getMapCacheKey($theme)
     {
         $key = crc32($theme->getPath()).'snippet-map';
+        /**
+         * @event pages.snippet.getMapCacheKey
+         * Enables modifying the key used to reference cached RainLab.Pages snippet maps
+         *
+         * Example usage:
+         *
+         *     Event::listen('pages.snippet.getMapCacheKey', function (&$key) {
+         *          $key = $key . '-' . App::getLocale();
+         *     });
+         *
+         */
         Event::fire('pages.snippet.getMapCacheKey', [&$key]);
         return $key;
     }
