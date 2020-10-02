@@ -836,8 +836,37 @@ class Index extends Controller
     {
         $templates = Content::listInTheme($this->theme, true);
 
-        /*
-         * Extensibility
+        /**
+         * @event pages.content.templateList
+         * Provides opportunity to filter the items returned to the ContentList widget used by the RainLab.Pages plugin in the backend.
+         *
+         * >**NOTE**: Recommended to just use cms.object.listInTheme instead
+         *
+         * Parameter provided is `$templates` (a collection of the Content CmsObjects being returned).
+         * > Note: The `$templates` parameter provided is an object reference to a CmsObjectCollection, to make changes you must use object modifying methods.
+         *
+         * Example usage (only shows allowed content files):
+         *
+         *      \Event::listen('pages.content.templateList', function ($templates) {
+         *           foreach ($templates as $index = $content) {
+         *               if (!in_array($content->fileName, $allowedContent)) {
+         *                   $templates->forget($index);
+         *               }
+         *           }
+         *       });
+         *
+         * Or:
+         *
+         *     \RainLab\Pages\Controller\Index::extend(function ($controller) {
+         *           $controller->bindEvent('content.templateList', function ($templates) {
+         *               foreach ($templates as $index = $content) {
+         *                   if (!in_array($content->fileName, $allowedContent)) {
+         *                       $templates->forget($index);
+         *                   }
+         *               }
+         *           });
+         *      });
+         * }
          */
         if (
             ($event = $this->fireEvent('content.templateList', [$templates], true)) ||
