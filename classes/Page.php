@@ -237,26 +237,26 @@ class Page extends ContentBase
     public function delete()
     {
         $result = [];
+        $filename = $this->getBaseFileName();
+        $children = $this->getChildren();
 
-        /*
-         * Delete subpages
-         */
-        foreach ($this->getChildren() as $subPage) {
-            $result = array_merge($result, $subPage->delete());
-        }
-        
         /*
          * Delete the object
          */
-        $result = array_merge($result, [$this->getBaseFileName()]);
-
         parent::delete();
         
+        /*
+         * Delete subpages
+         */
+        foreach ($children as $subPage) {
+            $result = array_merge($result, $subPage->delete());
+        }
+        $result = array_merge($result, [$filename]);
+
         /*
          * Remove from meta
          */
         $this->removeFromMeta();
-
 
         return $result;
     }
