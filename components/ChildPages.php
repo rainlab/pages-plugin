@@ -44,7 +44,7 @@ class ChildPages extends ComponentBase
 
             if ($this->childPages) {
                 foreach ($this->childPages as $childPage) {
-                    $viewBag = $childPage->settings['components']['viewBag'];
+                    $viewBag = $childPage->viewBag;
                     $this->pages = array_merge($this->pages, [[
                         'url'                => @$viewBag['url'],
                         'title'              => @$viewBag['title'],
