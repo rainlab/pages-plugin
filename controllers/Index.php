@@ -293,6 +293,23 @@ class Index extends Controller
             }
 
             $configuration = $snippet->getProperties();
+
+            /**
+             * @event pages.content.snippetConfiguration
+             * Provides opportunity to supplement the snippet configuration
+             *
+             * Example usage:
+             *
+             *      Event::listen('pages.content.snippetConfiguration', function ($snippetCode, $configuration) {
+             *          if ($snippetCode === Gallery::SNIPPET_CODE) {
+             *              $ids = GalleryModel::getIds();
+             *              $newConfiguration[0]['options'] = $ids;
+             *              return $newConfiguration;
+             *           }
+             *      });
+             */
+            $newConfiguration =  Event::fire('pages.content.snippetConfiguration', [$snippetCode, $configuration], true);
+            $configuration = !empty($newConfiguration) ? $newConfiguration : $configuration;
         }
 
         return [
