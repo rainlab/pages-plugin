@@ -35,13 +35,58 @@ class SnippetManager
         $themeSnippets = $this->listThemeSnippets($theme);
         $componentSnippets = $this->listComponentSnippets();
 
-        $snippets = array_merge($themeSnippets, $componentSnippets);
+        $this->snippets = array_merge($themeSnippets, $componentSnippets);
 
-        Event::fire('pages.snippet.getSnippetList', [&$snippets]);
+        /*
+         * @event pages.snippet.listSnippets
+         * Gives the ability to manage snippet list dynamically.
+         *
+         * Example usage to add a snippet to the list:
+         *
+         * Event::listen('pages.snippet.listSnippets', function(&$manager) {
+         *     $snippet = new \RainLab\Pages\Classes\Snippet();
+         *     $snippet->initFromComponentInfo('\Example\Plugin\Components\ComponentClass', 'snippetCode');
+         *     $manager->addSnippet($snippet);
+         * });
+         *
+         * Example usage to remove a snippet from the list:
+         *
+         * Event::listen('pages.snippet.listSnippets', function(&$manager) {
+         *     $manager->removeSnippet('snippetCode');
+         * });
+         */
+        Event::fire('pages.snippet.listSnippets', [&$this]);
 
-        $this->snippets = $snippets;
+        return $this->snippets;
+    }
 
-        return $snippets;
+    /**
+     * Add snippet to the list of snippets
+     *
+     * @param Snippet $snippet
+     * @return void
+     */
+    public function addSnippet(Snippet $snippet)
+    {
+        $this->snippets[] = $snippet;
+    }
+
+    /**
+     * Remove a snippet with the given code from the list of snippets
+     *
+     * @param string $snippetCode
+     * @return void
+     */
+    public function removeSnippet(string $snippetCode)
+    {
+        $newSnippets = [];
+        foreach ($this->snippets as $snippet) {
+            if ($snippet->code !== $snippetCode) {
+                $newSnippets[] = $snippet;
+            }
+        }
+
+        $this->snippets = $newSnippets;
     }
 
     /**

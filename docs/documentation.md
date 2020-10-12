@@ -347,20 +347,21 @@ A same component can be registered with registerPageSnippets() and registerCompo
 
 ###### Extending the list of snippets
 
-If you want to extend the list of the snippets you can bind to the `pages.snippets.getSnippetsList` event as follows:
+If you want to dynamically extend the list of the snippets you can bind to the `pages.snippets.listSnippets` event.
 
-```php
-    Event::listen('pages.snippet.getSnippetList', function(&$snippets) {
-        // Remove unneededSnippet from the list of snippets
-        $newSnippets = [];
-        foreach ($snippets as $snippet) {
-            if ($snippet->code !== 'unneededSnippet') {
-                $newSnippets[] = $snippet;
-            }
-        }
-        $snippets = $newSnippets;
+An example usage to add a snippet to the list:
+
+    Event::listen('pages.snippet.listSnippets', function(&$manager) {
+        $snippet = new \RainLab\Pages\Classes\Snippet();
+        $snippet->initFromComponentInfo('\Example\Plugin\Components\ComponentClass', 'snippetCode');
+        $manager->addSnippet($snippet);
     });
-```
+
+An example usage to remove a snippet from the list:
+
+    Event::listen('pages.snippet.listSnippets', function(&$manager) {
+        $manager->removeSnippet('snippetCode');
+    });
 
 ##### Custom page fields
 
