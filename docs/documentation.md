@@ -351,7 +351,7 @@ If you want to dynamically extend the list of the snippets you can bind to the `
 
 An example usage to add a snippet to the list:
 
-    Event::listen('pages.snippet.listSnippets', function(&$manager) {
+    Event::listen('pages.snippets.listSnippets', function(&$manager) {
         $snippet = new \RainLab\Pages\Classes\Snippet();
         $snippet->initFromComponentInfo('\Example\Plugin\Components\ComponentClass', 'snippetCode');
         $manager->addSnippet($snippet);
@@ -359,7 +359,7 @@ An example usage to add a snippet to the list:
 
 An example usage to remove a snippet from the list:
 
-    Event::listen('pages.snippet.listSnippets', function(&$manager) {
+    Event::listen('pages.snippets.listSnippets', function(&$manager) {
         $manager->removeSnippet('snippetCode');
     });
 

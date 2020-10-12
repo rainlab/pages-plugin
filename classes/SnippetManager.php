@@ -38,12 +38,12 @@ class SnippetManager
         $this->snippets = array_merge($themeSnippets, $componentSnippets);
 
         /*
-         * @event pages.snippet.listSnippets
+         * @event pages.snippets.listSnippets
          * Gives the ability to manage snippet list dynamically.
          *
          * Example usage to add a snippet to the list:
          *
-         * Event::listen('pages.snippet.listSnippets', function(&$manager) {
+         * Event::listen('pages.snippets.listSnippets', function(&$manager) {
          *     $snippet = new \RainLab\Pages\Classes\Snippet();
          *     $snippet->initFromComponentInfo('\Example\Plugin\Components\ComponentClass', 'snippetCode');
          *     $manager->addSnippet($snippet);
@@ -51,11 +51,11 @@ class SnippetManager
          *
          * Example usage to remove a snippet from the list:
          *
-         * Event::listen('pages.snippet.listSnippets', function(&$manager) {
+         * Event::listen('pages.snippets.listSnippets', function(&$manager) {
          *     $manager->removeSnippet('snippetCode');
          * });
          */
-        Event::fire('pages.snippet.listSnippets', [&$this]);
+        Event::fire('pages.snippets.listSnippets', [&$this]);
 
         return $this->snippets;
     }
