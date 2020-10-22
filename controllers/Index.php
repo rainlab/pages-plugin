@@ -610,8 +610,8 @@ class Index extends Controller
             /*
              * Translation support
              */
-            $translatableTypes = ['text', 'textarea', 'richeditor', 'repeater'];
-            if (in_array($fieldConfig['type'], $translatableTypes)) {
+            $translatableTypes = ['text', 'textarea', 'richeditor', 'repeater', 'markdown', 'mediafinder'];
+            if (in_array($fieldConfig['type'], $translatableTypes) && array_get($fieldConfig, 'translatable', true)) {
                 $page->translatable[] = 'viewBag['.$fieldCode.']';
             }
         }
