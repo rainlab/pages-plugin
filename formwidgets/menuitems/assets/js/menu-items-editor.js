@@ -418,7 +418,7 @@
             // If the RainLab.Translate default locale data locker fields are available make sure the regular inputs are properly populated
             if (defaultLocale) {
                 var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
-                if ($defaultLocaleField && $defaultLocaleField.val() && !$input.val()) {
+                if ($defaultLocaleField && $defaultLocaleField.val()) {
                     $input.val($defaultLocaleField.val())
                 }
             }
