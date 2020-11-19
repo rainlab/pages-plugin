@@ -91,7 +91,13 @@
                 // If the saved title is the default new item title, use reference title,
                 // removing CMS page [base file name] suffix
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
-                    $titleField.val($.trim(selectedTitle.replace(/\s*\[.*\]$/, '')))
+                    var title = $.trim(selectedTitle.replace(/\s*\[.*\]$/, ''))
+                    var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
+                    $titleField.val(title)
+                    if (defaultLocale) {
+                        var $localeField = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer)
+                        $localeField.val(title)
+                    }
                 }
             })
 
@@ -416,7 +422,7 @@
                 $input = $('[name="'+propertyName+'"]', self.$popupContainer).not('[type=hidden]')
 
             // If the RainLab.Translate default locale data locker fields are available make sure the regular inputs are properly populated
-            if(defaultLocale && !$input.val()) {
+            if (defaultLocale) {
                 var $defaultLocaleField = $('[name="RLTranslate['+defaultLocale+']['+propertyName+']"]', self.$popupContainer)
                 if ($defaultLocaleField && $defaultLocaleField.val()) {
                     $input.val($defaultLocaleField.val())
