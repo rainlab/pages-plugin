@@ -292,7 +292,6 @@ class Menu extends Meta
          *     $items = $iterator($items);
          * });
          */
-
         Event::fire('pages.menu.referencesGenerated', [&$items]);
 
         return $items;

@@ -122,6 +122,17 @@ class SnippetManager
     protected static function getPartialMapCacheKey($theme)
     {
         $key = crc32($theme->getPath()).'snippet-partial-map';
+        /**
+         * @event pages.snippet.getPartialMapCacheKey
+         * Enables modifying the key used to reference cached RainLab.Pages partial maps
+         *
+         * Example usage:
+         *
+         *     Event::listen('pages.snippet.getPartialMapCacheKey', function (&$key) {
+         *          $key = $key . '-' . App::getLocale();
+         *     });
+         *
+         */
         Event::fire('pages.snippet.getPartialMapCacheKey', [&$key]);
         return $key;
     }

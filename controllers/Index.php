@@ -610,8 +610,8 @@ class Index extends Controller
             /*
              * Translation support
              */
-            $translatableTypes = ['text', 'textarea', 'richeditor', 'repeater'];
-            if (in_array($fieldConfig['type'], $translatableTypes)) {
+            $translatableTypes = ['text', 'textarea', 'richeditor', 'repeater', 'markdown', 'mediafinder'];
+            if (in_array($fieldConfig['type'], $translatableTypes) && array_get($fieldConfig, 'translatable', true)) {
                 $page->translatable[] = 'viewBag['.$fieldCode.']';
             }
         }
@@ -808,7 +808,25 @@ class Index extends Controller
         $alias = Request::input('formWidgetAlias');
         $type = Request::input('objectType');
         $objectPath = trim(Request::input('objectPath'));
-        $object = $objectPath ? $this->loadObject($type, $objectPath) : $this->createObject($type);
+
+        if (!$objectPath) {
+            $object = $this->createObject($type);
+
+            if ($type === 'page') {
+                /**
+                 * If layout is in POST, populate that into the object's viewBag to allow placeholders and syntax
+                 * fields to still work when editing a new page.
+                 * 
+                 * Fixes https://github.com/octobercms/october/issues/4628
+                 */
+                $layout = Request::input('viewBag.layout');
+                if ($layout) {
+                    $object->getViewBag()->setProperty('layout', $layout);
+                }
+            }
+        } else {
+            $object = $this->loadObject($type, $objectPath);
+        }
 
         $widget = $this->makeObjectFormWidget($type, $object, $alias);
         $widget->bindToController();
@@ -836,8 +854,37 @@ class Index extends Controller
     {
         $templates = Content::listInTheme($this->theme, true);
 
-        /*
-         * Extensibility
+        /**
+         * @event pages.content.templateList
+         * Provides opportunity to filter the items returned to the ContentList widget used by the RainLab.Pages plugin in the backend.
+         *
+         * >**NOTE**: Recommended to just use cms.object.listInTheme instead
+         *
+         * Parameter provided is `$templates` (a collection of the Content CmsObjects being returned).
+         * > Note: The `$templates` parameter provided is an object reference to a CmsObjectCollection, to make changes you must use object modifying methods.
+         *
+         * Example usage (only shows allowed content files):
+         *
+         *      \Event::listen('pages.content.templateList', function ($templates) {
+         *           foreach ($templates as $index = $content) {
+         *               if (!in_array($content->fileName, $allowedContent)) {
+         *                   $templates->forget($index);
+         *               }
+         *           }
+         *       });
+         *
+         * Or:
+         *
+         *     \RainLab\Pages\Controller\Index::extend(function ($controller) {
+         *           $controller->bindEvent('content.templateList', function ($templates) {
+         *               foreach ($templates as $index = $content) {
+         *                   if (!in_array($content->fileName, $allowedContent)) {
+         *                       $templates->forget($index);
+         *                   }
+         *               }
+         *           });
+         *      });
+         * }
          */
         if (
             ($event = $this->fireEvent('content.templateList', [$templates], true)) ||

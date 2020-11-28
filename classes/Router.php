@@ -152,6 +152,17 @@ class Router
     protected function getCacheKey($keyName)
     {
         $key = crc32($this->theme->getPath()).$keyName;
+        /**
+         * @event pages.router.getCacheKey
+         * Enables modifying the key used to reference cached RainLab.Pages routes
+         *
+         * Example usage:
+         *
+         *     Event::listen('pages.router.getCacheKey', function (&$key) {
+         *          $key = $key . '-' . App::getLocale();
+         *     });
+         *
+         */
         Event::fire('pages.router.getCacheKey', [&$key]);
         return $key;
     }
