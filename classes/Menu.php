@@ -189,6 +189,7 @@ class Menu extends Meta
 
                                     foreach ($items as $item) {
                                         $reference = new MenuItemReference;
+                                        $reference->type = $item->type;
                                         $reference->title = isset($item['title']) ? $item['title'] : '--no title--';
                                         $reference->url = isset($item['url']) ? $item['url'] : '#';
                                         $reference->isActive = isset($item['isActive']) ? $item['isActive'] : false;

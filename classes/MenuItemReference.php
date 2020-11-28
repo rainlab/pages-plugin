@@ -20,7 +20,7 @@ class MenuItemReference
      * @var string Specifies the menu item type.
      */
     public $type;
-    
+
     /**
      * @var string Specifies the item title
      */
