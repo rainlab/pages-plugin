@@ -57,7 +57,7 @@ class PageList
             $result = [];
 
             foreach ($configPages as $fileName => $subpages) {
-                if (isset($pagesArray[$fileName]) {
+                if (isset($pagesArray[$fileName])) {
                     $result[] = (object) [
                         'page'     => $pagesArray[$fileName],
                         'subpages' => $iterator($subpages),
