@@ -53,7 +53,7 @@ class PageList
             return $page->getBaseFileName();
         })->all();
 
-        $iterator = function($configPages) use (&$iterator, &$pagesArray) {
+        $iterator = function($configPages) use (&$iterator, $pagesArray) {
             $result = [];
 
             foreach ($configPages as $fileName => $subpages) {
