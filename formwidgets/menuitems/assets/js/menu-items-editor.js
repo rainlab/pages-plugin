@@ -92,11 +92,12 @@
                 // removing CMS page [base file name] suffix
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
                     var title = $.trim(selectedTitle.replace(/\s*\[.*\]$/, ''))
-                    var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                     $titleField.val(title)
+                    
+                    // Support for RainLab.Translate
+                    var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                     if (defaultLocale) {
-                        var $localeField = $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer)
-                        $localeField.val(title)
+                        $('[name="RLTranslate['+defaultLocale+'][title]"]', self.$popupContainer).val(title)
                     }
                 }
             })
