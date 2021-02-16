@@ -43,7 +43,7 @@ class MenuPicker extends FormWidgetBase
         return Menu::listInTheme(Theme::getEditTheme(), true)
             ->mapWithKeys(function ($menu) {
                 return [
-                    $menu->fileName => $menu->name,
+                    $menu->code => $menu->name,
                 ];
             })->toArray();
     }
