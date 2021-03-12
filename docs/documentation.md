@@ -94,6 +94,28 @@ If you want to link to the static page by its URL, simply use the `|app` filter:
 
     <a href="{{ '/chairs'|app }}">Go to Chairs</a>
 
+##### Manually displaying a static menu
+
+When a static menu is first created it will be assigned a file name based on the menu name (menu code can also be manually defined). For example, a menu with the name **Primary Nav** will create a meta file called **menus/primary-nav.yaml** in the theme. This file will not change even if the menu name is changed at a later time.
+
+To render a static menu based on a menu code from the `staticmenupicker` dropdown form widget:
+
+You can either define the code property on the staticMenu component.
+
+    {% component 'staticMenu' code=this.theme.primary_menu %}
+
+Or, use the resetMenu method on the staticMenu component, so we can manually control the menu output without having to create a staticMenu partial override.
+
+```twig
+{% set menuItems = staticMenu.resetMenu(this.theme.primary_menu) %}
+
+<ul>
+{% for item in menuItems %}
+    <li><a href="{{ item.url }}">{{ item.name }}</a></li>
+{% endfor %}
+</ul>
+```
+
 ##### Backend forms
 
 If you need to select from a list of static pages in your own backend forms, you can use the `staticpagepicker` widget:
