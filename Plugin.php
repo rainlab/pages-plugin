@@ -108,7 +108,8 @@ class Plugin extends PluginBase
     public function registerFormWidgets()
     {
         return [
-            'RainLab\Pages\FormWidgets\PagePicker' => 'staticpagepicker'
+            FormWidgets\PagePicker::class => 'staticpagepicker',
+            FormWidgets\MenuPicker::class => 'staticmenupicker',
         ];
     }
 
