@@ -1,13 +1,12 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
-use Backend\Classes\FormWidgetBase;
 use Cms\Classes\Theme;
+use Backend\Classes\FormField;
+use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\Menu;
 
 /**
- * Static Menu picker widget
- *
- * @package RainLab\Pages\FormWidgets
+ * MenuPicker allows the user to pick from available menus
  */
 class MenuPicker extends FormWidgetBase
 {
@@ -29,7 +28,7 @@ class MenuPicker extends FormWidgetBase
         $this->vars['field'] = $this->makeFormField();
     }
 
-    protected function makeFormField(): \Backend\Classes\FormField
+    protected function makeFormField(): FormField
     {
         $field = clone $this->formField;
         $field->type = 'dropdown';
