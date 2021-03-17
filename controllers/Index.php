@@ -358,10 +358,18 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canCommitObject($object)) {
-            // Populate the filesystem with the object and then remove it from the db
-            $datasource = $this->getThemeDatasource();
-            $datasource->pushToSource($object, 'filesystem');
-            $datasource->removeFromSource($object, 'database');
+            if (class_exists('System')) {
+                // v1.2
+                $datasource = $this->getThemeDatasource();
+                $datasource->updateModelAtIndex(1, $object);
+                $datasource->forceDeleteModelAtIndex(0, $object);
+            }
+            else {
+                // v1.1
+                $datasource = $this->getThemeDatasource();
+                $datasource->pushToSource($object, 'filesystem');
+                $datasource->removeFromSource($object, 'database');
+            }
 
             Flash::success(Lang::get('cms::lang.editor.commit_success', ['type' => $type]));
         }
@@ -381,9 +389,16 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canResetObject($object)) {
-            // Remove the object from the DB
-            $datasource = $this->getThemeDatasource();
-            $datasource->removeFromSource($object, 'database');
+            if (class_exists('System')) {
+                // v1.2
+                $datasource = $this->getThemeDatasource();
+                $datasource->forceDeleteModelAtIndex(0, $object);
+            }
+            else {
+                // v1.1
+                $datasource = $this->getThemeDatasource();
+                $datasource->removeFromSource($object, 'database');
+            }
 
             Flash::success(Lang::get('cms::lang.editor.reset_success', ['type' => $type]));
         }
@@ -423,8 +438,6 @@ class Index extends Controller
 
     /**
      * Get the active theme's datasource
-     *
-     * @return \October\Rain\Halcyon\Datasource\DatasourceInterface
      */
     protected function getThemeDatasource()
     {
@@ -442,11 +455,24 @@ class Index extends Controller
     {
         $result = false;
 
-        if (Config::get('app.debug', false) &&
-            Theme::databaseLayerEnabled() &&
-            $this->getThemeDatasource()->sourceHasModel('database', $object)
-        ) {
-            $result = true;
+        if (class_exists('System')) {
+            // v1.2
+            if (
+                Config::get('app.debug', false) &&
+                $this->theme->secondLayerEnabled() &&
+                $this->getThemeDatasource()->hasModelAtIndex(1, $object)
+            ) {
+                $result = true;
+            }
+        }
+        else {
+            // v1.1
+            if (Config::get('app.debug', false) &&
+                Theme::databaseLayerEnabled() &&
+                $this->getThemeDatasource()->sourceHasModel('database', $object)
+            ) {
+                $result = true;
+            }
         }
 
         return $result;
@@ -463,9 +489,20 @@ class Index extends Controller
     {
         $result = false;
 
-        if (Theme::databaseLayerEnabled()) {
-            $datasource = $this->getThemeDatasource();
-            $result = $datasource->sourceHasModel('database', $object) && $datasource->sourceHasModel('filesystem', $object);
+        if (class_exists('System')) {
+            // v1.2
+            if ($this->theme->secondLayerEnabled()) {
+                $datasource = $this->getThemeDatasource();
+                $result = $datasource->hasModelAtIndex(0, $object) &&
+                    $datasource->hasModelAtIndex(1, $object);
+            }
+        }
+        else {
+            // v1.1
+            if (Theme::databaseLayerEnabled()) {
+                $datasource = $this->getThemeDatasource();
+                $result = $datasource->sourceHasModel('database', $object) && $datasource->sourceHasModel('filesystem', $object);
+            }
         }
 
         return $result;
@@ -816,7 +853,7 @@ class Index extends Controller
                 /**
                  * If layout is in POST, populate that into the object's viewBag to allow placeholders and syntax
                  * fields to still work when editing a new page.
-                 * 
+                 *
                  * Fixes https://github.com/octobercms/october/issues/4628
                  */
                 $layout = Request::input('viewBag.layout');
