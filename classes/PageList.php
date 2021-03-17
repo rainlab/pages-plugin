@@ -47,27 +47,22 @@ class PageList
     {
         $pages = $this->listPages($skipCache);
         $config = $this->getPagesConfig();
+        
+        // Make the $pages collection an associative array for performance
+        $pagesArray = $pages->keyBy(function ($page) {
+            return $page->getBaseFileName();
+        })->all();
 
-        $iterator = function($configPages) use (&$iterator, &$pages) {
+        $iterator = function($configPages) use (&$iterator, $pagesArray) {
             $result = [];
 
             foreach ($configPages as $fileName => $subpages) {
-                $pageObject = null;
-                foreach ($pages as $page) {
-                    if ($page->getBaseFileName() == $fileName) {
-                        $pageObject = $page;
-                        break;
-                    }
+                if (isset($pagesArray[$fileName])) {
+                    $result[] = (object) [
+                        'page'     => $pagesArray[$fileName],
+                        'subpages' => $iterator($subpages),
+                    ];
                 }
-
-                if ($pageObject === null) {
-                    continue;
-                }
-
-                $result[] = (object)[
-                    'page'     => $pageObject,
-                    'subpages' => $iterator($subpages)
-                ];
             }
 
             return $result;
