@@ -63,5 +63,6 @@ secondaryTabs:
         markup:
             tab: rainlab.pages::lang.editor.content
             type: richeditor
+            legacyMode: true
             stretch: true
             size: huge

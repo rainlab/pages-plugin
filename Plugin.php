@@ -182,6 +182,12 @@ class Plugin extends PluginBase
             }
         });
 
+        Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
+            if ($dataHolder->templateType === 'partial') {
+                Snippet::extendEditorPartialToolbar($dataHolder);
+            }
+        });
+
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
         });
@@ -190,8 +196,8 @@ class Plugin extends PluginBase
             $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
         });
 
-        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template) {
-            Snippet::processTemplateSettings($template);
+        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
+            Snippet::processTemplateSettings($template, $context);
         });
 
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {

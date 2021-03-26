@@ -265,6 +265,99 @@ class Snippet
        $formWidget->tabs['fields']['viewBag[snippetProperties]'] = $fieldConfig;
     }
 
+    public static function extendEditorPartialToolbar($dataHolder)
+    {
+        $dataHolder->buttons[] = [
+            'button' => 'rainlab.pages::lang.snippet.partialtab',
+            'icon' => 'octo-icon-code-snippet',
+            'popupTitle' => 'rainlab.pages::lang.snippet.settings_popup_title',
+            'useViewBag' => true,
+            'properties' => [
+                [
+                    'property' => 'snippetCode',
+                    'title' => 'rainlab.pages::lang.snippet.code',
+                    'description' => 'rainlab.pages::lang.snippet.code_comment',
+                    'type' => 'string',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'rainlab.pages::lang.snippet.code_required'
+                        ]
+                    ]
+                ],
+                [
+                    'property' => 'snippetName',
+                    'title' => 'rainlab.pages::lang.snippet.name',
+                    'description' => 'rainlab.pages::lang.snippet.name_comment',
+                    'type' => 'string',
+                    'validation' => [
+                        'required' => [
+                            'message' => 'rainlab.pages::lang.snippet.name_required'
+                        ]
+                    ]
+                ],
+                [
+                    'property' => 'snippetProperties',
+                    'title' => '',
+                    'type' => 'table',
+                    'tab' => 'rainlab.pages::lang.snippet.properties',
+                    'columns' => [
+                        [
+                            'column' => 'title',
+                            'type' => 'string',
+                            'title' => 'rainlab.pages::lang.snippet.column_property',
+                            'validation' => [
+                                'required' => [
+                                    'message' => 'rainlab.pages::lang.snippet.title_required'
+                                ]
+                            ]
+                        ],
+                        [
+                            'column' => 'property',
+                            'type' => 'string',
+                            'title' => 'rainlab.pages::lang.snippet.column_code',
+                            'validation' => [
+                                'required' => [
+                                    'message' => 'rainlab.pages::lang.snippet.property_required'
+                                ],
+                                'regex' => [
+                                    'pattern'   => '^[a-z][a-z0-9]*$',
+                                    'modifiers' => 'i',
+                                    'message'   => 'rainlab.pages::lang.snippet.property_format_error'
+                                ]
+                            ]
+                        ],
+                        [
+                            'column' => 'type',
+                            'title'   => 'rainlab.pages::lang.snippet.column_type',
+                            'type'    => 'dropdown',
+                            'placeholder' => 'rainlab.pages::lang.snippet.column_type_placeholder',
+                            'options' => [
+                                'string'   => 'rainlab.pages::lang.snippet.column_type_string',
+                                'checkbox' => 'rainlab.pages::lang.snippet.column_type_checkbox',
+                                'dropdown' => 'rainlab.pages::lang.snippet.column_type_dropdown'
+                            ],
+                            'validation' => [
+                                'required' => [
+                                    'message' => 'rainlab.pages::lang.snippet.type_required'
+                                ]
+                            ]
+                        ],
+                        [
+                            'column' => 'default',
+                            'type' => 'string',
+                            'title' => 'rainlab.pages::lang.snippet.column_default'
+                        ],
+                        [
+                            'column' => 'options',
+                            'type' => 'string',
+                            'title' => 'rainlab.pages::lang.snippet.column_options'
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
     /**
      * Returns a component corresponding to the snippet.
      * This method should not be used in the front-end request handling code.
@@ -327,12 +420,21 @@ class Snippet
 
     public static function processTemplateSettingsArray($settingsArray)
     {
-        if (!isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+        if (
+            !isset($settingsArray['viewBag']['snippetProperties']['TableData']) && 
+            !isset($settingsArray['viewBag']['snippetProperties']) // CMS Editor
+        ) {
             return $settingsArray;
         }
 
         $properties = [];
-        $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
+
+        if (isset($settingsArray['viewBag']['snippetProperties']['TableData'])) {
+            $rows = $settingsArray['viewBag']['snippetProperties']['TableData'];
+        }
+        else {
+            $rows = $settingsArray['viewBag']['snippetProperties'];
+        }
 
         foreach ($rows as $row) {
             $property = array_get($row, 'property');
@@ -354,7 +456,7 @@ class Snippet
         return $settingsArray;
     }
 
-    public static function processTemplateSettings($template)
+    public static function processTemplateSettings($template, $context = null)
     {
         if (!isset($template->viewBag['snippetProperties'])) {
             return;
@@ -363,14 +465,20 @@ class Snippet
         $parsedProperties = self::parseIniProperties($template->viewBag['snippetProperties']);
 
         foreach ($parsedProperties as $index => &$property) {
-            $property['id'] = $index;
+            if ($context !== 'editor') {
+                $property['id'] = $index;
+            }
 
-            if (isset($property['options'])) {
+            if (isset($property['options']) && is_array($property['options'])) {
                 $property['options'] = self::dropDownOptionsToString($property['options']);
             }
         }
 
         $template->viewBag['snippetProperties'] = $parsedProperties;
+
+        if ($context == 'editor') {
+            $template->settings['components']['viewBag'] = $template->viewBag;
+        }
     }
 
     /**
