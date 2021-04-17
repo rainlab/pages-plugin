@@ -1,9 +1,12 @@
+<?php
+    $mediaPath = Config::get('cms.storage.media.path', Config::get('system.storage.media.path', '/storage/app/media'));
+?>
 <div
     class="layout-absolute"
     data-control="menu-item-editor"
     data-alias="<?= $this->alias ?>"
     data-item-properties="<?= e($itemProperties) ?>"
-    data-storage-media-path="<?= url(Config::get('cms.storage.media.path')); ?>"
+    data-storage-media-path="<?= Url::to($mediaPath) ?>"
 >
     <div class="control-scrollbar" data-control="scrollbar">
         <div class="control-treeview treeview-light"

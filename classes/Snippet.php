@@ -421,7 +421,7 @@ class Snippet
     public static function processTemplateSettingsArray($settingsArray)
     {
         if (
-            !isset($settingsArray['viewBag']['snippetProperties']['TableData']) && 
+            !isset($settingsArray['viewBag']['snippetProperties']['TableData']) &&
             !isset($settingsArray['viewBag']['snippetProperties']) // CMS Editor
         ) {
             return $settingsArray;
@@ -645,7 +645,7 @@ class Snippet
             }
 
             $cached[$pageName] = $map;
-            $expiresAt = now()->addMinutes(Config::get('cms.parsedPageCacheTTL', 10));
+            $expiresAt = now()->addMinutes(Config::get('cms.template_cache_ttl', 10));
             Cache::put($key, serialize($cached), $expiresAt);
         }
 

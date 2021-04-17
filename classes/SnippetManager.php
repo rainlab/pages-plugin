@@ -212,7 +212,7 @@ class SnippetManager
             $result[$snippetCode] = $partial->getFileName();
         }
 
-        $expiresAt = now()->addMinutes(Config::get('cms.parsedPageCacheTTL', 10));
+        $expiresAt = now()->addMinutes(Config::get('cms.template_cache_ttl', 10));
         Cache::put($key, serialize($result), $expiresAt);
 
         return $result;

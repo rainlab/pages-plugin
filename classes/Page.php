@@ -244,14 +244,14 @@ class Page extends ContentBase
         foreach ($this->getChildren() as $subPage) {
             $result = array_merge($result, $subPage->delete());
         }
-        
+
         /*
          * Delete the object
          */
         $result = array_merge($result, [$this->getBaseFileName()]);
 
         parent::delete();
-        
+
         /*
          * Remove from meta
          */
@@ -906,7 +906,7 @@ class Page extends ContentBase
         $iterator($pageList->getPageTree(), null, 0);
 
         self::$menuTreeCache = $menuTree;
-        $expiresAt = now()->addMinutes(Config::get('cms.parsedPageCacheTTL', 10));
+        $expiresAt = now()->addMinutes(Config::get('cms.template_cache_ttl', 10));
         Cache::put($key, serialize($menuTree), $expiresAt);
 
         return self::$menuTreeCache;
