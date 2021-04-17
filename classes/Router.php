@@ -132,7 +132,7 @@ class Router
             self::$urlMap = $map;
 
             if ($cacheable) {
-                $expiresAt = now()->addMinutes(Config::get('cms.url_cache_ttl', 1));
+                $expiresAt = now()->addMinutes(Config::get('cms.url_cache_ttl', 10));
                 Cache::put($key, serialize($map), $expiresAt);
             }
 
