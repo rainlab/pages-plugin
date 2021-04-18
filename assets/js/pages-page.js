@@ -253,6 +253,18 @@
         this.updateContentEditorMode($tabPane, false)
     }
 
+    PagesPage.prototype.onDeletePageSingle  = function(el) {
+        var $el = $(el);
+
+        $el.request('onDelete', {
+            success: function(data) {
+                $.oc.pagesPage.closeTabs(data, 'page');
+                $.oc.pagesPage.updateObjectList('page');
+                $(this).trigger('close.oc.tab', [{force: true}]);
+            }
+        });
+    }
+
     /*
      * Updates the browser title when an object is saved.
      */
@@ -275,7 +287,7 @@
             }
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
-        })
+        });
     }
 
     /*

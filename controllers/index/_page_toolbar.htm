@@ -26,9 +26,8 @@
     <button
         type="button"
         class="btn btn-default empty oc-icon-trash-o <?php if (!$objectPath): ?>hide<?php endif ?>"
-        data-request="onDelete"
+        onclick="$.oc.pagesPage.onDeletePageSingle(this)"
         data-request-confirm="<?= e(trans('rainlab.pages::lang.page.delete_confirm_single')) ?>"
-        data-request-success="$.oc.pagesPage.closeTabs(data, 'page'); $.oc.pagesPage.updateObjectList('page'); $(this).trigger('close.oc.tab', [{force: true}])"
         data-control="delete-button">
     </button>
 

@@ -56,3 +56,4 @@
 1.3.7: Adds MenuPicker formwidget. Adds future support for v2.0 of October CMS.
 1.4.0: Fixes bug when adding menu items in October CMS v2.0.
 1.4.1: Fixes support for configuration values.
+1.4.3: Fixes page deletion is newer platform builds.
