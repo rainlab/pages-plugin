@@ -645,7 +645,8 @@ class Snippet
             }
 
             $cached[$pageName] = $map;
-            $expiresAt = now()->addMinutes(Config::get('cms.template_cache_ttl', 10));
+            $comboConfig = Config::get('cms.parsedPageCacheTTL', Config::get('cms.template_cache_ttl', 10));
+            $expiresAt = now()->addMinutes($comboConfig);
             Cache::put($key, serialize($cached), $expiresAt);
         }
 

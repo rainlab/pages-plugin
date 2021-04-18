@@ -760,7 +760,8 @@ class Index extends Controller
         if ($type == 'page') {
             $placeholders = array_get($saveData, 'placeholders');
 
-            if (is_array($placeholders) && Config::get('system.convert_line_endings', false) === true) {
+            $comboConfig = Config::get('cms.convertLineEndings', Config::get('system.convert_line_endings', false));
+            if (is_array($placeholders) && $comboConfig === true) {
                 $placeholders = array_map([$this, 'convertLineEndings'], $placeholders);
             }
 
@@ -793,7 +794,8 @@ class Index extends Controller
             }
         }
 
-        if (!empty($objectData['markup']) && Config::get('system.convert_line_endings', false) === true) {
+        $comboConfig = Config::get('cms.convertLineEndings', Config::get('system.convert_line_endings', false));
+        if (!empty($objectData['markup']) && $comboConfig === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
         }
 
