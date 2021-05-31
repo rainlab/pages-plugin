@@ -114,6 +114,8 @@ class Index extends Controller
         if (Request::ajax() && Request::input('formWidgetAlias')) {
             $this->bindFormWidgetToController();
         }
+
+        $this->vars['layoutIgnoreTouchNavigation'] = true;
     }
 
     public function index_onOpen()
