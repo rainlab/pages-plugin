@@ -26,6 +26,7 @@ fields:
 tabs:
     stretch: true
     cssClass: master-area
+    paneCssClass: pane-compact
     fields:
         items:
             stretch: true

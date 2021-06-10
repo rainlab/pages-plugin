@@ -107,15 +107,13 @@ class Index extends Controller
         // before it loads dynamically.
         $this->addJs('/modules/backend/formwidgets/codeeditor/assets/js/build-min.js', 'core');
 
-        $this->bodyClass = 'compact-container';
+        $this->bodyClass = 'compact-container sidenav-responsive';
         $this->pageTitle = 'rainlab.pages::lang.plugin.name';
         $this->pageTitleTemplate = Lang::get('rainlab.pages::lang.page.template_title');
 
         if (Request::ajax() && Request::input('formWidgetAlias')) {
             $this->bindFormWidgetToController();
         }
-
-        $this->vars['layoutIgnoreTouchNavigation'] = true;
     }
 
     public function index_onOpen()
