@@ -22,6 +22,7 @@ use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
 use ApplicationException;
 use Twig\Node\Node as TwigNode;
+use Cms\Classes\CodeParser;
 
 /**
  * Represents a static page.
@@ -958,5 +959,16 @@ class Page extends ContentBase
      */
     protected function checkSafeMode()
     {
+    }
+
+    public function layoutForm() {
+        if (!($layout = $this->getLayoutObject())) {
+            return;
+        }
+
+        $parser = new CodeParser($layout);
+        $layout = $parser->source(null, null, null);
+
+        return collect($layout::defineForm());
     }
 }
