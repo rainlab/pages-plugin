@@ -969,6 +969,6 @@ class Page extends ContentBase
         $parser = new CodeParser($layout);
         $layout = $parser->source(null, null, null);
 
-        return collect($layout::defineForm());
+        return method_exists($layout, 'defineForm')) ? collect($layout::defineForm()) : null;
     }
 }
