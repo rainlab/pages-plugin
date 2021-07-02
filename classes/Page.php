@@ -5,24 +5,21 @@ use File;
 use Lang;
 use Cache;
 use Event;
-use Route;
 use Config;
 use Validator;
-use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
 use Cms\Classes\Layout;
 use Cms\Classes\Content as ContentBase;
+use Cms\Classes\CodeParser;
 use Cms\Classes\ComponentManager;
 use System\Helpers\View as ViewHelper;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
 use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
-use ApplicationException;
 use Twig\Node\Node as TwigNode;
-use Cms\Classes\CodeParser;
 
 /**
  * Represents a static page.
@@ -961,14 +958,23 @@ class Page extends ContentBase
     {
     }
 
-    public function layoutForm() {
+    /**
+     * getPhpFormFieldsFromLayout will request the form fields defined by the layout
+     * if a defineCustomPageFields method is defined in the layout code section.
+     */
+    public function getPhpFormFieldsFromLayout(): ?array
+    {
         if (!($layout = $this->getLayoutObject())) {
-            return;
+            return null;
         }
 
         $parser = new CodeParser($layout);
         $layout = $parser->source(null, null, null);
 
-        return method_exists($layout, 'defineForm') ? collect($layout::defineForm()) : null;
+        if (!$layout->methodExists('defineCustomPageFields')) {
+            return null;
+        }
+
+        return (array) $layout->defineCustomPageFields();
     }
 }

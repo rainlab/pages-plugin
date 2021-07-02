@@ -6,9 +6,7 @@ use Flash;
 use Event;
 use Config;
 use Request;
-use Response;
 use BackendMenu;
-use Cms\Classes\Layout;
 use Cms\Classes\Theme;
 use Cms\Classes\CmsObject;
 use Cms\Classes\CmsCompoundObject;
@@ -18,9 +16,7 @@ use Backend\Classes\Controller;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
 use RainLab\Pages\Widgets\SnippetList;
-use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\Page as StaticPage;
-use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Plugin as PagesPlugin;
@@ -591,31 +587,38 @@ class Index extends Controller
                 $this->checkContentField($widget, $object);
                 $this->addPagePlaceholders($widget, $object);
                 $this->addPageSyntaxFields($widget, $object);
-                $this->addLayoutFormFields($widget, $object);
+                $this->addPagePhpFormFields($widget, $object);
             });
         }
 
         return $widget;
     }
 
-    protected function addLayoutFormFields($formWidget, $page) {
-        $form = $page->layoutForm();
+    /**
+     * addPagePhpFormFields will add fields to the form widget if they are defined
+     * by the layout code section using the defineCustomPageFields method
+     */
+    protected function addPagePhpFormFields($formWidget, $page): void
+    {
+        $fields = $page->getPhpFormFieldsFromLayout();
 
-        if (is_null($form)) {
+        if (!$fields || !is_array($fields)) {
             return;
         }
 
-        $layoutFieldBag = $form->mapWithKeys(function($fieldConfig, $name) {
+        $layoutFieldBag = collect($fields)->mapWithKeys(function($fieldConfig, $name) {
             $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
-            return [ "viewBag[{$name}]" => $fieldConfig ];
+            return [
+                "viewBag[${name}]" => $fieldConfig
+            ];
         })->toArray();
 
-        $formWidget->secondaryTabs['fields'] = array_merge(
-            $layoutFieldBag,
-            $formWidget->secondaryTabs['fields'],
-        );
+        $formWidget->secondaryTabs['fields'] += $layoutFieldBag;
     }
 
+    /**
+     * checkContentField
+     */
     protected function checkContentField($formWidget, $page)
     {
         if (!($layout = $page->getLayoutObject())) {
@@ -633,6 +636,9 @@ class Index extends Controller
         }
     }
 
+    /**
+     * addPageSyntaxFields
+     */
     protected function addPageSyntaxFields($formWidget, $page)
     {
         $fields = $page->listLayoutSyntaxFields();
@@ -905,7 +911,7 @@ class Index extends Controller
     }
 
     /**
-     * Returns a list of content files
+     * getContentTemplateList returns a list of content files
      * @return \October\Rain\Database\Collection
      */
     protected function getContentTemplateList()
@@ -916,10 +922,7 @@ class Index extends Controller
          * @event pages.content.templateList
          * Provides opportunity to filter the items returned to the ContentList widget used by the RainLab.Pages plugin in the backend.
          *
-         * >**NOTE**: Recommended to just use cms.object.listInTheme instead
-         *
-         * Parameter provided is `$templates` (a collection of the Content CmsObjects being returned).
-         * > Note: The `$templates` parameter provided is an object reference to a CmsObjectCollection, to make changes you must use object modifying methods.
+         * Parameter provided is `$templates` (a CmsObjectCollection of the Content CmsObjects being returned).
          *
          * Example usage (only shows allowed content files):
          *
@@ -931,18 +934,6 @@ class Index extends Controller
          *           }
          *       });
          *
-         * Or:
-         *
-         *     \RainLab\Pages\Controller\Index::extend(function ($controller) {
-         *           $controller->bindEvent('content.templateList', function ($templates) {
-         *               foreach ($templates as $index = $content) {
-         *                   if (!in_array($content->fileName, $allowedContent)) {
-         *                       $templates->forget($index);
-         *                   }
-         *               }
-         *           });
-         *      });
-         * }
          */
         if (
             ($event = $this->fireEvent('content.templateList', [$templates], true)) ||

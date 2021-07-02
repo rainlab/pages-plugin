@@ -430,6 +430,26 @@ You may also use the `{repeater}` tag for repeating content:
 
 For more details on syntax fields, see the [Parser section](https://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
+##### Custom page fields using PHP
+
+As an alternative to using Syntax Fields described above, you may also define form fields for the page programatically by defining a `defineCustomPageFields` PHP function inside the layout code section. The following code, when added to a layout's PHP code section, will add a repeater for all pages that select this layout.
+
+    function defineCustomPageFields() {
+        return [
+            'boxes' => [
+                'type' => 'repeater',
+                'tab' => 'Blocks',
+                'form' => [
+                    'fields' => [
+                        ['label' => 'Heading'],
+                        ['label' => 'Body', 'type' => 'textarea'],
+                        ['label' => 'Image', 'type' => 'mediafinder']
+                    ]
+                ]
+            ]
+        ];
+    }
+
 ##### Custom menu item form fields
 
 Just like CMS objects have the view bag component to store arbitrary values, you may use the `viewBag` property of the `MenuItem` class to store custom data values and add corresponding form fields.
