@@ -591,10 +591,29 @@ class Index extends Controller
                 $this->checkContentField($widget, $object);
                 $this->addPagePlaceholders($widget, $object);
                 $this->addPageSyntaxFields($widget, $object);
+                $this->addLayoutFormFields($widget, $object);
             });
         }
 
         return $widget;
+    }
+
+    protected function addLayoutFormFields($formWidget, $page) {
+        $form = $page->layoutForm();
+
+        if (is_null($form)) {
+            return;
+        }
+
+        $layoutFieldBag = $form->mapWithKeys(function($fieldConfig, $name) {
+            $fieldConfig['cssClass'] = 'secondary-tab ' . array_get($fieldConfig, 'cssClass', '');
+            return [ "viewBag[{$name}]" => $fieldConfig ];
+        })->toArray();
+
+        $formWidget->secondaryTabs['fields'] = array_merge(
+            $layoutFieldBag,
+            $formWidget->secondaryTabs['fields'],
+        );
     }
 
     protected function checkContentField($formWidget, $page)
