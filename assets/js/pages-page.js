@@ -479,6 +479,9 @@
             $primaryPanel.parent().removeClass('min-size');
         }
 
+        $secondaryPanel.find('> .tab-content > .tab-pane:gt(0)').addClass('padded-pane');
+        $secondaryPanel.find('> .layout-row > .nav-tabs > li:gt(0)').addClass('tab-content-bg');
+
         $collapseIcon.click(function(){
             $panel.toggleClass('collapsed')
 
