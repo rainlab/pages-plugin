@@ -26,6 +26,10 @@
                 }
             }
         }
+
+        &.active > a:before {
+            background-position: 0 -60px;
+        }
     }
 }
 
@@ -53,6 +57,10 @@
                 background-position: 0 -27px;
             }
         }
+    }
+
+    li.active > a:before {
+        background-position: 0 -27px;
     }
 
     li.group ul li > a:before {
@@ -84,7 +92,7 @@
             .page-snippet-icon();
 
             left: 18px;
-            top: 17px;
+            top: 12px;
         }
 
         &:hover {
@@ -114,6 +122,10 @@
                     }
                 }
             }
+
+            &.active > a:before {
+                background-position: 0px -40px;
+            }
         }
     }
 
@@ -130,6 +142,10 @@
                         background-position: 0px -52px;
                     }
                 }
+            }
+
+            &.active a:before {
+                background-position: 0px -52px;
             }
         }
     }

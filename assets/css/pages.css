@@ -16,6 +16,9 @@
 .control-filelist.menu-list li > a:hover:before {
   background-position: 0 -60px;
 }
+.control-filelist.menu-list li.active > a:before {
+  background-position: 0 -60px;
+}
 .control-filelist.content li > a {
   position: relative;
 }
@@ -34,6 +37,9 @@
 .control-filelist.content li > a:hover:before {
   background-position: 0 -27px;
 }
+.control-filelist.content li.active > a:before {
+  background-position: 0 -27px;
+}
 .control-filelist.content li.group ul li > a:before {
   left: 34px;
 }
@@ -45,13 +51,14 @@
   position: absolute;
   width: 17px;
   height: 19px;
+  top: 13px;
   content: ' ';
   background-image: url(../images/snippet-icons.png);
   background-position: 0 0;
   background-repeat: no-repeat;
   background-size: 34px auto;
   left: 18px;
-  top: 13px;
+  top: 12px;
 }
 .control-filelist.snippet-list li > a:hover:before {
   background-position: 0 -21px;
@@ -67,11 +74,17 @@
   .control-filelist.menu-list li > a:hover:before {
     background-position: 0px -40px;
   }
+  .control-filelist.menu-list li.active > a:before {
+    background-position: 0px -40px;
+  }
   .control-filelist.content li a:before {
     background-position: 0px -27px;
     background-size: 17px auto;
   }
   .control-filelist.content li a:hover:before {
+    background-position: 0px -52px;
+  }
+  .control-filelist.content li.active a:before {
     background-position: 0px -52px;
   }
   .control-filelist.snippet-list li a:before {
@@ -83,7 +96,7 @@
   }
 }
 .fancy-layout .pagesTextEditor {
-  border-left: 1px solid #bdc3c7 !important;
+  border-left: 1px solid #CFD7E1 !important;
 }
 .control-richeditor [data-snippet]:before {
   content: attr(data-name);
@@ -93,7 +106,7 @@
   width: 17px;
   height: 19px;
   left: 18px;
-  top: 17px;
+  top: 13px;
   content: ' ';
   background-image: url(../images/snippet-icons.png);
   background-position: 0 0;
@@ -119,8 +132,4 @@
     background-position: 0px -21px;
     background-size: 17px auto;
   }
-}
-.form-group.secondary-tab {
-    padding: 10px 20px;
-    background: #fff;
 }
