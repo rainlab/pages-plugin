@@ -601,6 +601,8 @@ class Page extends ContentBase
             $markup = TextParser::parse($markup, $globalVars);
         }
 
+        Event::fire('pages.page.markup', [&$markup]);
+
         return $this->processedMarkupCache = $markup;
     }
 
