@@ -116,6 +116,10 @@ class Router
                 'titles' => []
             ];
             foreach ($pages as $page) {
+                if (!$page) {
+                    continue;
+                }
+
                 $url = $page->getViewBag()->property('url');
                 if (!$url) {
                     continue;
