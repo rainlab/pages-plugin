@@ -621,6 +621,10 @@ class Index extends Controller
         foreach ($fields as $fieldCode => $fieldConfig) {
             if ($fieldConfig['type'] == 'fileupload') continue;
 
+            if (in_array($fieldConfig['type'], ['richeditor', 'codeeditor'])) {
+                $fieldConfig['legacyMode'] = true;
+            }
+
             if ($fieldConfig['type'] == 'repeater') {
                 if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
                     $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
@@ -667,7 +671,8 @@ class Index extends Controller
             $fieldConfig = [
                 'tab'     => $placeholderTitle,
                 'stretch' => '1',
-                'size'    => 'huge'
+                'size'    => 'huge',
+                'legacyMode' => true
             ];
 
             if ($info['type'] != 'text') {
