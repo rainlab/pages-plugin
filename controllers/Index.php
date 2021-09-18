@@ -614,28 +614,46 @@ class Index extends Controller
         }
     }
 
-    protected function addPageSyntaxFields($formWidget, $page)
+    /**
+     * modLegacyModeFields will ensure specific field types use legacy mode
+     */
+    protected function modLegacyModeFields($fields)
     {
-        $fields = $page->listLayoutSyntaxFields();
-
-        foreach ($fields as $fieldCode => $fieldConfig) {
-            if ($fieldConfig['type'] == 'fileupload') continue;
-
+        foreach ($fields as &$fieldConfig) {
             if (in_array($fieldConfig['type'], ['richeditor', 'codeeditor'])) {
                 $fieldConfig['legacyMode'] = true;
             }
+        }
 
-            if ($fieldConfig['type'] == 'repeater') {
+        return $fields;
+    }
+
+    /**
+     * addPageSyntaxFields adds syntax defined fields to the form
+     */
+    protected function addPageSyntaxFields($formWidget, $page)
+    {
+        $fields = $page->listLayoutSyntaxFields();
+        $fields = $this->modLegacyModeFields($fields);
+
+        foreach ($fields as $fieldCode => $fieldConfig) {
+            if ($fieldConfig['type'] === 'fileupload') {
+                continue;
+            }
+
+            if ($fieldConfig['type'] === 'repeater') {
                 if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
-                    $fieldConfig['form']['fields'] = array_get($fieldConfig, 'fields', []);
+                    $repeaterFields = array_get($fieldConfig, 'fields', []);
+                    $repeaterFields = $this->modLegacyModeFields($repeaterFields);
+                    $fieldConfig['form']['fields'] = $repeaterFields;
                     unset($fieldConfig['fields']);
                 }
             }
 
             /*
-            * Custom fields placement
-            */
-            $placement = (!empty($fieldConfig['placement']) ? $fieldConfig['placement'] : NULL);
+             * Custom fields placement
+             */
+            $placement = !empty($fieldConfig['placement']) ? $fieldConfig['placement'] : null;
 
             switch ($placement) {
                 case 'primary':
