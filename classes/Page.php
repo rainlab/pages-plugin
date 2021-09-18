@@ -578,6 +578,9 @@ class Page extends ContentBase
         $this->attributes['placeholders'] = $placeholders;
     }
 
+    /**
+     * getProcessedMarkup will return the processed markup of a page
+     */
     public function getProcessedMarkup()
     {
         if ($this->processedMarkupCache !== false) {
@@ -600,6 +603,11 @@ class Page extends ContentBase
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
+
+        /*
+         * Event hook
+         */
+        Event::fire('pages.page.getProcessedMarkup', [&$markup]);
 
         return $this->processedMarkupCache = $markup;
     }
