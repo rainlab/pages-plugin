@@ -61,3 +61,4 @@
 1.4.5: Minor styling improvements
 1.4.6: Minor styling improvements
 1.4.7: Minor layout fix in the Page editor
+1.4.8: Fixes rich editor usage inside repeaters. Adds getProcessedMarkup event.
