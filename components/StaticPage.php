@@ -1,9 +1,9 @@
 <?php namespace RainLab\Pages\Components;
 
-use Request;
 use Cms\Classes\Theme;
 use Cms\Classes\ComponentBase;
 use RainLab\Pages\Classes\Router;
+use Cms\Models\MaintenanceSetting;
 
 /**
  * The static page component.
@@ -40,7 +40,7 @@ class StaticPage extends ComponentBase
             'description' => 'rainlab.pages::lang.component.static_page_description'
         ];
     }
-    
+
     public function defineProperties()
     {
         return [
@@ -64,7 +64,6 @@ class StaticPage extends ComponentBase
                 'type'              => 'string',
                 'showExternalParam' => false
             ]
-            
         ];
     }
 
@@ -74,6 +73,10 @@ class StaticPage extends ComponentBase
 
         if (!strlen($url)) {
             $url = '/';
+        }
+
+        if ($this->isMaintenanceModeEnabled()) {
+            return;
         }
 
         $router = new Router(Theme::getActiveTheme());
@@ -144,6 +147,23 @@ class StaticPage extends ComponentBase
         }
 
         return $extraData;
+    }
+
+    /**
+     * isMaintenanceModeEnabled will check if maintenance mode is currently enabled.
+     * Static page logic should be disabled when this occurs.
+     */
+    protected function isMaintenanceModeEnabled(): bool
+    {
+        // Logic for October CMS v2.0
+        if (method_exists(MaintenanceSetting::class, 'isEnabled')) {
+            return MaintenanceSetting::isEnabled();
+        }
+
+        // Logic for October CMS v1.0
+        return MaintenanceSetting::isConfigured() &&
+            MaintenanceSetting::get('is_enabled', false) &&
+            !\BackendAuth::getUser();
     }
 
     /**
