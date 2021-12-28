@@ -145,7 +145,7 @@ The field's assigned value will be the static menu's code, which can be used to 
 The `placeholder` tag accepts some optional attributes:
 
 - `title`: manages the tab title in the Static Page editor.
-- `type`: manages the placeholder type. There are two types supported at the moment - **text**,  **html** and **hidden**.
+- `type`: manages the placeholder type. The following values are supported - **text**,  **html** and **hidden**.
 
 The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code:
 
