@@ -145,8 +145,7 @@ The field's assigned value will be the static menu's code, which can be used to 
 The `placeholder` tag accepts some optional attributes:
 
 - `title`: manages the tab title in the Static Page editor.
-- `type`: manages the placeholder type. There are two types supported at the moment - **text** and **html**.
-- `ignore`: if set to true, will be ignored by the Static Page editor.
+- `type`: manages the placeholder type. There are two types supported at the moment - **text**,  **html** and **hidden**.
 
 The content of text placeholders is escaped before it's displayed. Text placeholders are edited with a regular (non-WYSIWYG) text editor. The title and type attributes should be defined after the placeholder code:
 
@@ -158,9 +157,9 @@ They should also appear after the `default` attribute, if it's presented.
         There is no ordering information for this product.
     {% endplaceholder %}
 
-To prevent a placeholder from appearing in the editor set the `ignore` attribute.
+To prevent a placeholder from appearing in the editor set the `type` attribute to **hidden**.
 
-    {% placeholder systemInfo ignore=true %}
+    {% placeholder systemInfo type="hidden" %}
 
 ### Creating new menu item types
 

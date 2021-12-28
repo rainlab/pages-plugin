@@ -478,10 +478,13 @@ class Page extends ContentBase
 
             $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
             $ignore = $node->hasAttribute('ignore') ? trim($node->getAttribute('ignore')) : false;
+            if ($type === 'hidden') {
+                $ignore = true;
+            }
 
             $placeholderInfo = [
-                'title'  => $title,
-                'type'   => $type ?: 'html',
+                'title' => $title,
+                'type' => $type ?: 'html',
                 'ignore' => $ignore
             ];
 
