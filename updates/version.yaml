@@ -64,3 +64,4 @@
 1.4.8: Fixes rich editor usage inside repeaters. Adds getProcessedMarkup event.
 1.4.9: Fixes a lifecycle issue when switching the page layout.
 1.4.10: Fixes maintenance mode when using static pages.
+1.4.11: Adds type hidden to content placeholders.
