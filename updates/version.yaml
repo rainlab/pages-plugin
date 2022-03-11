@@ -1,67 +1,68 @@
-1.0.1: Implemented the static pages management and the Static Page component.
-1.0.2: Fixed the page preview URL.
-1.0.3: Implemented menus.
-1.0.4: Implemented the content block management and placeholder support.
-1.0.5: Added support for the Sitemap plugin.
-1.0.6: Minor updates to the internal API.
-1.0.7: Added the Snippets feature.
-1.0.8: Minor improvements to the code.
-1.0.9: Fixes issue where Snippet tab is missing from the Partials form.
-1.0.10: Add translations for various locales.
-1.0.11: Fixes issue where placeholders tabs were missing from Page form.
-1.0.12: Implement Media Manager support.
-1.1.0:
+v1.0.1: Implemented the static pages management and the Static Page component.
+v1.0.2: Fixed the page preview URL.
+v1.0.3: Implemented menus.
+v1.0.4: Implemented the content block management and placeholder support.
+v1.0.5: Added support for the Sitemap plugin.
+v1.0.6: Minor updates to the internal API.
+v1.0.7: Added the Snippets feature.
+v1.0.8: Minor improvements to the code.
+v1.0.9: Fixes issue where Snippet tab is missing from the Partials form.
+v1.0.10: Add translations for various locales.
+v1.0.11: Fixes issue where placeholders tabs were missing from Page form.
+v1.0.12: Implement Media Manager support.
+v1.1.0:
   - Adds meta title and description to pages. Adds |staticPage filter.
   - snippets_rename_viewbag_properties.php
-1.1.1: Add support for Syntax Fields.
-1.1.2: Static Breadcrumbs component now respects the hide from navigation setting.
-1.1.3: Minor back-end styling fix.
-1.1.4: Minor fix to the StaticPage component API.
-1.1.5: Fixes bug when using syntax fields.
-1.1.6: Minor styling fix to the back-end UI.
-1.1.7: Improved menu item form to include CSS class, open in a new window and hidden flag.
-1.1.8: Improved the output of snippet partials when saved.
-1.1.9: Minor update to snippet inspector internal API.
-1.1.10: Fixes a bug where selecting a layout causes permanent unsaved changes.
-1.1.11: Add support for repeater syntax field.
-1.2.0: Added support for translations, UI updates.
-1.2.1: Use nice titles when listing the content files.
-1.2.2: Minor styling update.
-1.2.3: Snippets can now be moved by dragging them.
-1.2.4: Fixes a bug where the cursor is misplaced when editing text files.
-1.2.5: Fixes a bug where the parent page is lost upon changing a page layout.
-1.2.6: Shared view variables are now passed to static pages.
-1.2.7: Fixes issue with duplicating properties when adding multiple snippets on the same page.
-1.2.8: Fixes a bug where creating a content block without extension doesn't save the contents to file.
-1.2.9: Add conditional support for translating page URLs.
-1.2.10: Streamline generation of URLs to use the new Cms::url helper.
-1.2.11: Implements repeater usage with translate plugin.
-1.2.12: Fixes minor issue when using snippets and switching the application locale.
-1.2.13: Fixes bug when AJAX is used on a page that does not yet exist.
-1.2.14: Add theme logging support for changes made to menus.
-1.2.15: Back-end navigation sort order updated.
-1.2.16: Fixes a bug when saving a template that has been modified outside of the CMS (mtime mismatch).
-1.2.17: Changes locations of custom fields to secondary tabs instead of the primary Settings area. New menu search ability on adding menu items
-1.2.18: Fixes cache-invalidation issues when RainLab.Translate is not installed. Added Greek & Simplified Chinese translations. Removed deprecated calls. Allowed saving HTML in snippet properties. Added support for the MediaFinder in menu items.
-1.2.19: Catch exception with corrupted menu file.
-1.2.20: StaticMenu component now exposes menuName property; added pages.menu.referencesGenerated event.
-1.2.21: Fixes a bug where last Static Menu item cannot be deleted. Improved Persian, Slovak and Turkish translations.
-1.3.0: Added support for using Database-driven Themes when enabled in the CMS configuration.
-1.3.1: Added ChildPages Component, prevent hidden pages from being returned via menu item resolver.
-1.3.2: Fixes error when creating a subpage whose parent has no layout set.
-1.3.3: Improves user experience for users with only partial access through permissions
-1.3.4: Fix error where large menus were being truncated due to the PHP "max_input_vars" configuration value. Improved Slovenian translation.
-1.3.5: Minor fix to bust the browser cache for JS assets. Prevent duplicate property fields in snippet inspector.
-1.3.6: ChildPages component now displays localized page titles from Translate plugin.
-1.3.7: Adds MenuPicker formwidget. Adds future support for v2.0 of October CMS.
-1.4.0: Fixes bug when adding menu items in October CMS v2.0.
-1.4.1: Fixes support for configuration values.
-1.4.3: Fixes page deletion is newer platform builds.
-1.4.4: Disable touch device detection
-1.4.5: Minor styling improvements
-1.4.6: Minor styling improvements
-1.4.7: Minor layout fix in the Page editor
-1.4.8: Fixes rich editor usage inside repeaters. Adds getProcessedMarkup event.
-1.4.9: Fixes a lifecycle issue when switching the page layout.
-1.4.10: Fixes maintenance mode when using static pages.
-1.4.11: Adds type hidden to content placeholders.
+v1.1.1: Add support for Syntax Fields.
+v1.1.2: Static Breadcrumbs component now respects the hide from navigation setting.
+v1.1.3: Minor back-end styling fix.
+v1.1.4: Minor fix to the StaticPage component API.
+v1.1.5: Fixes bug when using syntax fields.
+v1.1.6: Minor styling fix to the back-end UI.
+v1.1.7: Improved menu item form to include CSS class, open in a new window and hidden flag.
+v1.1.8: Improved the output of snippet partials when saved.
+v1.1.9: Minor update to snippet inspector internal API.
+v1.1.10: Fixes a bug where selecting a layout causes permanent unsaved changes.
+v1.1.11: Add support for repeater syntax field.
+v1.2.0: Added support for translations, UI updates.
+v1.2.1: Use nice titles when listing the content files.
+v1.2.2: Minor styling update.
+v1.2.3: Snippets can now be moved by dragging them.
+v1.2.4: Fixes a bug where the cursor is misplaced when editing text files.
+v1.2.5: Fixes a bug where the parent page is lost upon changing a page layout.
+v1.2.6: Shared view variables are now passed to static pages.
+v1.2.7: Fixes issue with duplicating properties when adding multiple snippets on the same page.
+v1.2.8: Fixes a bug where creating a content block without extension doesn't save the contents to file.
+v1.2.9: Add conditional support for translating page URLs.
+v1.2.10: Streamline generation of URLs to use the new Cms::url helper.
+v1.2.11: Implements repeater usage with translate plugin.
+v1.2.12: Fixes minor issue when using snippets and switching the application locale.
+v1.2.13: Fixes bug when AJAX is used on a page that does not yet exist.
+v1.2.14: Add theme logging support for changes made to menus.
+v1.2.15: Back-end navigation sort order updated.
+v1.2.16: Fixes a bug when saving a template that has been modified outside of the CMS (mtime mismatch).
+v1.2.17: Changes locations of custom fields to secondary tabs instead of the primary Settings area. New menu search ability on adding menu items
+v1.2.18: Fixes cache-invalidation issues when RainLab.Translate is not installed. Added Greek & Simplified Chinese translations. Removed deprecated calls. Allowed saving HTML in snippet properties. Added support for the MediaFinder in menu items.
+v1.2.19: Catch exception with corrupted menu file.
+v1.2.20: StaticMenu component now exposes menuName property; added pages.menu.referencesGenerated event.
+v1.2.21: Fixes a bug where last Static Menu item cannot be deleted. Improved Persian, Slovak and Turkish translations.
+v1.3.0: Added support for using Database-driven Themes when enabled in the CMS configuration.
+v1.3.1: Added ChildPages Component, prevent hidden pages from being returned via menu item resolver.
+v1.3.2: Fixes error when creating a subpage whose parent has no layout set.
+v1.3.3: Improves user experience for users with only partial access through permissions
+v1.3.4: Fix error where large menus were being truncated due to the PHP "max_input_vars" configuration value. Improved Slovenian translation.
+v1.3.5: Minor fix to bust the browser cache for JS assets. Prevent duplicate property fields in snippet inspector.
+v1.3.6: ChildPages component now displays localized page titles from Translate plugin.
+v1.3.7: Adds MenuPicker formwidget. Adds future support for v2.0 of October CMS.
+v1.4.0: Fixes bug when adding menu items in October CMS v2.0.
+v1.4.1: Fixes support for configuration values.
+v1.4.3: Fixes page deletion is newer platform builds.
+v1.4.4: Disable touch device detection
+v1.4.5: Minor styling improvements
+v1.4.6: Minor styling improvements
+v1.4.7: Minor layout fix in the Page editor
+v1.4.8: Fixes rich editor usage inside repeaters. Adds getProcessedMarkup event.
+v1.4.9: Fixes a lifecycle issue when switching the page layout.
+v1.4.10: Fixes maintenance mode when using static pages.
+v1.4.11: Adds type hidden to content placeholders.
+v1.4.12: Improve support with October v2.2

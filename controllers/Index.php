@@ -641,7 +641,7 @@ class Index extends Controller
                 continue;
             }
 
-            if ($fieldConfig['type'] === 'repeater') {
+            if (in_array($fieldConfig['type'], ['repeater', 'nestedform'])) {
                 if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
                     $repeaterFields = array_get($fieldConfig, 'fields', []);
                     $repeaterFields = $this->modLegacyModeFields($repeaterFields);
