@@ -76,7 +76,7 @@ class Controller
 
         CmsException::mask($staticPage, 400);
         $loader->setObject($staticPage);
-        $template = $twig->loadTemplate($staticPage->getFilePath());
+        $template = $twig->load($staticPage->getFilePath());
         $template->render([]);
         CmsException::unmask();
     }
