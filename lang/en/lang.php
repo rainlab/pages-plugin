@@ -79,6 +79,11 @@ return [
         'saved' => 'The content has been successfully saved.',
         'cant_save_to_dir' => 'Saving content files to the static-pages directory is not allowed.',
     ],
+    'template' => [
+        'order_by' => 'Order by',
+        'no_list_records' => 'No records found',
+        'delete_confirm' => 'Delete selected templates?',
+    ],
     'sidebar' => [
         'add' => 'Add',
         'search' => 'Search...',
