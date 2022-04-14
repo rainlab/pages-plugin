@@ -67,3 +67,4 @@ v1.4.10: Fixes maintenance mode when using static pages.
 v1.4.11: Adds type hidden to content placeholders.
 v1.4.12: Improve support with October v2.2
 v1.4.13: Improve support with October v3.0 Beta
+v1.4.14: Fixes support with October v3
