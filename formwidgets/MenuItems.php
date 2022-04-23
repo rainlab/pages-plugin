@@ -1,6 +1,5 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
-use Request;
 use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\MenuItem;
 
