@@ -16,21 +16,21 @@ class Plugin extends PluginBase
     public function pluginDetails()
     {
         return [
-            'name'        => 'rainlab.pages::lang.plugin.name',
+            'name' => 'rainlab.pages::lang.plugin.name',
             'description' => 'rainlab.pages::lang.plugin.description',
-            'author'      => 'Alexey Bobkov, Samuel Georges',
-            'icon'        => 'icon-files-o',
-            'homepage'    => 'https://github.com/rainlab/pages-plugin'
+            'author' => 'Alexey Bobkov, Samuel Georges',
+            'icon' => 'icon-files-o',
+            'homepage' => 'https://github.com/rainlab/pages-plugin'
         ];
     }
 
     public function registerComponents()
     {
         return [
-            '\RainLab\Pages\Components\ChildPages' => 'childPages',
-            '\RainLab\Pages\Components\StaticPage' => 'staticPage',
-            '\RainLab\Pages\Components\StaticMenu' => 'staticMenu',
-            '\RainLab\Pages\Components\StaticBreadcrumbs' => 'staticBreadcrumbs'
+            \RainLab\Pages\Components\ChildPages::class => 'childPages',
+            \RainLab\Pages\Components\StaticPage::class => 'staticPage',
+            \RainLab\Pages\Components\StaticMenu::class => 'staticMenu',
+            \RainLab\Pages\Components\StaticBreadcrumbs::class => 'staticBreadcrumbs'
         ];
     }
 
@@ -234,7 +234,7 @@ class Plugin extends PluginBase
     {
         return [
             'filters' => [
-                'staticPage' => ['RainLab\Pages\Classes\Page', 'url']
+                'staticPage' => [\RainLab\Pages\Classes\Page::class, 'url']
             ]
         ];
     }
