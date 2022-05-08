@@ -650,6 +650,11 @@ class Page extends ContentBase
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
+        
+        /*
+         * Event hook
+         */
+        Event::fire('pages.page.getProcessedPlaceholderMarkup', [&$markup]);
 
         return $this->processedBlockMarkupCache[$placeholderName] = $markup;
     }
