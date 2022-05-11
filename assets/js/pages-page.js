@@ -205,14 +205,14 @@
             $tabPane = $form.closest('.tab-pane')
 
          // Update the visibilities of the commit & reset buttons
-        $('[data-control=commit-button]', $form).toggleClass('hide', !data.canCommit)
-        $('[data-control=reset-button]', $form).toggleClass('hide', !data.canReset)
+        $('[data-control=commit-button]', $form).toggleClass('oc-hide hide', !data.canCommit)
+        $('[data-control=reset-button]', $form).toggleClass('oc-hide hide', !data.canReset)
 
         if (data.objectPath !== undefined) {
             $('input[name=objectPath]', $form).val(data.objectPath)
             $('input[name=objectMtime]', $form).val(data.objectMtime)
-            $('[data-control=delete-button]', $form).removeClass('hide')
-            $('[data-control=preview-button]', $form).removeClass('hide')
+            $('[data-control=delete-button]', $form).removeClass('oc-hide hide')
+            $('[data-control=preview-button]', $form).removeClass('oc-hide hide')
 
             if (data.pageUrl !== undefined)
                 $('[data-control=preview-button]', $form).attr('href', data.pageUrl)
@@ -235,7 +235,8 @@
         if (objectType.length > 0 &&
             (context.handler == 'onSave' || context.handler == 'onCommit' || context.handler == 'onReset')
         )
-           this.updateObjectList(objectType)
+
+        this.updateObjectList(objectType);
 
         if (context.handler == 'onSave' && (!data['X_OCTOBER_ERROR_FIELDS'] && !data['X_OCTOBER_ERROR_MESSAGE']))
             $form.trigger('unchange.oc.changeMonitor')
@@ -530,8 +531,8 @@
 
         $form.on('changed.oc.changeMonitor', function() {
             $panel.trigger('modified.oc.tab')
-            $panel.find('[data-control=commit-button]').addClass('hide');
-            $panel.find('[data-control=reset-button]').addClass('hide');
+            $panel.find('[data-control=commit-button]').addClass('oc-hide hide');
+            $panel.find('[data-control=reset-button]').addClass('oc-hide hide');
             self.updateModifiedCounter()
         })
 
