@@ -94,10 +94,11 @@ class Index extends Controller
 
     public function index()
     {
-        $this->addJs('/plugins/rainlab/pages/assets/js/october.treeview.js', 'core');
+        $this->addJs('/plugins/rainlab/pages/assets/js/october.treeview.js', 'RainLab.Pages');
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js', 'RainLab.Pages');
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js', 'RainLab.Pages');
         $this->addCss('/plugins/rainlab/pages/assets/css/pages.css', 'RainLab.Pages');
+        $this->addCss('/plugins/rainlab/pages/assets/css/treeview.css', 'RainLab.Pages');
 
         // Preload the code editor class as it could be needed
         // before it loads dynamically.

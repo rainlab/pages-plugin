@@ -11,4 +11,5 @@
 
 module.exports = (mix) => {
     mix.less('plugins/rainlab/pages/assets/less/pages.less', 'plugins/rainlab/pages/assets/css/');
+    mix.less('plugins/rainlab/pages/assets/less/treeview.less', 'plugins/rainlab/pages/assets/css/');
 }
