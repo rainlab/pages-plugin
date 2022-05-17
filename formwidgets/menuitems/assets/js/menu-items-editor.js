@@ -93,7 +93,7 @@
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
                     var title = $.trim(selectedTitle.replace(/\s*\[.*\]$/, ''))
                     $titleField.val(title)
-                    
+
                     // Support for RainLab.Translate
                     var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                     if (defaultLocale) {
@@ -190,7 +190,7 @@
             }
         }
 
-        var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
+        var defaultLocale = $('[data-control="multilingual"]', $popupContainer).data('default-locale')
         $.each(properties, function(property, val) {
             if (property == 'viewBag') {
                 $.each(val, function(vbProperty, vbVal) {
@@ -212,45 +212,54 @@
                 /**
                  * Mediafinder support
                  */
-                var mediafinderElements = $('[data-control="mediafinder"]');
+                var mediafinderElements = $('[data-control="mediafinder"]', $popupContainer);
                 var storageMediaPath = $('[data-storage-media-path]').data('storage-media-path');
 
                 $.each(mediafinderElements, function() {
+                    var input = $(this).find('> input'),
+                        propertyName = input.attr('name'),
+                        propertyNameSimple;
 
-                      var input = $(this).find('>input');
-                      var propertyName = input.attr('name');
+                    if (propertyName && propertyName.length) {
+                        propertyNameSimple = propertyName.substr(8).slice(0, -1);
+                    }
 
-                      if( propertyName.length ) {
-                          var propertyNameSimple = propertyName.substr(8).slice(0,-1);
-                      }
+                    var propertyValue = '';
 
-                      var propertyValue = '';
+                    $.each(val, function(vbProperty, vbVal) {
+                        if (vbProperty == propertyNameSimple) {
+                            propertyValue = vbVal;
+                        }
+                    });
 
-                      $.each(val, function(vbProperty, vbVal) {
-                          if( vbProperty == propertyNameSimple ) {
-                              propertyValue = vbVal;
-                          }
-                      });
+                    if (propertyValue != '') {
+                        // v2 media finder
+                        var dataLocker = $('[data-data-locker]', this);
+                        if (dataLocker.length) {
+                            var items = [{
+                                path: propertyValue,
+                                publicUrl: storageMediaPath + propertyValue,
+                                title: propertyValue.substring(1)
+                            }];
 
-                      if( propertyValue != '' ) {
+                            mediaFinder.addItems(items);
+                        }
+                        // v1 media finder
+                        else {
+                            $(this).toggleClass('is-populated');
+                            input.attr('value', propertyValue);
 
-                          $(this).toggleClass('is-populated');
-                          input.attr('value', propertyValue);
+                            var image = $('[data-find-image]', this);
+                            if (image.length) {
+                                image.attr('src', storageMediaPath + propertyValue);
+                            }
 
-                          var image = $(this).find('[data-find-image]');
-
-                          if( image.length ) {
-                              image.attr('src', storageMediaPath + propertyValue );
-                          }
-
-                          var file = $(this).find('[data-find-file-name]');
-
-                          if( file.length ) {
-                              file.text( propertyValue.substr(1) );
-                          }
-
-                      }
-
+                            var file = $('[data-find-file-name]', this);
+                            if (file.length) {
+                                file.text(propertyValue.substring(1));
+                            }
+                        }
+                    }
                 });
 
             }
