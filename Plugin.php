@@ -70,6 +70,7 @@ class Plugin extends PluginBase
                 'iconSvg'     => 'plugins/rainlab/pages/assets/images/pages-icon.svg',
                 'permissions' => ['rainlab.pages.*'],
                 'order'       => 200,
+                'useDropdown' => false,
 
                 'sideMenu' => [
                     'pages' => [
