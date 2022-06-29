@@ -69,8 +69,8 @@
             $container = $('> div', $item),
             self = this
 
-        $container.one('show.oc.popup', function(e){
-            $(document).trigger('render')
+        $container.one('show.oc.popup', function(e) {
+            self.triggerRenderEvent();
 
             self.$popupContainer = $(e.relatedTarget);
             self.$itemDataContainer = $container.closest('li')
@@ -373,7 +373,7 @@
         $urlFormGroup.toggle(type == 'url')
         $replaceFormGroup.toggle(typeInfo.dynamicItems !== undefined && typeInfo.dynamicItems)
 
-        $(document).trigger('render')
+        this.triggerRenderEvent();
 
         if (focusList) {
             var focusElements = [
@@ -596,6 +596,17 @@
         $(window).trigger('oc.updateUi')
 
         this.onItemClick(item, true)
+    }
+
+    MenuItemsEditor.prototype.triggerRenderEvent = function() {
+        // Vanilla AJAX Framework (v3)
+        if (oc.Events) {
+            oc.Events.dispatch('render');
+        }
+        // Classic AJAX Framework (v1,2)
+        else {
+            $(document).trigger('render');
+        }
     }
 
     MenuItemsEditor.DEFAULTS = {
