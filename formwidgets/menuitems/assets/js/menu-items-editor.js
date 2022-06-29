@@ -600,7 +600,7 @@
 
     MenuItemsEditor.prototype.triggerRenderEvent = function() {
         // Vanilla AJAX Framework (v3)
-        if (oc.Events) {
+        if (oc && oc.Events) {
             oc.Events.dispatch('render');
         }
         // Classic AJAX Framework (v1,2)
