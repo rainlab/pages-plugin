@@ -5,10 +5,8 @@ use File;
 use Lang;
 use Cache;
 use Event;
-use Route;
 use Config;
 use Validator;
-use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
@@ -20,7 +18,6 @@ use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
 use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
-use ApplicationException;
 use Twig\Node\Node as TwigNode;
 
 /**
@@ -31,6 +28,9 @@ use Twig\Node\Node as TwigNode;
  */
 class Page extends ContentBase
 {
+    /**
+     * @var array implement
+     */
     public $implement = [
         '@RainLab.Translate.Behaviors.TranslatablePageUrl',
         '@RainLab.Translate.Behaviors.TranslatableCmsObject'
@@ -650,7 +650,7 @@ class Page extends ContentBase
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
-        
+
         /*
          * Event hook
          */
