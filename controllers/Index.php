@@ -118,6 +118,9 @@ class Index extends Controller
         }
     }
 
+    /**
+     * index_onOpen
+     */
     public function index_onOpen()
     {
         $this->validateRequestTheme();
@@ -125,9 +128,18 @@ class Index extends Controller
         $type = Request::input('type');
         $object = $this->loadObject($type, Request::input('path'));
 
+        /*
+         * Extensibility
+         */
+        Event::fire('pages.object.load', [$this, $object, $type]);
+        $this->fireEvent('object.load', [$object, $type]);
+
         return $this->pushObjectForm($type, $object);
     }
 
+    /**
+     * onSave
+     */
     public function onSave()
     {
         $this->validateRequestTheme();
@@ -183,13 +195,13 @@ class Index extends Controller
 
         $result = [
             'tabTitle' => $this->getTabTitle($type, $object),
-            'tab'      => $this->makePartial('form_page', [
-                'form'         => $widget,
-                'objectType'   => $type,
-                'objectTheme'  => $this->theme->getDirName(),
-                'objectMtime'  => null,
+            'tab' => $this->makePartial('form_page', [
+                'form' => $widget,
+                'objectType' => $type,
+                'objectTheme' => $this->theme->getDirName(),
+                'objectMtime' => null,
                 'objectParent' => $parent,
-                'parentPage'   => $parentPage
+                'parentPage' => $parentPage
             ])
         ];
 
@@ -510,6 +522,9 @@ class Index extends Controller
         return $result;
     }
 
+    /**
+     * validateRequestTheme
+     */
     protected function validateRequestTheme()
     {
         if ($this->theme->getDirName() != Request::input('theme')) {
@@ -517,6 +532,9 @@ class Index extends Controller
         }
     }
 
+    /**
+     * loadObject
+     */
     protected function loadObject($type, $path, $ignoreNotFound = false)
     {
         $class = $this->resolveTypeClassName($type);
@@ -546,9 +564,9 @@ class Index extends Controller
     protected function resolveTypeClassName($type)
     {
         $types = [
-            'page'    => 'RainLab\Pages\Classes\Page',
-            'menu'    => 'RainLab\Pages\Classes\Menu',
-            'content' => 'RainLab\Pages\Classes\Content'
+            'page' => \RainLab\Pages\Classes\Page::class,
+            'menu' => \RainLab\Pages\Classes\Menu::class,
+            'content' => \RainLab\Pages\Classes\Content::class
         ];
 
         if (!array_key_exists($type, $types)) {
@@ -558,7 +576,8 @@ class Index extends Controller
         $allowed = false;
         if ($type === 'content') {
             $allowed = $this->user->hasAccess('rainlab.pages.manage_content');
-        } else {
+        }
+        else {
             $allowed = $this->user->hasAccess("rainlab.pages.manage_{$type}s");
         }
 
@@ -753,6 +772,9 @@ class Index extends Controller
         return $object->getFileName();
     }
 
+    /**
+     * fillObjectFromPost
+     */
     protected function fillObjectFromPost($type)
     {
         $objectPath = trim(Request::input('objectPath'));
@@ -829,6 +851,12 @@ class Index extends Controller
         if (!empty($objectData['markup']) && $comboConfig === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
         }
+
+        /*
+         * Extensibility
+         */
+        Event::fire('pages.object.fillObject', [$this, $object, &$objectData, $type]);
+        $this->fireEvent('object.fillObject', [$object, &$objectData, $type]);
 
         if (!Request::input('objectForceSave') && $object->mtime) {
             if (Request::input('objectMtime') != $object->mtime) {
