@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Controllers;
 
 use Url;
+use Site;
 use Lang;
 use Flash;
 use Event;
@@ -440,7 +441,7 @@ class Index extends Controller
         ];
 
         if ($type == 'page') {
-            $result['pageUrl'] = Url::to($object->getViewBag()->property('url'));
+            $result['pageUrl'] = $this->getPageUrl($object);
             PagesPlugin::clearCache();
         }
 
@@ -886,7 +887,7 @@ class Index extends Controller
         $this->vars['lastModified'] = DateTime::makeCarbon($object->mtime);
 
         if ($type == 'page') {
-            $this->vars['pageUrl'] = Url::to($object->getViewBag()->property('url'));
+            $this->vars['pageUrl'] = $this->getPageUrl($object);
         }
 
         return [
@@ -899,6 +900,20 @@ class Index extends Controller
                 'objectParent' => Request::input('parentFileName')
             ])
         ];
+    }
+    
+    protected function getPageUrl($object)
+    {
+        $pageUrl = $object->getViewBag()->property('url');
+
+        // 3.1
+        if(class_exists('Site')) {
+            if($editSite = Site::getEditSite()) {
+                return rtrim($editSite->base_url . $pageUrl, '/');
+            }
+        }
+
+        return Url::to($pageUrl);
     }
 
     protected function bindFormWidgetToController()
