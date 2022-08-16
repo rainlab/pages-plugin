@@ -1,8 +1,5 @@
 <?php namespace RainLab\Pages\Classes;
 
-use ApplicationException;
-use Validator;
-use Lang;
 use Event;
 
 /**
