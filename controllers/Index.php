@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Controllers;
 
 use Url;
+use Cms;
 use Site;
 use Lang;
 use Flash;
@@ -441,7 +442,7 @@ class Index extends Controller
         ];
 
         if ($type == 'page') {
-            $result['pageUrl'] = $this->getPageUrl($object);
+            $result['pageUrl'] = $this->getPreviewPageUrl($object);
             PagesPlugin::clearCache();
         }
 
@@ -877,6 +878,9 @@ class Index extends Controller
         return $object;
     }
 
+    /**
+     * pushObjectForm
+     */
     protected function pushObjectForm($type, $object, $alias = null)
     {
         $widget = $this->makeObjectFormWidget($type, $object, $alias);
@@ -887,7 +891,7 @@ class Index extends Controller
         $this->vars['lastModified'] = DateTime::makeCarbon($object->mtime);
 
         if ($type == 'page') {
-            $this->vars['pageUrl'] = $this->getPageUrl($object);
+            $this->vars['pageUrl'] = $this->getPreviewPageUrl($object);
         }
 
         return [
@@ -901,21 +905,40 @@ class Index extends Controller
             ])
         ];
     }
-    
-    protected function getPageUrl($object)
+
+    /**
+     * getPreviewPageUrl
+     */
+    protected function getPreviewPageUrl($object)
     {
         $pageUrl = $object->getViewBag()->property('url');
 
-        // 3.1
-        if(class_exists('Site')) {
-            if($editSite = Site::getEditSite()) {
-                return rtrim($editSite->base_url . $pageUrl, '/');
-            }
+        // Support for October CMS 3.0 and below
+        if (!class_exists('Site')) {
+            return Url::to($pageUrl);
         }
 
-        return Url::to($pageUrl);
+        /**
+         * Hook the site picker to determine preview
+         * @see \Cms\Components\SitePicker
+         */
+        $eventPattern = Event::fire('cms.sitePicker.overridePattern', [
+            $object,
+            $pageUrl,
+            Site::getEditSite(),
+            Site::getEditSite()
+        ], true);
+
+        if ($eventPattern) {
+            $pageUrl = $eventPattern;
+        }
+
+        return Cms::fullUrl($pageUrl);
     }
 
+    /**
+     * bindFormWidgetToController
+     */
     protected function bindFormWidgetToController()
     {
         $alias = Request::input('formWidgetAlias');
