@@ -171,7 +171,7 @@ class MenuItems extends FormWidgetBase
 
         return strlen($itemInfo) ? $itemInfo : trans('rainlab.pages::lang.menuitem.unnamed');
     }
-    
+
     public function makeEditorTemplate()
     {
         $regEx = '#<script(.*?)</script>#is';

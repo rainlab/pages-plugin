@@ -239,11 +239,11 @@
                             var items = [{
                                 path: propertyValue,
                                 publicUrl: storageMediaPath + propertyValue,
+                                thumbUrl: storageMediaPath + propertyValue,
                                 title: propertyValue.substring(1)
                             }];
 
                             var mediafinder = $(this).data('oc.mediaFinder');
-
                             mediafinder.addItems(items);
                             mediafinder.setValue();
                             mediafinder.evalIsPopulated();
