@@ -216,7 +216,7 @@
                 var storageMediaPath = $('[data-storage-media-path]').data('storage-media-path');
 
                 $.each(mediafinderElements, function() {
-                    var input = $(this).find('> input'),
+                    var input = $(this).find('input'),
                         propertyName = input.attr('name'),
                         propertyNameSimple;
 
@@ -242,7 +242,11 @@
                                 title: propertyValue.substring(1)
                             }];
 
-                            mediaFinder.addItems(items);
+                            var mediafinder = $(this).data('oc.mediaFinder');
+
+                            mediafinder.addItems(items);
+                            mediafinder.setValue();
+                            mediafinder.evalIsPopulated();
                         }
                         // v1 media finder
                         else {
