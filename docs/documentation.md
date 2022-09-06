@@ -73,10 +73,12 @@ The component injects the `breadcrumbs` page variable that contains an array of 
 
 In some cases you might want to mark a specific menu item as active explicitly. You can do that in the page's [`onInit()`](http://octobercms.com/docs/cms/pages#dynamic-pages) function with assigning the `activeMenuItem` page variable a value matching the menu item code you want to make active. Menu item codes are managed in the Edit Menu Item popup.
 
-    function onInit()
-    {
-        $this['activeMenuItem'] = 'blog';
-    }
+```php
+function onInit()
+{
+    $this['activeMenuItem'] = 'blog';
+}
+```
 
 ##### Linking to static pages
 
@@ -84,15 +86,27 @@ When a static page is first created it will be assigned a file name based on the
 
 To create a link to a static page, use the `|staticPage` filter:
 
-    <a href="{{ 'chairs'|staticPage }}">Go to Chairs</a>
+```twig
+<a href="{{ 'chairs'|staticPage }}">Go to Chairs</a>
+```
 
 This filter translates to PHP code as:
 
-    echo RainLab\Pages\Classes\Page::url('chairs');
+```php
+echo RainLab\Pages\Classes\Page::url('chairs');
+```
 
 If you want to link to the static page by its URL, simply use the `|app` filter:
 
-    <a href="{{ '/chairs'|app }}">Go to Chairs</a>
+```twig
+<a href="{{ '/chairs'|app }}">Go to Chairs</a>
+```
+
+Linking to the current page, if the component name is called `staticPage`:
+
+```twig
+​{{ staticPage.page.baseFileName|staticPage }}
+```
 
 ##### Manually displaying a static menu
 
@@ -102,7 +116,9 @@ To render a static menu based on a menu code from the `staticmenupicker` dropdow
 
 You can either define the code property on the staticMenu component.
 
-    {% component 'staticMenu' code=this.theme.primary_menu %}
+```twig
+{% component 'staticMenu' code=this.theme.primary_menu %}
+```
 
 Or, use the resetMenu method on the staticMenu component, so we can manually control the menu output without having to create a staticMenu partial override.
 
