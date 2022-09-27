@@ -39,7 +39,7 @@ class Components extends FormWidgetBase
         $manager->listComponents();
 
         foreach ($this->model->settings['components'] as $name => $properties) {
-            [$name, $alias] = strpos($name, ' ') ? explode(' ', $name) : [$name, $name];
+            list($name, $alias) = strpos($name, ' ') ? explode(' ', $name) : [$name, $name];
 
             try {
                 $componentObj = $manager->makeComponent($name, null, $properties);
