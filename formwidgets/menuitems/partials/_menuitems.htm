@@ -1,5 +1,11 @@
 <?php
-    $mediaPath = Config::get('cms.storage.media.path', Config::get('system.storage.media.path', '/storage/app/media'));
+    $mediaPath = Config::get('filesystems.disks.media.url',
+        Config::get('cms.storage.media.path',
+            Config::get('system.storage.media.path',
+                '/storage/app/media'
+            )
+        )
+    );
     list($editorTemplate, $editorScripts) = $this->makeEditorTemplate();
 ?>
 <div
@@ -21,7 +27,7 @@
     <script type="text/template" data-editor-template>
         <?= $editorTemplate ?>
     </script>
-    
+
     <?= $editorScripts ?>
 
     <script type="text/template" data-item-template>
