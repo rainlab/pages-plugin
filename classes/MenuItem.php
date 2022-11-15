@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Event;
+use RainLab\Pages\Helpers\CmsPageHelper;
 
 /**
  * Represents a menu item.
@@ -129,6 +130,7 @@ class MenuItem
         $result = [
             'url' => 'URL',
             'header' => 'Header',
+            'cms-page' => 'CMS Page',
         ];
 
         $apiResult = Event::fire('pages.menuitem.listTypes');
@@ -161,7 +163,13 @@ class MenuItem
     public static function getTypeInfo($type)
     {
         $result = [];
-        $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
+
+        if ($type === 'cms-page') {
+            $apiResult = [CmsPageHelper::getMenuTypeInfo()];
+        }
+        else {
+            $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
+        }
 
         if (is_array($apiResult)) {
             foreach ($apiResult as $typeInfo) {

@@ -6,6 +6,7 @@ use Request;
 use SystemException;
 use Cms\Classes\Meta;
 use October\Rain\Support\Str;
+use RainLab\Pages\Helpers\CmsPageHelper;
 
 /**
  * Represents a front-end menu.
@@ -171,7 +172,13 @@ class Menu extends Meta
                      * If the item type is not URL, use the API to request the item type's provider to
                      * return the item URL, subitems and determine whether the item is active.
                      */
-                    $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
+                    if ($item->type == 'cms-page') {
+                        $apiResult = [CmsPageHelper::resolveMenuItem($item, $currentUrl, $this->theme)];
+                    }
+                    else {
+                        $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
+                    }
+
                     if (is_array($apiResult)) {
                         foreach ($apiResult as $itemInfo) {
                             if (!is_array($itemInfo)) {
