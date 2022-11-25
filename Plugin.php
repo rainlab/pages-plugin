@@ -154,14 +154,14 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen('pages.menuitem.listTypes', function() {
+        Event::listen(['cms.pageLookup.listTypes', 'pages.menuitem.listTypes'], function() {
             return [
                 'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
                 'all-static-pages' => 'rainlab.pages::lang.menuitem.all_static_pages'
             ];
         });
 
-        Event::listen('pages.menuitem.getTypeInfo', function($type) {
+        Event::listen(['cms.pageLookup.getTypeInfo', 'pages.menuitem.getTypeInfo'], function($type) {
             if ($type == 'url') {
                 return [];
             }
@@ -171,7 +171,7 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
+        Event::listen(['cms.pageLookup.resolveItem', 'pages.menuitem.resolveItem'], function($type, $item, $url, $theme) {
             if ($type == 'static-page' || $type == 'all-static-pages') {
                 return StaticPage::resolveMenuItem($item, $url, $theme);
             }
