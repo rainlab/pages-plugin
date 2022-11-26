@@ -91,9 +91,9 @@
         $(popup.$container).on('click', 'button[data-action=save]', function(){
             popup.hide()
 
-            $('input[name=objectForceSave]', $form).val(1)
-            $('a[data-request=onSave]', $form).trigger('click')
-            $('input[name=objectForceSave]', $form).val(0)
+            $('input[name=objectForceSave]', $form).val(1);
+            $('a[data-request=onSave]', $form).get(0).click();
+            $('input[name=objectForceSave]', $form).val(0);
         })
     }
 
