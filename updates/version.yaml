@@ -70,3 +70,4 @@ v1.5.0: Improve support with October v3.0
 v1.5.4: Compatibility updates
 v1.5.5: Fixes media finder added to menu in October v2
 v1.5.6: Fixes concurrency save form in October v3
+v1.5.7: Adds page finder support for October v3.2
