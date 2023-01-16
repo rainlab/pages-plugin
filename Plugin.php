@@ -154,7 +154,14 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen(['cms.pageLookup.listTypes', 'pages.menuitem.listTypes'], function() {
+        Event::listen('cms.pageLookup.listTypes', function() {
+            return [
+                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
+                'all-static-pages' => ['rainlab.pages::lang.menuitem.all_static_pages', true]
+            ];
+        });
+
+        Event::listen('pages.menuitem.listTypes', function() {
             return [
                 'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
                 'all-static-pages' => 'rainlab.pages::lang.menuitem.all_static_pages'
