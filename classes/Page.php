@@ -635,6 +635,13 @@ class Page extends ContentBase
         }
 
         /*
+         * Process content using core parser
+         */
+        if (class_exists(\Cms\Classes\PageLookup::class)) {
+            $markup = \Cms\Classes\PageLookup::processMarkup($markup);
+        }
+
+        /*
          * Event hook
          */
         Event::fire('pages.page.getProcessedMarkup', [&$markup]);
