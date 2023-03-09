@@ -322,17 +322,17 @@
             tabId = data.type + '-' + data.theme + '-' + data.path
 
         if ($item.data('type') == 'snippet') {
-            this.snippetManager.onSidebarSnippetClick($item)
-
-            return
+            this.snippetManager.onSidebarSnippetClick($item);
+            return;
         }
 
         /*
          * Find if the tab is already opened
          */
 
-         if (this.masterTabsObj.goTo(tabId))
-            return false
+         if (this.masterTabsObj.goTo(tabId)) {
+            return false;
+         }
 
         /*
          * Open a new tab
@@ -342,9 +342,9 @@
         $form.request('onOpen', {
             data: data
         }).done(function(data) {
-            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'))
+            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'));
         }).always(function() {
-            $.oc.stripeLoadIndicator.hide()
+            $.oc.stripeLoadIndicator.hide();
         })
 
         return false
@@ -377,17 +377,18 @@
 
         e.stopPropagation()
 
-        return false
+        return false;
     }
 
     /*
      * Triggered when an item is clicked in the sidebar submenu
      */
     PagesPage.prototype.onSidebarSubmenuItemClick = function(e) {
-        if ($(e.clickEvent.target).data('control') == 'create-object')
-            this.onCreateObject(e.clickEvent)
+        if ($(e.clickEvent.target).data('control') == 'create-object') {
+            this.onCreateObject(e.clickEvent);
+        }
 
-        return false
+        return false;
     }
 
     /*
@@ -473,6 +474,9 @@
             hasSecondaryTabs = $secondaryPanel.length > 0
 
         $secondaryPanel.addClass('secondary-content-tabs')
+
+        // Disable fancy layout on nested forms
+        $('.form-tabless-fields', $secondaryPanel).addClass('not-fancy');
 
         $panel.append($collapseIcon)
 
