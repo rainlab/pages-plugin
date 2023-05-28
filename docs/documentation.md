@@ -380,7 +380,7 @@ In addition, properties can be passed to the partial components using an [extern
 
 ###### Snippets created from components
 
-Any component can be registered as a snippet and be used in Static Pages. To register a snippet, add the `registerPageSnippets()` method to your plugin class in the [registration file](https://octobercms.com/docs/plugin/registration#registration-file). The API for registering a snippet is similar to the one for [registering  components](https://octobercms.com/docs/plugin/registration#component-registration) - the method should return an array with class names in keys and aliases in values:
+Any component can be registered as a snippet and be used in Static Pages. To register a snippet, add the `registerPageSnippets()` method to your plugin class in the [registration file](https://octobercms.com/docs/plugin/registration#registration-file). The API for registering a snippet is similar to the one for [registering components](https://octobercms.com/docs/plugin/registration#component-registration) - the method should return an array with class names in keys and aliases in values:
 
     public function registerPageSnippets()
     {
