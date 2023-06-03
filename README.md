@@ -18,13 +18,7 @@ If a static layout contains [placeholders](https://octobercms.com/docs/cms/layou
 
 ## Snippets
 
-Snippets are elements that can be added by a Static Page, in the rich text editor. They allow to inject complex (and interactive) areas to pages. There are many possible applications and examples of using Snippets:
-
-* Google Maps snippet - outputs a map centered on specific coordinates with predefined zoom factor. That snippet would be great for static pages that explain directions.
-* Universal commenting system - allows visitors to post comments to any static page.
-* Third-party integrations - for example with Yelp or TripAdvisor for displaying extra information on a static page.
-
-Snippets are displayed in the sidebar list on the Static Pages and can be added into a rich editor with a mouse click. Snippets are configurable and have properties that users can manage with the Inspector.
+Snippets is a [featured included with October CMS](https://docs.octobercms.com/3.x/cms/themes/snippets.html), with elements that can be added by a Static Page, in the rich text editor. They allow you to inject complex (and interactive) areas to pages. Snippets are configurable and have properties that users can manage with the Inspector.
 
 ![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-backend.png)
 

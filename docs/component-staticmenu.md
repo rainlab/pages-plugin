@@ -1,21 +1,22 @@
 # Component: Static Menu (staticMenu)
 
 ## Purpose
+
 Outputs a single menu
 
-## Available properties:
+## Available Properties
 
 Property | Inspector Name | Description
 -------- | -------------- | -----------
 `code` | Menu | The code (identifier) for the menu that should be displayed by the component
 
-## Page variables
+## Page Variables
 
 Variable | Type | Description
 -------- | ---- | -----------
 `menuItems` | `array` | Array of `RainLab\Pages\Classes\MenuItemReference` objects representing the defined menu
 
-## Default output
+## Default Output
 
 The default component partial outputs a simple nested unordered list for menus:
 
