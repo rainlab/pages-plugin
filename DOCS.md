@@ -25,8 +25,8 @@ In the simplest case you could create a [layout](https://octobercms.com/docs/cms
 
 Include the Static Page [component](http://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
 
-* `title` - specifies the static page title.
-* `content` - the static page content.
+- `title` - specifies the static page title.
+- `content` - the static page content.
 
 ## Static Menus
 
