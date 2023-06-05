@@ -535,26 +535,11 @@ class Index extends Controller
     }
 
     /**
-     * modLegacyModeFields will ensure specific field types use legacy mode
-     */
-    protected function modLegacyModeFields($fields)
-    {
-        foreach ($fields as &$fieldConfig) {
-            if (in_array($fieldConfig['type'], ['richeditor', 'codeeditor'])) {
-                $fieldConfig['legacyMode'] = true;
-            }
-        }
-
-        return $fields;
-    }
-
-    /**
      * addPageSyntaxFields adds syntax defined fields to the form
      */
     protected function addPageSyntaxFields($formWidget, $page)
     {
         $fields = $page->listLayoutSyntaxFields();
-        $fields = $this->modLegacyModeFields($fields);
 
         foreach ($fields as $fieldCode => $fieldConfig) {
             if ($fieldConfig['type'] === 'fileupload') {
@@ -564,7 +549,6 @@ class Index extends Controller
             if (in_array($fieldConfig['type'], ['repeater', 'nestedform'])) {
                 if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
                     $repeaterFields = array_get($fieldConfig, 'fields', []);
-                    $repeaterFields = $this->modLegacyModeFields($repeaterFields);
                     $fieldConfig['form']['fields'] = $repeaterFields;
                     unset($fieldConfig['fields']);
                 }
@@ -607,10 +591,9 @@ class Index extends Controller
 
             $placeholderTitle = $info['title'];
             $fieldConfig = [
-                'tab'     => $placeholderTitle,
+                'tab' => $placeholderTitle,
                 'stretch' => '1',
-                'size'    => 'huge',
-                'legacyMode' => true
+                'size' => 'huge'
             ];
 
             if ($info['type'] != 'text') {
