@@ -614,12 +614,7 @@ class Page extends ContentBase
             return $this->processedMarkupCache;
         }
 
-        // Process snippets
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName(),
-            $this->theme,
-            $this->markup
-        );
+        $markup = $this->markup;
 
         // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
@@ -647,12 +642,7 @@ class Page extends ContentBase
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
-        // Process snippets
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName().md5($placeholderName),
-            $this->theme,
-            $placeholderContents
-        );
+        $markup = $this->markup;
 
         // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();

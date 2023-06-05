@@ -172,12 +172,6 @@ class Plugin extends PluginBase
             }
         });
 
-        // Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
-        //     if ($dataHolder->templateType === 'partial') {
-        //         Snippet::extendEditorPartialToolbar($dataHolder);
-        //     }
-        // });
-
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
         });
