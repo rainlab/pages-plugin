@@ -313,19 +313,9 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canCommitObject($object)) {
-            if (class_exists('System')) {
-                // v1.2
-                $datasource = $this->getThemeDatasource();
-                $datasource->updateModelAtIndex(1, $object);
-                $datasource->forceDeleteModelAtIndex(0, $object);
-            }
-            else {
-                // v1.1
-                $datasource = $this->getThemeDatasource();
-                $datasource->pushToSource($object, 'filesystem');
-                $datasource->removeFromSource($object, 'database');
-            }
-
+            $datasource = $this->getThemeDatasource();
+            $datasource->updateModelAtIndex(1, $object);
+            $datasource->forceDeleteModelAtIndex(0, $object);
             Flash::success(Lang::get('cms::lang.editor.commit_success', ['type' => $type]));
         }
 
@@ -344,17 +334,8 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canResetObject($object)) {
-            if (class_exists('System')) {
-                // v1.2
-                $datasource = $this->getThemeDatasource();
-                $datasource->forceDeleteModelAtIndex(0, $object);
-            }
-            else {
-                // v1.1
-                $datasource = $this->getThemeDatasource();
-                $datasource->removeFromSource($object, 'database');
-            }
-
+            $datasource = $this->getThemeDatasource();
+            $datasource->forceDeleteModelAtIndex(0, $object);
             Flash::success(Lang::get('cms::lang.editor.reset_success', ['type' => $type]));
         }
 
@@ -410,24 +391,12 @@ class Index extends Controller
     {
         $result = false;
 
-        if (class_exists('System')) {
-            // v1.2
-            if (
-                Config::get('app.debug', false) &&
-                $this->theme->secondLayerEnabled() &&
-                $this->getThemeDatasource()->hasModelAtIndex(1, $object)
-            ) {
-                $result = true;
-            }
-        }
-        else {
-            // v1.1
-            if (Config::get('app.debug', false) &&
-                Theme::databaseLayerEnabled() &&
-                $this->getThemeDatasource()->sourceHasModel('database', $object)
-            ) {
-                $result = true;
-            }
+        if (
+            Config::get('app.debug', false) &&
+            $this->theme->secondLayerEnabled() &&
+            $this->getThemeDatasource()->hasModelAtIndex(1, $object)
+        ) {
+            $result = true;
         }
 
         return $result;
@@ -444,20 +413,10 @@ class Index extends Controller
     {
         $result = false;
 
-        if (class_exists('System')) {
-            // v1.2
-            if ($this->theme->secondLayerEnabled()) {
-                $datasource = $this->getThemeDatasource();
-                $result = $datasource->hasModelAtIndex(0, $object) &&
-                    $datasource->hasModelAtIndex(1, $object);
-            }
-        }
-        else {
-            // v1.1
-            if (Theme::databaseLayerEnabled()) {
-                $datasource = $this->getThemeDatasource();
-                $result = $datasource->sourceHasModel('database', $object) && $datasource->sourceHasModel('filesystem', $object);
-            }
+        if ($this->theme->secondLayerEnabled()) {
+            $datasource = $this->getThemeDatasource();
+            $result = $datasource->hasModelAtIndex(0, $object) &&
+                $datasource->hasModelAtIndex(1, $object);
         }
 
         return $result;
