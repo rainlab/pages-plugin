@@ -937,7 +937,7 @@ class Page extends ContentBase
         $iterator($pageList->getPageTree(), null, 0);
 
         self::$menuTreeCache = $menuTree;
-        $comboConfig = Config::get('cms.parsedPageCacheTTL', Config::get('cms.template_cache_ttl', 10));
+        $comboConfig = Config::get('cms.template_cache_ttl', 10);
         $expiresAt = now()->addMinutes($comboConfig);
         Cache::put($key, serialize($menuTree), $expiresAt);
 
