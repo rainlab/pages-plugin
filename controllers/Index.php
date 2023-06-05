@@ -16,7 +16,6 @@ use System\Helpers\DateTime;
 use Backend\Classes\Controller;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
-use RainLab\Pages\Widgets\SnippetList;
 use RainLab\Pages\Widgets\TemplateList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Content;
@@ -73,11 +72,6 @@ class Index extends Controller
                         return $this->getContentTemplateList();
                     });
                     $this->vars['activeWidgets'][] = 'contentList';
-                }
-
-                if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
-                    new SnippetList($this, 'snippetList');
-                    $this->vars['activeWidgets'][] = 'snippetList';
                 }
             }
         }
@@ -295,60 +289,6 @@ class Index extends Controller
         return $this->pushObjectForm($type, $object, Request::input('formWidgetAlias'));
     }
 
-    public function onGetInspectorConfiguration()
-    {
-        $configuration = [];
-
-        $snippetCode = Request::input('snippet');
-        $componentClass = Request::input('component');
-
-        if (strlen($snippetCode)) {
-            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-            if (!$snippet) {
-                throw new ApplicationException(trans('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]));
-            }
-
-            $configuration = $snippet->getProperties();
-        }
-
-        return [
-            'configuration' => [
-                'properties'  => $configuration,
-                'title'       => $snippet->getName(),
-                'description' => $snippet->getDescription()
-            ]
-        ];
-    }
-
-    public function onGetSnippetNames()
-    {
-        $codes = array_unique(Request::input('codes'));
-        $result = [];
-
-        foreach ($codes as $snippetCode) {
-            $parts = explode('|', $snippetCode);
-            $componentClass = null;
-
-            if (count($parts) > 1) {
-                $snippetCode = $parts[0];
-                $componentClass = $parts[1];
-            }
-
-            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-
-            if (!$snippet) {
-                $result[$snippetCode] = trans('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]);
-            }
-            else {
-                $result[$snippetCode] =$snippet->getName();
-            }
-        }
-
-        return [
-            'names' => $result
-        ];
-    }
-
     public function onMenuItemReferenceSearch()
     {
         $alias = Request::input('alias');
@@ -363,8 +303,7 @@ class Index extends Controller
     }
 
     /**
-     * Commits the DB changes of a object to the filesystem
-     *
+     * onCommit commits the DB changes of a object to the filesystem
      * @return array $response
      */
     public function onCommit()

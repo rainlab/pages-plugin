@@ -6,7 +6,6 @@ use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\Snippet;
-use RainLab\Pages\Classes\SnippetManager;
 use Cms\Classes\Theme;
 use Cms\Classes\Controller as CmsController;
 use System\Classes\PluginBase;
@@ -51,11 +50,6 @@ class Plugin extends PluginBase
                 'tab'   => 'rainlab.pages::lang.page.tab',
                 'order' => 200,
                 'label' => 'rainlab.pages::lang.page.manage_content'
-            ],
-            'rainlab.pages.access_snippets' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
-                'order' => 200,
-                'label' => 'rainlab.pages::lang.page.access_snippets'
             ]
         ];
     }
@@ -93,13 +87,6 @@ class Plugin extends PluginBase
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'content'],
                         'permissions' => ['rainlab.pages.manage_content']
-                    ],
-                    'snippets' => [
-                        'label'       => 'rainlab.pages::lang.snippet.menu_label',
-                        'icon'        => 'icon-newspaper-o',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'snippet'],
-                        'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
             ]
@@ -255,6 +242,6 @@ class Plugin extends PluginBase
         $router->clearCache();
 
         StaticPage::clearMenuCache($theme);
-        SnippetManager::clearCache($theme);
+        // SnippetManager::clearCache($theme);
     }
 }
