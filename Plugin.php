@@ -176,14 +176,6 @@ class Plugin extends PluginBase
             Plugin::clearCache();
         });
 
-        // Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
-        //     $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
-        // });
-
-        // Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
-        //     Snippet::processTemplateSettings($template, $context);
-        // });
-
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
             if ($template instanceof \Cms\Classes\Layout) {
                 $dataHolder->content = Controller::instance()->parseSyntaxFields($dataHolder->content);
