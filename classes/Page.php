@@ -628,8 +628,8 @@ class Page extends ContentBase
         }
 
         // Process content using core parser
-        if (class_exists(\Cms\Classes\PageLookup::class)) {
-            $markup = \Cms\Classes\PageLookup::processMarkup($markup);
+        if (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
         }
 
         // Event hook
@@ -638,6 +638,9 @@ class Page extends ContentBase
         return $this->processedMarkupCache = $markup;
     }
 
+    /**
+     * getProcessedPlaceholderMarkup
+     */
     public function getProcessedPlaceholderMarkup($placeholderName, $placeholderContents)
     {
         if (array_key_exists($placeholderName, $this->processedBlockMarkupCache)) {
@@ -655,6 +658,11 @@ class Page extends ContentBase
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
+        }
+
+        // Process content using core parser
+        if (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
         }
 
         // Event hook
