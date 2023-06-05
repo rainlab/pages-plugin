@@ -5,9 +5,10 @@ use Backend;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
 use Cms\Classes\Theme;
+use Cms\Classes\Snippet;
 use Cms\Classes\Controller as CmsController;
+use Cms\Classes\SnippetManager;
 use System\Classes\PluginBase;
 
 class Plugin extends PluginBase
@@ -171,29 +172,23 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
-            if ($formWidget->model instanceof \Cms\Classes\Partial) {
-                Snippet::extendPartialForm($formWidget);
-            }
-        });
-
-        Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
-            if ($dataHolder->templateType === 'partial') {
-                Snippet::extendEditorPartialToolbar($dataHolder);
-            }
-        });
+        // Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
+        //     if ($dataHolder->templateType === 'partial') {
+        //         Snippet::extendEditorPartialToolbar($dataHolder);
+        //     }
+        // });
 
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
         });
 
-        Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
-            $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
-        });
+        // Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
+        //     $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
+        // });
 
-        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
-            Snippet::processTemplateSettings($template, $context);
-        });
+        // Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
+        //     Snippet::processTemplateSettings($template, $context);
+        // });
 
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
             if ($template instanceof \Cms\Classes\Layout) {
