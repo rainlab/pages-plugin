@@ -21,7 +21,6 @@ use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Plugin as PagesPlugin;
-use RainLab\Pages\Classes\SnippetManager;
 use ApplicationException;
 use Exception;
 

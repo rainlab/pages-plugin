@@ -7,9 +7,9 @@ use Cache;
 use Event;
 use Config;
 use Validator;
-use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
+use Cms\Classes\Snippet;
 use Cms\Classes\Layout;
 use Cms\Classes\Content as ContentBase;
 use Cms\Classes\ComponentManager;
@@ -439,7 +439,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns the Twig content string
+     * getTwigContent returns the Twig content string
      */
     public function getTwigContent()
     {
@@ -450,6 +450,9 @@ class Page extends ContentBase
     // Syntax field processing
     //
 
+    /**
+     * listLayoutSyntaxFields
+     */
     public function listLayoutSyntaxFields()
     {
         if (!$layout = $this->getLayoutObject()) {
@@ -467,8 +470,9 @@ class Page extends ContentBase
     //
 
     /**
-     * Returns information about placeholders defined in the page layout.
-     * @return array Returns an associative array of the placeholder name and codes.
+     * listLayoutPlaceholders gets information about placeholders defined in the page layout.
+     * Returns an associative array of the placeholder name and codes.
+     * @return array
      */
     public function listLayoutPlaceholders()
     {
@@ -509,7 +513,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Recursively flattens a twig node and children
+     * flattenTwigNode recursively flattens a twig node and children
      * @param $node
      * @return array A flat array of twig nodes
      */
@@ -529,8 +533,9 @@ class Page extends ContentBase
     }
 
     /**
-     * Parses the page placeholder {% put %} tags and extracts the placeholder values.
-     * @return array Returns an associative array of the placeholder names and values.
+     * getPlaceholdersAttribute parses the page placeholder {% put %} tags and extracts the
+     * placeholder values. Returns an associative array of the placeholder names and values.
+     * @return array
      */
     public function getPlaceholdersAttribute()
     {
@@ -568,8 +573,8 @@ class Page extends ContentBase
     }
 
     /**
-     * Takes an array of placeholder data (key: code, value: content) and renders
-     * it as a single string of Twig markup against the "code" attribute.
+     * setPlaceholdersAttribute takes an array of placeholder data (key: code, value: content)
+     * and renders it as a single string of Twig markup against the "code" attribute.
      * @param array  $value
      * @return void
      */
@@ -609,33 +614,25 @@ class Page extends ContentBase
             return $this->processedMarkupCache;
         }
 
-        /*
-         * Process snippets
-         */
+        // Process snippets
         $markup = Snippet::processPageMarkup(
             $this->getFileName(),
             $this->theme,
             $this->markup
         );
 
-        /*
-         * Inject global view variables
-         */
+        // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
 
-        /*
-         * Process content using core parser
-         */
+        // Process content using core parser
         if (class_exists(\Cms\Classes\PageLookup::class)) {
             $markup = \Cms\Classes\PageLookup::processMarkup($markup);
         }
 
-        /*
-         * Event hook
-         */
+        // Event hook
         Event::fire('pages.page.getProcessedMarkup', [&$markup]);
 
         return $this->processedMarkupCache = $markup;
@@ -647,26 +644,20 @@ class Page extends ContentBase
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
-        /*
-         * Process snippets
-         */
+        // Process snippets
         $markup = Snippet::processPageMarkup(
             $this->getFileName().md5($placeholderName),
             $this->theme,
             $placeholderContents
         );
 
-        /*
-         * Inject global view variables
-         */
+        // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
 
-        /*
-         * Event hook
-         */
+        // Event hook
         Event::fire('pages.page.getProcessedPlaceholderMarkup', [&$markup]);
 
         return $this->processedBlockMarkupCache[$placeholderName] = $markup;
