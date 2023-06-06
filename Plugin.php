@@ -109,24 +109,16 @@ class Plugin extends PluginBase
         });
 
         Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
-            /*
-             * Before twig renders
-             */
+            // Before twig renders
             $twig = $controller->getTwig();
             $loader = $controller->getLoader();
             Controller::instance()->injectPageTwig($page, $loader, $twig);
 
-            /*
-             * Get rendered content
-             */
+            // Get rendered content
             $contents = Controller::instance()->getPageContents($page);
             if (strlen($contents)) {
                 return $contents;
             }
-        });
-
-        Event::listen('cms.page.initComponents', function($controller, $page) {
-            Controller::instance()->initPageComponents($controller, $page);
         });
 
         Event::listen('cms.block.render', function($blockName, $blockContents) {

@@ -99,15 +99,6 @@ class Controller
         return $page->apiBag['staticPage']->getProcessedPlaceholderMarkup($placeholderName, $placeholderContents);
     }
 
-    public function initPageComponents($cmsController, $page)
-    {
-        if (!isset($page->apiBag['staticPage'])) {
-            return;
-        }
-
-        $page->apiBag['staticPage']->initCmsComponents($cmsController);
-    }
-
     public function parseSyntaxFields($content)
     {
         try {
