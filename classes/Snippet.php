@@ -267,6 +267,11 @@ class Snippet
 
     public static function extendEditorPartialToolbar($dataHolder)
     {
+        // Running v1 without editor or v3.4 with native snippets
+        if (!class_exists('System') || version_compare(\System::VERSION, '3.4', '>=')) {
+            return;
+        }
+
         $dataHolder->buttons[] = [
             'button' => 'rainlab.pages::lang.snippet.partialtab',
             'icon' => 'octo-icon-code-snippet',

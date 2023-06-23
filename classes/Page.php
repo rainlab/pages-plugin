@@ -617,14 +617,19 @@ class Page extends ContentBase
             return $this->processedMarkupCache;
         }
 
+        $markup = $this->markup;
+
         /*
          * Process snippets
+         * In v3.4 this is handled by the core parser (below)
          */
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName(),
-            $this->theme,
-            $this->markup
-        );
+        if (!class_exists('System') || !version_compare(\System::VERSION, '3.4', '>=')) {
+            $markup = Snippet::processPageMarkup(
+                $this->getFileName(),
+                $this->theme,
+                $markup
+            );
+        }
 
         /*
          * Inject global view variables
@@ -636,9 +641,13 @@ class Page extends ContentBase
 
         /*
          * Process content using core parser
+         * PageLookup class was deprecated to PageManager in v3.4 -sg
          */
         if (class_exists(\Cms\Classes\PageLookup::class)) {
             $markup = \Cms\Classes\PageLookup::processMarkup($markup);
+        }
+        elseif (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
         }
 
         /*
@@ -657,12 +666,15 @@ class Page extends ContentBase
 
         /*
          * Process snippets
+         * In v3.4 this is handled by the core parser (below)
          */
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName().md5($placeholderName),
-            $this->theme,
-            $placeholderContents
-        );
+        if (!class_exists('System') || !version_compare(\System::VERSION, '3.4', '>=')) {
+            $markup = Snippet::processPageMarkup(
+                $this->getFileName().md5($placeholderName),
+                $this->theme,
+                $placeholderContents
+            );
+        }
 
         /*
          * Inject global view variables
@@ -670,6 +682,17 @@ class Page extends ContentBase
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
+        }
+
+        /*
+         * Process content using core parser
+         * PageLookup class was deprecated to PageManager in v3.4 -sg
+         */
+        if (class_exists(\Cms\Classes\PageLookup::class)) {
+            $markup = \Cms\Classes\PageLookup::processMarkup($markup);
+        }
+        elseif (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
         }
 
         /*

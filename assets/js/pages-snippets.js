@@ -24,22 +24,29 @@
             }
         })
 
-        $(document).on('syncContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor, container) {
-            self.syncPageMarkup(ev, container)
-        })
+        if (!this.isForwardCompatibilityMode()) {
+            $(document).on('syncContent.oc.richeditor', '.field-richeditor textarea', function(ev, richeditor, container) {
+                self.syncPageMarkup(ev, container)
+            })
 
-        $(document).on('figureKeydown.oc.richeditor', '.field-richeditor textarea', function(ev, originalEv, richeditor) {
-            self.editorKeyDown(ev, originalEv, richeditor)
-        })
+            $(document).on('figureKeydown.oc.richeditor', '.field-richeditor textarea', function(ev, originalEv, richeditor) {
+                self.editorKeyDown(ev, originalEv, richeditor)
+            })
 
-        $(document).on('click', '[data-snippet]', function() {
-            if ($(this).hasClass('inspector-open')) {
-                return
-            }
+            $(document).on('click', '[data-snippet]', function() {
+                if ($(this).hasClass('inspector-open')) {
+                    return
+                }
 
-            $.oc.inspector.manager.createInspector(this)
-            return false
-        })
+                $.oc.inspector.manager.createInspector(this)
+                return false
+            })
+        }
+    }
+
+    // Detects October CMS v3.4
+    SnippetManager.prototype.isForwardCompatibilityMode = function() {
+        return window.oc && window.oc.snippetLookup;
     }
 
     SnippetManager.prototype.onSidebarSnippetClick = function($sidebarItem) {
@@ -85,6 +92,11 @@
 
         $snippetNode.addClass('fr-draggable')
 
+        if (this.isForwardCompatibilityMode()) {
+            $snippetNode.attr('data-control', 'snippet');
+            $snippetNode.removeAttr('data-inspector-css-class');
+        }
+
         $richeditorNode.richEditor('insertUiBlock', $snippetNode)
     }
 
@@ -124,6 +136,13 @@
     }
 
     SnippetManager.prototype.initSnippets = function($editor) {
+        if (this.isForwardCompatibilityMode()) {
+            $('.fr-view [data-snippet]', $editor).each(function(){
+                $(this).attr('data-control', 'snippet');
+            });
+            return;
+        }
+
         var snippetCodes = []
 
         $('.fr-view [data-snippet]', $editor).each(function(){
