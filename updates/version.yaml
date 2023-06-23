@@ -71,3 +71,4 @@ v1.5.6: Fixes concurrency save form in October v3
 v1.5.7: Adds page finder support for October v3.2
 v1.5.8: Fixes resolving links used in static pages
 v1.5.9: Fixes fancy layout with nested forms
+v1.5.10: Adds forward compatibility with October CMS v3.4
