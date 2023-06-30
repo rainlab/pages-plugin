@@ -664,6 +664,8 @@ class Page extends ContentBase
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
+        $markup = $placeholderContents;
+
         /*
          * Process snippets
          * In v3.4 this is handled by the core parser (below)
@@ -672,7 +674,7 @@ class Page extends ContentBase
             $markup = Snippet::processPageMarkup(
                 $this->getFileName().md5($placeholderName),
                 $this->theme,
-                $placeholderContents
+                $markup
             );
         }
 
