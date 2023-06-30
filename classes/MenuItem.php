@@ -35,6 +35,11 @@ class MenuItem
     public $nesting;
 
     /**
+     * @var array|bool sites includes a lookup for other sites.
+     */
+    public $sites = false;
+
+    /**
      * @var string Specifies the menu item type - URL, static page, etc.
      */
     public $type = 'url';
