@@ -191,6 +191,11 @@ class Plugin extends PluginBase
         });
 
         Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
+            // Running v3.4 with native snippets
+            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
+                return;
+            }
+
             if ($dataHolder->templateType === 'partial') {
                 Snippet::extendEditorPartialToolbar($dataHolder);
             }
@@ -201,10 +206,20 @@ class Plugin extends PluginBase
         });
 
         Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
+            // Running v3.4 with native snippets
+            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
+                return;
+            }
+
             $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
         });
 
         Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
+            // Running v3.4 with native snippets
+            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
+                return;
+            }
+
             Snippet::processTemplateSettings($template, $context);
         });
 
