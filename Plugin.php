@@ -5,10 +5,10 @@ use Backend;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
-use RainLab\Pages\Classes\SnippetManager;
 use Cms\Classes\Theme;
+use Cms\Classes\Snippet;
 use Cms\Classes\Controller as CmsController;
+use Cms\Classes\SnippetManager;
 use System\Classes\PluginBase;
 
 class Plugin extends PluginBase
@@ -51,11 +51,6 @@ class Plugin extends PluginBase
                 'tab'   => 'rainlab.pages::lang.page.tab',
                 'order' => 200,
                 'label' => 'rainlab.pages::lang.page.manage_content'
-            ],
-            'rainlab.pages.access_snippets' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
-                'order' => 200,
-                'label' => 'rainlab.pages::lang.page.access_snippets'
             ]
         ];
     }
@@ -93,13 +88,6 @@ class Plugin extends PluginBase
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'content'],
                         'permissions' => ['rainlab.pages.manage_content']
-                    ],
-                    'snippets' => [
-                        'label'       => 'rainlab.pages::lang.snippet.menu_label',
-                        'icon'        => 'icon-newspaper-o',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'snippet'],
-                        'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
             ]
@@ -121,24 +109,16 @@ class Plugin extends PluginBase
         });
 
         Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
-            /*
-             * Before twig renders
-             */
+            // Before twig renders
             $twig = $controller->getTwig();
             $loader = $controller->getLoader();
             Controller::instance()->injectPageTwig($page, $loader, $twig);
 
-            /*
-             * Get rendered content
-             */
+            // Get rendered content
             $contents = Controller::instance()->getPageContents($page);
             if (strlen($contents)) {
                 return $contents;
             }
-        });
-
-        Event::listen('cms.page.initComponents', function($controller, $page) {
-            Controller::instance()->initPageComponents($controller, $page);
         });
 
         Event::listen('cms.block.render', function($blockName, $blockContents) {
@@ -184,43 +164,8 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
-            if ($formWidget->model instanceof \Cms\Classes\Partial) {
-                Snippet::extendPartialForm($formWidget);
-            }
-        });
-
-        Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
-            // Running v3.4 with native snippets
-            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
-                return;
-            }
-
-            if ($dataHolder->templateType === 'partial') {
-                Snippet::extendEditorPartialToolbar($dataHolder);
-            }
-        });
-
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
-        });
-
-        Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
-            // Running v3.4 with native snippets
-            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
-                return;
-            }
-
-            $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
-        });
-
-        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
-            // Running v3.4 with native snippets
-            if (class_exists('System') && version_compare(\System::VERSION, '3.4', '>=')) {
-                return;
-            }
-
-            Snippet::processTemplateSettings($template, $context);
         });
 
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
@@ -270,6 +215,6 @@ class Plugin extends PluginBase
         $router->clearCache();
 
         StaticPage::clearMenuCache($theme);
-        SnippetManager::clearCache($theme);
+        // SnippetManager::clearCache($theme);
     }
 }

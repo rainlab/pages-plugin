@@ -16,13 +16,11 @@ use System\Helpers\DateTime;
 use Backend\Classes\Controller;
 use RainLab\Pages\Widgets\PageList;
 use RainLab\Pages\Widgets\MenuList;
-use RainLab\Pages\Widgets\SnippetList;
 use RainLab\Pages\Widgets\TemplateList;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\Plugin as PagesPlugin;
-use RainLab\Pages\Classes\SnippetManager;
 use ApplicationException;
 use Exception;
 
@@ -74,11 +72,6 @@ class Index extends Controller
                     });
                     $this->vars['activeWidgets'][] = 'contentList';
                 }
-
-                if ($this->user->hasAccess('rainlab.pages.access_snippets')) {
-                    new SnippetList($this, 'snippetList');
-                    $this->vars['activeWidgets'][] = 'snippetList';
-                }
             }
         }
         catch (Exception $ex) {
@@ -103,7 +96,6 @@ class Index extends Controller
     {
         $this->addJs('/plugins/rainlab/pages/assets/js/october.treeview.js', 'RainLab.Pages');
         $this->addJs('/plugins/rainlab/pages/assets/js/pages-page.js', 'RainLab.Pages');
-        $this->addJs('/plugins/rainlab/pages/assets/js/pages-snippets.js', 'RainLab.Pages');
         $this->addCss('/plugins/rainlab/pages/assets/css/pages.css', 'RainLab.Pages');
         $this->addCss('/plugins/rainlab/pages/assets/css/treeview.css', 'RainLab.Pages');
 
@@ -295,60 +287,6 @@ class Index extends Controller
         return $this->pushObjectForm($type, $object, Request::input('formWidgetAlias'));
     }
 
-    public function onGetInspectorConfiguration()
-    {
-        $configuration = [];
-
-        $snippetCode = Request::input('snippet');
-        $componentClass = Request::input('component');
-
-        if (strlen($snippetCode)) {
-            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-            if (!$snippet) {
-                throw new ApplicationException(trans('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]));
-            }
-
-            $configuration = $snippet->getProperties();
-        }
-
-        return [
-            'configuration' => [
-                'properties'  => $configuration,
-                'title'       => $snippet->getName(),
-                'description' => $snippet->getDescription()
-            ]
-        ];
-    }
-
-    public function onGetSnippetNames()
-    {
-        $codes = array_unique(Request::input('codes'));
-        $result = [];
-
-        foreach ($codes as $snippetCode) {
-            $parts = explode('|', $snippetCode);
-            $componentClass = null;
-
-            if (count($parts) > 1) {
-                $snippetCode = $parts[0];
-                $componentClass = $parts[1];
-            }
-
-            $snippet = SnippetManager::instance()->findByCodeOrComponent($this->theme, $snippetCode, $componentClass);
-
-            if (!$snippet) {
-                $result[$snippetCode] = trans('rainlab.pages::lang.snippet.not_found', ['code' => $snippetCode]);
-            }
-            else {
-                $result[$snippetCode] =$snippet->getName();
-            }
-        }
-
-        return [
-            'names' => $result
-        ];
-    }
-
     public function onMenuItemReferenceSearch()
     {
         $alias = Request::input('alias');
@@ -363,8 +301,7 @@ class Index extends Controller
     }
 
     /**
-     * Commits the DB changes of a object to the filesystem
-     *
+     * onCommit commits the DB changes of a object to the filesystem
      * @return array $response
      */
     public function onCommit()
@@ -374,19 +311,9 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canCommitObject($object)) {
-            if (class_exists('System')) {
-                // v1.2
-                $datasource = $this->getThemeDatasource();
-                $datasource->updateModelAtIndex(1, $object);
-                $datasource->forceDeleteModelAtIndex(0, $object);
-            }
-            else {
-                // v1.1
-                $datasource = $this->getThemeDatasource();
-                $datasource->pushToSource($object, 'filesystem');
-                $datasource->removeFromSource($object, 'database');
-            }
-
+            $datasource = $this->getThemeDatasource();
+            $datasource->updateModelAtIndex(1, $object);
+            $datasource->forceDeleteModelAtIndex(0, $object);
             Flash::success(Lang::get('cms::lang.editor.commit_success', ['type' => $type]));
         }
 
@@ -405,17 +332,8 @@ class Index extends Controller
         $object = $this->loadObject($type, trim(Request::input('objectPath')));
 
         if ($this->canResetObject($object)) {
-            if (class_exists('System')) {
-                // v1.2
-                $datasource = $this->getThemeDatasource();
-                $datasource->forceDeleteModelAtIndex(0, $object);
-            }
-            else {
-                // v1.1
-                $datasource = $this->getThemeDatasource();
-                $datasource->removeFromSource($object, 'database');
-            }
-
+            $datasource = $this->getThemeDatasource();
+            $datasource->forceDeleteModelAtIndex(0, $object);
             Flash::success(Lang::get('cms::lang.editor.reset_success', ['type' => $type]));
         }
 
@@ -471,24 +389,12 @@ class Index extends Controller
     {
         $result = false;
 
-        if (class_exists('System')) {
-            // v1.2
-            if (
-                Config::get('app.debug', false) &&
-                $this->theme->secondLayerEnabled() &&
-                $this->getThemeDatasource()->hasModelAtIndex(1, $object)
-            ) {
-                $result = true;
-            }
-        }
-        else {
-            // v1.1
-            if (Config::get('app.debug', false) &&
-                Theme::databaseLayerEnabled() &&
-                $this->getThemeDatasource()->sourceHasModel('database', $object)
-            ) {
-                $result = true;
-            }
+        if (
+            Config::get('app.debug', false) &&
+            $this->theme->secondLayerEnabled() &&
+            $this->getThemeDatasource()->hasModelAtIndex(1, $object)
+        ) {
+            $result = true;
         }
 
         return $result;
@@ -505,20 +411,10 @@ class Index extends Controller
     {
         $result = false;
 
-        if (class_exists('System')) {
-            // v1.2
-            if ($this->theme->secondLayerEnabled()) {
-                $datasource = $this->getThemeDatasource();
-                $result = $datasource->hasModelAtIndex(0, $object) &&
-                    $datasource->hasModelAtIndex(1, $object);
-            }
-        }
-        else {
-            // v1.1
-            if (Theme::databaseLayerEnabled()) {
-                $datasource = $this->getThemeDatasource();
-                $result = $datasource->sourceHasModel('database', $object) && $datasource->sourceHasModel('filesystem', $object);
-            }
+        if ($this->theme->secondLayerEnabled()) {
+            $datasource = $this->getThemeDatasource();
+            $result = $datasource->hasModelAtIndex(0, $object) &&
+                $datasource->hasModelAtIndex(1, $object);
         }
 
         return $result;
@@ -638,26 +534,11 @@ class Index extends Controller
     }
 
     /**
-     * modLegacyModeFields will ensure specific field types use legacy mode
-     */
-    protected function modLegacyModeFields($fields)
-    {
-        foreach ($fields as &$fieldConfig) {
-            if (in_array($fieldConfig['type'], ['richeditor', 'codeeditor'])) {
-                $fieldConfig['legacyMode'] = true;
-            }
-        }
-
-        return $fields;
-    }
-
-    /**
      * addPageSyntaxFields adds syntax defined fields to the form
      */
     protected function addPageSyntaxFields($formWidget, $page)
     {
         $fields = $page->listLayoutSyntaxFields();
-        $fields = $this->modLegacyModeFields($fields);
 
         foreach ($fields as $fieldCode => $fieldConfig) {
             if ($fieldConfig['type'] === 'fileupload') {
@@ -667,7 +548,6 @@ class Index extends Controller
             if (in_array($fieldConfig['type'], ['repeater', 'nestedform'])) {
                 if (empty($fieldConfig['form']) || !is_string($fieldConfig['form'])) {
                     $repeaterFields = array_get($fieldConfig, 'fields', []);
-                    $repeaterFields = $this->modLegacyModeFields($repeaterFields);
                     $fieldConfig['form']['fields'] = $repeaterFields;
                     unset($fieldConfig['fields']);
                 }
@@ -710,10 +590,9 @@ class Index extends Controller
 
             $placeholderTitle = $info['title'];
             $fieldConfig = [
-                'tab'     => $placeholderTitle,
+                'tab' => $placeholderTitle,
                 'stretch' => '1',
-                'size'    => 'huge',
-                'legacyMode' => true
+                'size' => 'huge'
             ];
 
             if ($info['type'] != 'text') {
@@ -814,9 +693,7 @@ class Index extends Controller
 
         if ($type == 'page') {
             $placeholders = array_get($saveData, 'placeholders');
-
-            $comboConfig = Config::get('cms.convertLineEndings', Config::get('system.convert_line_endings', false));
-            if (is_array($placeholders) && $comboConfig === true) {
+            if (is_array($placeholders) && Config::get('system.convert_line_endings', false) === true) {
                 $placeholders = array_map([$this, 'convertLineEndings'], $placeholders);
             }
 
@@ -849,8 +726,7 @@ class Index extends Controller
             }
         }
 
-        $comboConfig = Config::get('cms.convertLineEndings', Config::get('system.convert_line_endings', false));
-        if (!empty($objectData['markup']) && $comboConfig === true) {
+        if (!empty($objectData['markup']) && Config::get('system.convert_line_endings', false) === true) {
             $objectData['markup'] = $this->convertLineEndings($objectData['markup']);
         }
 

@@ -1,9 +1,9 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
-use Backend\Classes\FormWidgetBase;
 use Cms\Classes\ComponentManager;
-use Cms\Classes\ComponentHelpers;
+use Cms\Helpers\Component as ComponentHelpers;
 use Cms\Components\UnknownComponent;
+use Backend\Classes\FormWidgetBase;
 use Exception;
 
 /**

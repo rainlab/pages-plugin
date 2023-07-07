@@ -10,9 +10,7 @@ v1.0.9: Fixes issue where Snippet tab is missing from the Partials form.
 v1.0.10: Add translations for various locales.
 v1.0.11: Fixes issue where placeholders tabs were missing from Page form.
 v1.0.12: Implement Media Manager support.
-v1.1.0:
-  - Adds meta title and description to pages. Adds |staticPage filter.
-  - snippets_rename_viewbag_properties.php
+v1.1.0: Adds meta title and description to pages. Adds |staticPage filter.
 v1.1.1: Add support for Syntax Fields.
 v1.1.2: Static Breadcrumbs component now respects the hide from navigation setting.
 v1.1.3: Minor back-end styling fix.
