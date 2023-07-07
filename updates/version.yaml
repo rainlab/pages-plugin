@@ -74,3 +74,4 @@ v1.5.9: Fixes fancy layout with nested forms
 v1.5.10: Adds forward compatibility with October CMS v3.4
 v1.5.12: Fixes more areas of forward compatibility
 v2.0.1: Compatibility with core snippets
+v2.0.2: Fixes bug opening menu with tailor list menu items
