@@ -642,7 +642,7 @@ class Page extends ContentBase
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
-        $markup = $this->markup;
+        $markup = $placeholderContents;
 
         // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
