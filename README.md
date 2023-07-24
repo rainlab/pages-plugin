@@ -92,10 +92,10 @@ This drop-down is available for menu item types that require a special CMS page 
 
 The Code field allows to assign the API code that you can use to set the active menu item explicitly in the page's `onInit()` handler described in the documentation.
 
-## Documentation
-
-Read the [documentation](./DOCS.md) to learn more about this plugin.
-
 ## See also
 
 Read the [Getting started with Static Pages](https://octobercms.com/blog/post/getting-started-static-pages) tutorial in the Blog.
+
+## Documentation
+
+Read the [documentation](./DOCS.md) to learn more about this plugin.
