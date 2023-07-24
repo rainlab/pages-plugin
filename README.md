@@ -6,7 +6,7 @@ This plugin allows end users to create and edit static pages and menus with a si
 
 Static pages are managed on the Pages tab of the Static Pages plugin. Static pages have three required parameters - **Title**, **URL** and **Layout**. The URL is generated automatically when the Title is entered, but it could be changed manually. URLs must start with the forward slash character. The Layout drop-down allows to select a layout created with the CMS. Only layouts that include the `staticPage` component are displayed in the drop-down.
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/static-page.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/static-page.png) {.img-responsive .frame}
 
 Pages are hierarchical. The page hierarchy is used when a new page URL is generated, but as URLs can be changed manually, the hierarchy doesn't really affect the routing process. The only place where the page hierarchy matters is the generated Menus. The generated menus reflect the page hierarchy. You can manage the page hierarchy by dragging pages in the page tree. The page drag handle appears when you move the mouse cursor over page item in the tree.
 
@@ -20,9 +20,9 @@ If a static layout contains [placeholders](https://octobercms.com/docs/cms/layou
 
 Snippets is a [featured included with October CMS](https://docs.octobercms.com/3.x/cms/themes/snippets.html), with elements that can be added by a Static Page, in the rich text editor. They allow you to inject complex (and interactive) areas to pages. Snippets are configurable and have properties that users can manage with the Inspector.
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-backend.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/snippets-backend.png)
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/snippets-frontend.png)
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/snippets-frontend.png)
 
 ## Managing Menus
 
@@ -30,11 +30,11 @@ You can manage menus on the Menus tab of the Static Pages plugin. A website can 
 
 Menus have two required properties - the menu **Name** and menu **Code**. The menu name is displayed in the menu list in the back-end. The menu code is required for referring menus in the layout code, it's the API parameter.
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-management.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/menu-management.png) {.img-responsive .frame}
 
 Menus can contain multiple **menu items**, and menu items can be nested. Each menu item has a number of properties. There are properties common for all menu item types, and some properties depend on the item type. The common menu item properties are **Title** and **Type**. The Title defines the menu item text. The Type is a drop-down list which displays all menu item types available in your OctoberCMS copy.
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/images/menu-item.png) {.img-responsive .frame}
+![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/menu-item.png) {.img-responsive .frame}
 
 #### Standard Menu Item Types
 
