@@ -22,8 +22,6 @@ Snippets is a [featured included with October CMS](https://docs.octobercms.com/3
 
 ![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/snippets-backend.png)
 
-![image](https://raw.githubusercontent.com/rainlab/pages-plugin/master/docs/snippets-frontend.png)
-
 ## Managing Menus
 
 You can manage menus on the Menus tab of the Static Pages plugin. A website can contain multiple menus, for example the main menu, footer menu, sidebar menu, etc. A theme developer can include menus on a page layout with the `staticMenu` component.
