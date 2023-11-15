@@ -76,3 +76,4 @@ v1.5.12: Fixes more areas of forward compatibility
 v2.0.1: Compatibility with core snippets
 v2.0.2: Fixes bug opening menu with tailor list menu items
 v2.0.3: Fixes bug showing wrong placeholder code
+v2.0.4: Fixes sidebar delete button in October v3.5

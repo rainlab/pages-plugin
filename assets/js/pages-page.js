@@ -61,7 +61,7 @@
         $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', this.proxy(this.onSidebarSubmenuItemClick))
 
         // The Delete Object button click
-        $(document).on('click', '#pages-side-panel form button[data-control=delete-object], #pages-side-panel form button[data-control=delete-template]',
+        $(document).on('click', '#pages-side-panel form button[data-control~=delete-object], #pages-side-panel form button[data-control~=delete-template]',
             this.proxy(this.onDeleteObject))
 
         // A new tab is added to the editor
@@ -283,7 +283,7 @@
         $.oc.stripeLoadIndicator.show()
         $form.request(objectList + '::onUpdate', {
             complete: function(data) {
-                $('button[data-control=delete-object], button[data-control=delete-template]', $form).trigger('oc.triggerOn.update')
+                $('button[data-control~=delete-object], button[data-control~=delete-template]', $form).trigger('oc.triggerOn.update')
             }
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
