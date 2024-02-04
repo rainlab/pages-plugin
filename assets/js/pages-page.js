@@ -230,6 +230,9 @@
         this.$pageTree.treeView('markActive', tabId)
         $('[data-control=filelist]', this.$sidePanel).fileList('markActive', tabId)
 
+        // Disable fancy layout on nested forms in repeater items
+        $('.field-repeater-item .form-tabless-fields', $tabPane).addClass('not-fancy');
+        
         var objectType = $('input[name=objectType]', $form).val()
         if (objectType.length > 0 &&
             (context.handler == 'onSave' || context.handler == 'onCommit' || context.handler == 'onReset')
