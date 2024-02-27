@@ -1,16 +1,19 @@
 @import "../../../../../modules/backend/assets/less/core/boot.less";
 
-@color-treeview-item-bg:                     #ffffff;
-@color-treeview-item-title:                  #2b3e50;
+@color-treeview-item-bg:                     var(--oc-primary-bg, #ffffff);
+@color-treeview-item-title:                  var(--oc-primary-color, #2b3e50);
 @color-treeview-item-comment:                #95a5a6;
 @color-treeview-control:                     #bdc3c7;
-@color-treeview-hover-bg:                    @brand-primary;
-@color-treeview-hover-text:                  @highlight-hover-text;
-@color-treeview-active-bg:                   @highlight-active-bg;
-@color-treeview-active-text:                 @highlight-active-text;
+@color-treeview-hover-bg:                    var(--bs-primary, #6a6cf7);
+@color-treeview-hover-text:                  #fff;
+@color-treeview-active-bg:                   var(--oc-selection, #5254f6);
+@color-treeview-active-text:                 #ffffff;
 @color-treeview-item-active-comment:         #ffffff;
-@color-treeview-light-submenu-bg:            lighten(@brand-primary, 5%);
-@color-treeview-light-submenu-border:        @brand-primary;
+@color-treeview-light-submenu-bg:            #8284f8;
+@color-treeview-light-submenu-border:        var(--bs-primary, #6a6cf7);
+@color-treeview-cb-border:                   #cccccc;
+@color-filelist-norecords-text:              #666666;
+
 @font-size-base:          14px;
 
 .control-treeview {
@@ -87,7 +90,7 @@
                     .transition(transform 0.1s ease);
 
                     &:before {
-                        .icon(@caret-right);
+                        .icon(@icon-caret-right);
                         font-family: FontAwesome, 'octo-icon';
                         line-height: 100%;
                         font-size: @font-size-base + 1;
@@ -112,7 +115,7 @@
                     opacity: 0;
 
                     &:before {
-                        .icon(@bars);
+                        .icon(@icon-bars);
                         font-family: FontAwesome, 'octo-icon';
                         font-size: 18px;
                     }
@@ -132,7 +135,7 @@
                     height: 27px;
                     display: none;
                     margin-left: 15px;
-                    background-color: lighten(@color-treeview-hover-bg, 2%);
+                    background-color: #7476f8;
                     .border-bottom-radius(8px);
                     .box-shadow(~"inset 0 3px 3px -3px rgba(0, 0, 0, 0.2)");
 
@@ -179,7 +182,7 @@
                         margin-right: 0;
 
                         &:before {
-                            border-color: @color-filelist-cb-border;
+                            border-color: @color-treeview-cb-border;
                         }
                     }
                 }
@@ -338,7 +341,7 @@
 
             &.active {
                 > div {
-                    background: @color-filelist-active;
+                    background: @color-treeview-active-bg;
 
                     > a {
                         color: @color-treeview-item-active-comment;
@@ -360,7 +363,7 @@
                             height: 1px;
                             display: block;
                             left: 0;
-                            background-color: @color-filelist-active;
+                            background-color: @color-treeview-active-bg;
                         }
 
                         &:before {top: -1px;}
