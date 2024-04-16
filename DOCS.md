@@ -23,7 +23,7 @@ In the simplest case you could create a [layout](https://octobercms.com/docs/cms
 
 ## Static Pages
 
-Include the Static Page [component](http://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
+Include the Static Page [component](https://octobercms.com/docs/cms/components) to the layout. The Static Page component has two public properties:
 
 - `title` - specifies the static page title.
 - `content` - the static page content.
@@ -81,7 +81,7 @@ The component injects the `breadcrumbs` page variable that contains an array of 
 
 ## Setting the Active Menu Item Explicitly
 
-In some cases you might want to mark a specific menu item as active explicitly. You can do that in the page's [`onInit()`](http://octobercms.com/docs/cms/pages#dynamic-pages) function with assigning the `activeMenuItem` page variable a value matching the menu item code you want to make active. Menu item codes are managed in the Edit Menu Item popup.
+In some cases you might want to mark a specific menu item as active explicitly. You can do that in the page's [`onInit()`](https://octobercms.com/docs/cms/pages#dynamic-pages) function with assigning the `activeMenuItem` page variable a value matching the menu item code you want to make active. Menu item codes are managed in the Edit Menu Item popup.
 
 ```php
 function onInit()
