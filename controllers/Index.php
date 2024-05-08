@@ -772,11 +772,11 @@ class Index extends Controller
 
         return [
             'tabTitle' => $this->getTabTitle($type, $object),
-            'tab'      => $this->makePartial('form_page', [
-                'form'         => $widget,
-                'objectType'   => $type,
-                'objectTheme'  => $this->theme->getDirName(),
-                'objectMtime'  => $object->mtime,
+            'tab' => $this->makePartial('form_page', [
+                'form' => $widget,
+                'objectType' => $type,
+                'objectTheme' => $this->theme->getDirName(),
+                'objectMtime' => $object->mtime,
                 'objectParent' => Request::input('parentFileName')
             ])
         ];

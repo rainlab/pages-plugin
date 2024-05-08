@@ -3,7 +3,7 @@
 use Event;
 
 /**
- * Represents a menu item.
+ * MenuItem represents a menu item.
  * This class is used in the back-end for managing the menu items.
  * On the front-end items are represented with the
  * \RainLab\Pages\Classes\MenuItemReference objects.
