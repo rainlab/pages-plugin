@@ -103,7 +103,7 @@ To create a link to a static page, use the `|staticPage` filter:
 This filter translates to PHP code as:
 
 ```php
-echo RainLab\Pages\Classes\Page::url('chairs');
+echo \RainLab\Pages\Classes\Page::url('chairs');
 ```
 
 If you want to link to the static page by its URL, simply use the `|app` filter:
@@ -356,14 +356,7 @@ As the resolving process occurs every time when the front-end page is rendered, 
 If your item type requires a CMS page to resolve item URLs, you might need to return the selected page's URL, and sometimes pass parameters to the page through the URL. The next code example shows how to load a blog category CMS page referred by a menu item and how to generate an URL to this page. The blog category page has the `blogPosts` component that can load the requested category slug from the URL. We assume that the URL parameter is called 'slug', although it can be edited manually. We skip the part that loads the real parameter name for the simplicity. Please refer to the [Blog plugin](https://octobercms.com/plugin/rainlab-blog) for the reference.
 
 ```php
-use Cms\Classes\Page as CmsPage;
-use October\Rain\Router\Helper as RouterHelper;
-use Str;
-use Url;
-
-...
-
-$page = CmsPage::loadCached($theme, $item->cmsPage);
+$page = \Cms\Classes\Page::loadCached($theme, $item->cmsPage);
 
 // Always check if the page can be resolved
 if (!$page) {
@@ -371,9 +364,7 @@ if (!$page) {
 }
 
 // Generate the URL
-$url = CmsPage::url($page->getBaseFileName(), ['slug' => $category->slug]);
-
-$url = Url::to(Str::lower(RouterHelper::normalizeUrl($url)));
+$url = \Cms::pageUrl($page->getBaseFileName(), ['slug' => $category->slug]);
 ```
 
 To determine whether an item is active just compare it with the `$url` argument of the event handler.
