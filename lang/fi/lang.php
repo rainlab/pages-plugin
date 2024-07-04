@@ -101,7 +101,7 @@ return [
         'exit_fullscreen' => 'Poistu kokoruudun tilasta',
         'hidden' => 'Piilotettu',
         'hidden_comment' => 'Piilotetut sivut ovat saatavilla ainoastaan hallintaan kirjautuneille.',
-        'navigation_hidden' => 'Piilota navigaatiossa',
+        'navigation_hidden' => 'Piilota navigaatiosta',
         'navigation_hidden_comment' => 'Käytä tätä valintaruutua piilottaaksesi tämä sivu automaattisesti generoiduista valikoista ja leivänmuruista.',
     ],
     'snippet' => [
