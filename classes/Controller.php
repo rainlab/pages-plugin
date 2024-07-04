@@ -76,7 +76,7 @@ class Controller
 
         CmsException::mask($staticPage, 400);
         $loader->setObject($staticPage);
-        $template = $twig->loadTemplate($staticPage->getFilePath());
+        $template = $twig->load($staticPage->getFilePath());
         $template->render([]);
         CmsException::unmask();
     }
@@ -97,15 +97,6 @@ class Controller
         }
 
         return $page->apiBag['staticPage']->getProcessedPlaceholderMarkup($placeholderName, $placeholderContents);
-    }
-
-    public function initPageComponents($cmsController, $page)
-    {
-        if (!isset($page->apiBag['staticPage'])) {
-            return;
-        }
-
-        $page->apiBag['staticPage']->initCmsComponents($cmsController);
     }
 
     public function parseSyntaxFields($content)

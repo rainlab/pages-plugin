@@ -69,8 +69,8 @@
             $container = $('> div', $item),
             self = this
 
-        $container.one('show.oc.popup', function(e){
-            $(document).trigger('render')
+        $container.one('show.oc.popup', function(e) {
+            self.triggerRenderEvent();
 
             self.$popupContainer = $(e.relatedTarget);
             self.$itemDataContainer = $container.closest('li')
@@ -93,7 +93,7 @@
                 if (selectedTitle && self.properties.title === self.$popupForm.attr('data-new-item-title')) {
                     var title = $.trim(selectedTitle.replace(/\s*\[.*\]$/, ''))
                     $titleField.val(title)
-                    
+
                     // Support for RainLab.Translate
                     var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
                     if (defaultLocale) {
@@ -190,7 +190,7 @@
             }
         }
 
-        var defaultLocale = $('[data-control="multilingual"]').data('default-locale')
+        var defaultLocale = $('[data-control="multilingual"]', $popupContainer).data('default-locale')
         $.each(properties, function(property, val) {
             if (property == 'viewBag') {
                 $.each(val, function(vbProperty, vbVal) {
@@ -212,45 +212,58 @@
                 /**
                  * Mediafinder support
                  */
-                var mediafinderElements = $('[data-control="mediafinder"]');
+                var mediafinderElements = $('[data-control="mediafinder"]', $popupContainer);
                 var storageMediaPath = $('[data-storage-media-path]').data('storage-media-path');
 
                 $.each(mediafinderElements, function() {
+                    var input = $(this).find('input'),
+                        propertyName = input.attr('name'),
+                        propertyNameSimple;
 
-                      var input = $(this).find('>input');
-                      var propertyName = input.attr('name');
+                    if (propertyName && propertyName.length) {
+                        propertyNameSimple = propertyName.substr(8).slice(0, -1);
+                    }
 
-                      if( propertyName.length ) {
-                          var propertyNameSimple = propertyName.substr(8).slice(0,-1);
-                      }
+                    var propertyValue = '';
 
-                      var propertyValue = '';
+                    $.each(val, function(vbProperty, vbVal) {
+                        if (vbProperty == propertyNameSimple) {
+                            propertyValue = vbVal;
+                        }
+                    });
 
-                      $.each(val, function(vbProperty, vbVal) {
-                          if( vbProperty == propertyNameSimple ) {
-                              propertyValue = vbVal;
-                          }
-                      });
+                    if (propertyValue != '') {
+                        // v2 media finder
+                        var dataLocker = $('[data-data-locker]', this);
+                        if (dataLocker.length) {
+                            var items = [{
+                                path: propertyValue,
+                                publicUrl: storageMediaPath + propertyValue,
+                                thumbUrl: storageMediaPath + propertyValue,
+                                title: propertyValue.substring(1)
+                            }];
 
-                      if( propertyValue != '' ) {
+                            var mediafinder = $(this).data('oc.mediaFinder');
+                            mediafinder.addItems(items);
+                            mediafinder.setValue();
+                            mediafinder.evalIsPopulated();
+                        }
+                        // v1 media finder
+                        else {
+                            $(this).toggleClass('is-populated');
+                            input.attr('value', propertyValue);
 
-                          $(this).toggleClass('is-populated');
-                          input.attr('value', propertyValue);
+                            var image = $('[data-find-image]', this);
+                            if (image.length) {
+                                image.attr('src', storageMediaPath + propertyValue);
+                            }
 
-                          var image = $(this).find('[data-find-image]');
-
-                          if( image.length ) {
-                              image.attr('src', storageMediaPath + propertyValue );
-                          }
-
-                          var file = $(this).find('[data-find-file-name]');
-
-                          if( file.length ) {
-                              file.text( propertyValue.substr(1) );
-                          }
-
-                      }
-
+                            var file = $('[data-find-file-name]', this);
+                            if (file.length) {
+                                file.text(propertyValue.substring(1));
+                            }
+                        }
+                    }
                 });
 
             }
@@ -364,7 +377,7 @@
         $urlFormGroup.toggle(type == 'url')
         $replaceFormGroup.toggle(typeInfo.dynamicItems !== undefined && typeInfo.dynamicItems)
 
-        $(document).trigger('render')
+        this.triggerRenderEvent();
 
         if (focusList) {
             var focusElements = [
@@ -587,6 +600,17 @@
         $(window).trigger('oc.updateUi')
 
         this.onItemClick(item, true)
+    }
+
+    MenuItemsEditor.prototype.triggerRenderEvent = function() {
+        // Vanilla AJAX Framework (v3)
+        if (window.oc && oc.Events) {
+            oc.Events.dispatch('render');
+        }
+        // Classic AJAX Framework (v1,2)
+        else {
+            $(document).trigger('render');
+        }
     }
 
     MenuItemsEditor.DEFAULTS = {

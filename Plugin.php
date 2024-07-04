@@ -5,10 +5,10 @@ use Backend;
 use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
-use RainLab\Pages\Classes\SnippetManager;
 use Cms\Classes\Theme;
+use Cms\Classes\Snippet;
 use Cms\Classes\Controller as CmsController;
+use Cms\Classes\SnippetManager;
 use System\Classes\PluginBase;
 
 class Plugin extends PluginBase
@@ -16,21 +16,21 @@ class Plugin extends PluginBase
     public function pluginDetails()
     {
         return [
-            'name'        => 'rainlab.pages::lang.plugin.name',
+            'name' => 'rainlab.pages::lang.plugin.name',
             'description' => 'rainlab.pages::lang.plugin.description',
-            'author'      => 'Alexey Bobkov, Samuel Georges',
-            'icon'        => 'icon-files-o',
-            'homepage'    => 'https://github.com/rainlab/pages-plugin'
+            'author' => 'Alexey Bobkov, Samuel Georges',
+            'icon' => 'icon-files-o',
+            'homepage' => 'https://github.com/rainlab/pages-plugin'
         ];
     }
 
     public function registerComponents()
     {
         return [
-            '\RainLab\Pages\Components\ChildPages' => 'childPages',
-            '\RainLab\Pages\Components\StaticPage' => 'staticPage',
-            '\RainLab\Pages\Components\StaticMenu' => 'staticMenu',
-            '\RainLab\Pages\Components\StaticBreadcrumbs' => 'staticBreadcrumbs'
+            \RainLab\Pages\Components\ChildPages::class => 'childPages',
+            \RainLab\Pages\Components\StaticPage::class => 'staticPage',
+            \RainLab\Pages\Components\StaticMenu::class => 'staticMenu',
+            \RainLab\Pages\Components\StaticBreadcrumbs::class => 'staticBreadcrumbs'
         ];
     }
 
@@ -51,11 +51,6 @@ class Plugin extends PluginBase
                 'tab'   => 'rainlab.pages::lang.page.tab',
                 'order' => 200,
                 'label' => 'rainlab.pages::lang.page.manage_content'
-            ],
-            'rainlab.pages.access_snippets' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
-                'order' => 200,
-                'label' => 'rainlab.pages::lang.page.access_snippets'
             ]
         ];
     }
@@ -70,6 +65,7 @@ class Plugin extends PluginBase
                 'iconSvg'     => 'plugins/rainlab/pages/assets/images/pages-icon.svg',
                 'permissions' => ['rainlab.pages.*'],
                 'order'       => 200,
+                'useDropdown' => false,
 
                 'sideMenu' => [
                     'pages' => [
@@ -92,13 +88,6 @@ class Plugin extends PluginBase
                         'url'         => 'javascript:;',
                         'attributes'  => ['data-menu-item'=>'content'],
                         'permissions' => ['rainlab.pages.manage_content']
-                    ],
-                    'snippets' => [
-                        'label'       => 'rainlab.pages::lang.snippet.menu_label',
-                        'icon'        => 'icon-newspaper-o',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'snippet'],
-                        'permissions' => ['rainlab.pages.access_snippets']
                     ]
                 ]
             ]
@@ -120,24 +109,16 @@ class Plugin extends PluginBase
         });
 
         Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
-            /*
-             * Before twig renders
-             */
+            // Before twig renders
             $twig = $controller->getTwig();
             $loader = $controller->getLoader();
             Controller::instance()->injectPageTwig($page, $loader, $twig);
 
-            /*
-             * Get rendered content
-             */
+            // Get rendered content
             $contents = Controller::instance()->getPageContents($page);
             if (strlen($contents)) {
                 return $contents;
             }
-        });
-
-        Event::listen('cms.page.initComponents', function($controller, $page) {
-            Controller::instance()->initPageComponents($controller, $page);
         });
 
         Event::listen('cms.block.render', function($blockName, $blockContents) {
@@ -153,6 +134,13 @@ class Plugin extends PluginBase
             }
         });
 
+        Event::listen('cms.pageLookup.listTypes', function() {
+            return [
+                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
+                'all-static-pages' => ['rainlab.pages::lang.menuitem.all_static_pages', true]
+            ];
+        });
+
         Event::listen('pages.menuitem.listTypes', function() {
             return [
                 'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
@@ -160,7 +148,7 @@ class Plugin extends PluginBase
             ];
         });
 
-        Event::listen('pages.menuitem.getTypeInfo', function($type) {
+        Event::listen(['cms.pageLookup.getTypeInfo', 'pages.menuitem.getTypeInfo'], function($type) {
             if ($type == 'url') {
                 return [];
             }
@@ -170,34 +158,14 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
+        Event::listen(['cms.pageLookup.resolveItem', 'pages.menuitem.resolveItem'], function($type, $item, $url, $theme) {
             if ($type == 'static-page' || $type == 'all-static-pages') {
                 return StaticPage::resolveMenuItem($item, $url, $theme);
             }
         });
 
-        Event::listen('backend.form.extendFieldsBefore', function($formWidget) {
-            if ($formWidget->model instanceof \Cms\Classes\Partial) {
-                Snippet::extendPartialForm($formWidget);
-            }
-        });
-
-        Event::listen('cms.template.getTemplateToolbarSettingsButtons', function($extension, $dataHolder) {
-            if ($dataHolder->templateType === 'partial') {
-                Snippet::extendEditorPartialToolbar($dataHolder);
-            }
-        });
-
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
-        });
-
-        Event::listen('cms.template.processSettingsBeforeSave', function($controller, $dataHolder) {
-            $dataHolder->settings = Snippet::processTemplateSettingsArray($dataHolder->settings);
-        });
-
-        Event::listen('cms.template.processSettingsAfterLoad', function($controller, $template, $context = null) {
-            Snippet::processTemplateSettings($template, $context);
         });
 
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
@@ -234,7 +202,7 @@ class Plugin extends PluginBase
     {
         return [
             'filters' => [
-                'staticPage' => ['RainLab\Pages\Classes\Page', 'url']
+                'staticPage' => [\RainLab\Pages\Classes\Page::class, 'url']
             ]
         ];
     }
@@ -247,6 +215,6 @@ class Plugin extends PluginBase
         $router->clearCache();
 
         StaticPage::clearMenuCache($theme);
-        SnippetManager::clearCache($theme);
+        // SnippetManager::clearCache($theme);
     }
 }

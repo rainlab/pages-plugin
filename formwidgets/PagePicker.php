@@ -44,7 +44,7 @@ class PagePicker extends FormWidgetBase
 
         // Flatten page tree for dropdown options
         $options = [];
-        $iterator = function($items, $depth=0) use(&$iterator, &$tree, &$options, $indent) {
+        $iterator = function($items, $depth = 0) use (&$iterator, &$tree, &$options, $indent) {
 
             foreach ($items as $code) {
                 $itemData = $tree[$code];

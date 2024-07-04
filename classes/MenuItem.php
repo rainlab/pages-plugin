@@ -1,12 +1,9 @@
 <?php namespace RainLab\Pages\Classes;
 
-use ApplicationException;
-use Validator;
-use Lang;
 use Event;
 
 /**
- * Represents a menu item.
+ * MenuItem represents a menu item.
  * This class is used in the back-end for managing the menu items.
  * On the front-end items are represented with the
  * \RainLab\Pages\Classes\MenuItemReference objects.
@@ -36,6 +33,11 @@ class MenuItem
      * @var boolean Determines whether the auto-generated menu items could have subitems.
      */
     public $nesting;
+
+    /**
+     * @var array|bool sites includes a lookup for other sites.
+     */
+    public $sites = false;
 
     /**
      * @var string Specifies the menu item type - URL, static page, etc.

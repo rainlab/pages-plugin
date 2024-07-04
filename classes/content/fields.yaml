@@ -13,7 +13,7 @@ fields:
         path: content_toolbar
         cssClass: collapse-visible
 
-    components: Cms\FormWidgets\Components
+    components: RainLab\Pages\FormWidgets\Components
 
 secondaryTabs:
     stretch: true

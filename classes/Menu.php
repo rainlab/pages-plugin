@@ -49,7 +49,7 @@ class Menu extends Meta
      */
     public $customMessages = [
         'required' => 'rainlab.pages::lang.menu.code_required',
-        'regex'    => 'rainlab.pages::lang.menu.invalid_code',
+        'regex' => 'rainlab.pages::lang.menu.invalid_code',
     ];
 
     /**

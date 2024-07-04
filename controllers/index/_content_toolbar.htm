@@ -8,18 +8,41 @@
         <?= e(trans('backend::lang.form.save')) ?>
     </a>
 
-    <?= $this->makePartial('~/modules/cms/controllers/index/_button_commit.htm'); ?>
-
-    <?= $this->makePartial('~/modules/cms/controllers/index/_button_reset.htm'); ?>
+    <button
+        type="button"
+        class="btn btn-danger oc-icon-download <?php if (!$canCommit): ?>hide oc-hide<?php endif ?>"
+        data-request="onCommit"
+        data-request-confirm="<?= e(trans('cms::lang.editor.commit_confirm')) ?>"
+        data-load-indicator="<?= e(trans('cms::lang.editor.committing')) ?>"
+        data-control="commit-button">
+        <?= e(trans('cms::lang.editor.commit')) ?>
+    </button>
 
     <button
         type="button"
-        class="btn btn-default empty oc-icon-trash-o <?php if (!$objectPath): ?>hide<?php endif ?>"
+        class="btn btn-danger oc-icon-bomb <?php if (!$canReset): ?>hide oc-hide<?php endif ?>"
+        data-request="onReset"
+        data-request-confirm="<?= e(trans('cms::lang.editor.reset_confirm')) ?>"
+        data-load-indicator="<?= e(trans('cms::lang.editor.resetting')) ?>"
+        data-control="reset-button">
+        <?= e(trans('cms::lang.editor.reset')) ?>
+    </button>
+
+    <button
+        type="button"
+        class="btn btn-default empty oc-icon-trash-o <?php if (!$objectPath): ?>hide oc-hide<?php endif ?>"
         data-request="onDelete"
         data-request-confirm="<?= e(trans('cms::lang.content.delete_confirm_single')) ?>"
         data-request-success="$.oc.pagesPage.updateObjectList('content'); $(this).trigger('close.oc.tab', [{force: true}])"
         data-control="delete-button">
     </button>
 
-    <?= $this->makePartial('~/modules/cms/controllers/index/_button_lastmodified.htm'); ?>
+    <?php if (isset($lastModified)): ?>
+        <span
+            class="btn empty oc-icon-calendar"
+            title="<?= e(trans('backend::lang.media.last_modified')) ?>: <?= $lastModified ?>"
+            data-toggle="tooltip"
+            data-placement="right">
+        </span>
+    <?php endif ?>
 </div>

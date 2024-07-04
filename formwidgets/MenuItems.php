@@ -1,6 +1,5 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
-use Request;
 use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\MenuItem;
 
@@ -111,7 +110,11 @@ class MenuItems extends FormWidgetBase
         }
 
         if (isset($this->typeInfoCache[$item->type])) {
-            $result = trans($this->typeListCache[$item->type]);
+            $result = trans(
+                is_array($this->typeListCache[$item->type])
+                ? $this->typeListCache[$item->type][0]
+                : $this->typeListCache[$item->type]
+            );
 
             if ($item->type !== 'url') {
                 if (isset($this->typeInfoCache[$item->type]['references'])) {
@@ -171,5 +174,18 @@ class MenuItems extends FormWidgetBase
         }
 
         return strlen($itemInfo) ? $itemInfo : trans('rainlab.pages::lang.menuitem.unnamed');
+    }
+
+    public function makeEditorTemplate()
+    {
+        $regEx = '#<script(.*?)</script>#is';
+        $partial = $this->makePartial('editorTemplate');
+
+        preg_match_all($regEx, $partial, $matches);
+
+        $scripts = implode('', $matches[0]);
+        $template = preg_replace($regEx, '', $partial);
+
+        return [$template, $scripts];
     }
 }

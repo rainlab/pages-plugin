@@ -19,7 +19,6 @@
         this.$sidePanel = $('#pages-side-panel')
         this.$pageTree = $('[data-control=treeview]', this.$sidePanel)
         this.masterTabsObj = this.$masterTabs.data('oc.tab')
-        this.snippetManager = new $.oc.pages.snippetManager(this.$masterTabs)
 
         this.registerHandlers()
     }
@@ -62,7 +61,7 @@
         $(document).on('submenu.oc.treeview', 'form.layout[data-content-id=pages]', this.proxy(this.onSidebarSubmenuItemClick))
 
         // The Delete Object button click
-        $(document).on('click', '#pages-side-panel form button[data-control=delete-object], #pages-side-panel form button[data-control=delete-template]',
+        $(document).on('click', '#pages-side-panel form button[data-control~=delete-object], #pages-side-panel form button[data-control~=delete-template]',
             this.proxy(this.onDeleteObject))
 
         // A new tab is added to the editor
@@ -91,9 +90,9 @@
         $(popup.$container).on('click', 'button[data-action=save]', function(){
             popup.hide()
 
-            $('input[name=objectForceSave]', $form).val(1)
-            $('a[data-request=onSave]', $form).trigger('click')
-            $('input[name=objectForceSave]', $form).val(0)
+            $('input[name=objectForceSave]', $form).val(1);
+            $('a[data-request=onSave]', $form).get(0).click();
+            $('input[name=objectForceSave]', $form).val(0);
         })
     }
 
@@ -205,14 +204,14 @@
             $tabPane = $form.closest('.tab-pane')
 
          // Update the visibilities of the commit & reset buttons
-        $('[data-control=commit-button]', $form).toggleClass('hide', !data.canCommit)
-        $('[data-control=reset-button]', $form).toggleClass('hide', !data.canReset)
+        $('[data-control=commit-button]', $form).toggleClass('oc-hide hide', !data.canCommit)
+        $('[data-control=reset-button]', $form).toggleClass('oc-hide hide', !data.canReset)
 
         if (data.objectPath !== undefined) {
             $('input[name=objectPath]', $form).val(data.objectPath)
             $('input[name=objectMtime]', $form).val(data.objectMtime)
-            $('[data-control=delete-button]', $form).removeClass('hide')
-            $('[data-control=preview-button]', $form).removeClass('hide')
+            $('[data-control=delete-button]', $form).removeClass('oc-hide hide')
+            $('[data-control=preview-button]', $form).removeClass('oc-hide hide')
 
             if (data.pageUrl !== undefined)
                 $('[data-control=preview-button]', $form).attr('href', data.pageUrl)
@@ -231,11 +230,15 @@
         this.$pageTree.treeView('markActive', tabId)
         $('[data-control=filelist]', this.$sidePanel).fileList('markActive', tabId)
 
+        // Disable fancy layout on nested forms in repeater items
+        $('.field-repeater-item .form-tabless-fields', $tabPane).addClass('not-fancy');
+        
         var objectType = $('input[name=objectType]', $form).val()
         if (objectType.length > 0 &&
             (context.handler == 'onSave' || context.handler == 'onCommit' || context.handler == 'onReset')
         )
-           this.updateObjectList(objectType)
+
+        this.updateObjectList(objectType);
 
         if (context.handler == 'onSave' && (!data['X_OCTOBER_ERROR_FIELDS'] && !data['X_OCTOBER_ERROR_MESSAGE']))
             $form.trigger('unchange.oc.changeMonitor')
@@ -283,7 +286,7 @@
         $.oc.stripeLoadIndicator.show()
         $form.request(objectList + '::onUpdate', {
             complete: function(data) {
-                $('button[data-control=delete-object], button[data-control=delete-template]', $form).trigger('oc.triggerOn.update')
+                $('button[data-control~=delete-object], button[data-control~=delete-template]', $form).trigger('oc.triggerOn.update')
             }
         }).always(function(){
             $.oc.stripeLoadIndicator.hide()
@@ -320,18 +323,13 @@
             },
             tabId = data.type + '-' + data.theme + '-' + data.path
 
-        if ($item.data('type') == 'snippet') {
-            this.snippetManager.onSidebarSnippetClick($item)
-
-            return
-        }
-
         /*
          * Find if the tab is already opened
          */
 
-         if (this.masterTabsObj.goTo(tabId))
-            return false
+         if (this.masterTabsObj.goTo(tabId)) {
+            return false;
+         }
 
         /*
          * Open a new tab
@@ -341,9 +339,9 @@
         $form.request('onOpen', {
             data: data
         }).done(function(data) {
-            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'))
+            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'));
         }).always(function() {
-            $.oc.stripeLoadIndicator.hide()
+            $.oc.stripeLoadIndicator.hide();
         })
 
         return false
@@ -376,17 +374,18 @@
 
         e.stopPropagation()
 
-        return false
+        return false;
     }
 
     /*
      * Triggered when an item is clicked in the sidebar submenu
      */
     PagesPage.prototype.onSidebarSubmenuItemClick = function(e) {
-        if ($(e.clickEvent.target).data('control') == 'create-object')
-            this.onCreateObject(e.clickEvent)
+        if ($(e.clickEvent.target).data('control') == 'create-object') {
+            this.onCreateObject(e.clickEvent);
+        }
 
-        return false
+        return false;
     }
 
     /*
@@ -473,13 +472,16 @@
 
         $secondaryPanel.addClass('secondary-content-tabs')
 
+        // Disable fancy layout on nested forms
+        $('.form-tabless-fields', $secondaryPanel).addClass('not-fancy');
+
         $panel.append($collapseIcon)
 
         if (!hasSecondaryTabs) {
             $primaryPanel.parent().removeClass('min-size');
         }
 
-        $secondaryPanel.find('> .tab-content > .tab-pane:gt(0)').addClass('padded-pane');
+        $secondaryPanel.find('> .tab-content > .tab-pane').not(':has(>.form-group[data-field-name=markup],>div>div.stretch)').addClass('padded-pane');
         $secondaryPanel.find('> .layout-row > .nav-tabs > li:gt(0)').addClass('tab-content-bg');
 
         $collapseIcon.click(function(){
@@ -530,8 +532,8 @@
 
         $form.on('changed.oc.changeMonitor', function() {
             $panel.trigger('modified.oc.tab')
-            $panel.find('[data-control=commit-button]').addClass('hide');
-            $panel.find('[data-control=reset-button]').addClass('hide');
+            $panel.find('[data-control=commit-button]').addClass('oc-hide hide');
+            $panel.find('[data-control=reset-button]').addClass('oc-hide hide');
             self.updateModifiedCounter()
         })
 

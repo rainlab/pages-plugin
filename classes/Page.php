@@ -5,13 +5,11 @@ use File;
 use Lang;
 use Cache;
 use Event;
-use Route;
 use Config;
 use Validator;
-use RainLab\Pages\Classes\Router;
-use RainLab\Pages\Classes\Snippet;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
+use Cms\Classes\Snippet;
 use Cms\Classes\Layout;
 use Cms\Classes\Content as ContentBase;
 use Cms\Classes\ComponentManager;
@@ -20,20 +18,22 @@ use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
 use October\Rain\Parse\Bracket as TextParser;
 use October\Rain\Parse\Syntax\Parser as SyntaxParser;
-use ApplicationException;
 use Twig\Node\Node as TwigNode;
 
 /**
- * Represents a static page.
+ * Page represents a static page.
  *
  * @package rainlab\pages
  * @author Alexey Bobkov, Samuel Georges
  */
 class Page extends ContentBase
 {
+    /**
+     * @var array implement
+     */
     public $implement = [
-        '@RainLab.Translate.Behaviors.TranslatablePageUrl',
-        '@RainLab.Translate.Behaviors.TranslatableCmsObject'
+        '@'.\RainLab\Translate\Behaviors\TranslatablePageUrl::class,
+        '@'.\RainLab\Translate\Behaviors\TranslatableCmsObject::class
     ];
 
     /**
@@ -65,7 +65,7 @@ class Page extends ContentBase
      */
     public $rules = [
         'title' => 'required',
-        'url'   => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
+        'url' => ['required', 'regex:/^\/[a-z0-9\/_\-\.]*$/i', 'uniqueUrl']
     ];
 
     /**
@@ -98,18 +98,33 @@ class Page extends ContentBase
      */
     public $parentFileName;
 
+    /**
+     * @var mixed menuTreeCache
+     */
     protected static $menuTreeCache = null;
 
+    /**
+     * @var mixed parentCache
+     */
     protected $parentCache = null;
 
+    /**
+     * @var mixed childrenCache
+     */
     protected $childrenCache = null;
 
+    /**
+     * @var mixed processedMarkupCache
+     */
     protected $processedMarkupCache = false;
 
+    /**
+     * @var mixed processedBlockMarkupCache
+     */
     protected $processedBlockMarkupCache = [];
 
     /**
-     * Creates an instance of the object and associates it with a CMS theme.
+     * __construct an instance of the object and associates it with a CMS theme.
      * @param array $attributes
      */
     public function __construct(array $attributes = [])
@@ -117,7 +132,7 @@ class Page extends ContentBase
         parent::__construct($attributes);
 
         $this->customMessages = [
-            'url.regex'      => 'rainlab.pages::lang.page.invalid_url',
+            'url.regex' => 'rainlab.pages::lang.page.invalid_url',
             'url.unique_url' => 'rainlab.pages::lang.page.url_not_unique',
         ];
     }
@@ -202,8 +217,8 @@ class Page extends ContentBase
         $pageList->appendPage($this);
     }
 
-    /*
-     * Generate a file name based on the URL
+    /**
+     * generateFilenameFromCode based on the URL
      */
     protected function generateFilenameFromCode()
     {
@@ -230,7 +245,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Deletes the object from the disk.
+     * delete the object from the disk.
      * Recursively deletes subpages. Returns a list of file names of deleted pages.
      * @return array
      */
@@ -256,7 +271,6 @@ class Page extends ContentBase
          * Remove from meta
          */
         $this->removeFromMeta();
-
 
         return $result;
     }
@@ -425,7 +439,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns the Twig content string
+     * getTwigContent returns the Twig content string
      */
     public function getTwigContent()
     {
@@ -436,6 +450,9 @@ class Page extends ContentBase
     // Syntax field processing
     //
 
+    /**
+     * listLayoutSyntaxFields
+     */
     public function listLayoutSyntaxFields()
     {
         if (!$layout = $this->getLayoutObject()) {
@@ -453,8 +470,9 @@ class Page extends ContentBase
     //
 
     /**
-     * Returns information about placeholders defined in the page layout.
-     * @return array Returns an associative array of the placeholder name and codes.
+     * listLayoutPlaceholders gets information about placeholders defined in the page layout.
+     * Returns an associative array of the placeholder name and codes.
+     * @return array
      */
     public function listLayoutPlaceholders()
     {
@@ -478,10 +496,13 @@ class Page extends ContentBase
 
             $type = $node->hasAttribute('type') ? trim($node->getAttribute('type')) : null;
             $ignore = $node->hasAttribute('ignore') ? trim($node->getAttribute('ignore')) : false;
+            if ($type === 'hidden') {
+                $ignore = true;
+            }
 
             $placeholderInfo = [
-                'title'  => $title,
-                'type'   => $type ?: 'html',
+                'title' => $title,
+                'type' => $type ?: 'html',
                 'ignore' => $ignore
             ];
 
@@ -492,7 +513,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Recursively flattens a twig node and children
+     * flattenTwigNode recursively flattens a twig node and children
      * @param $node
      * @return array A flat array of twig nodes
      */
@@ -512,8 +533,9 @@ class Page extends ContentBase
     }
 
     /**
-     * Parses the page placeholder {% put %} tags and extracts the placeholder values.
-     * @return array Returns an associative array of the placeholder names and values.
+     * getPlaceholdersAttribute parses the page placeholder {% put %} tags and extracts the
+     * placeholder values. Returns an associative array of the placeholder names and values.
+     * @return array
      */
     public function getPlaceholdersAttribute()
     {
@@ -536,8 +558,13 @@ class Page extends ContentBase
                 continue;
             }
 
-            $bodyNode = $node->getNode('body');
-            $result[$node->getAttribute('name')] = trim($bodyNode->getAttribute('data'));
+            $names = $node->getNode('names');
+            $values = $node->getNode('values');
+            $isCapture = $node->getAttribute('capture');
+            if ($isCapture) {
+                $name = $names->getNode(0);
+                $result[$name->getAttribute('name')] = trim($values->getAttribute('data'));
+            }
         }
 
         $this->attributes['placeholders'] = $result;
@@ -546,8 +573,8 @@ class Page extends ContentBase
     }
 
     /**
-     * Takes an array of placeholder data (key: code, value: content) and renders
-     * it as a single string of Twig markup against the "code" attribute.
+     * setPlaceholdersAttribute takes an array of placeholder data (key: code, value: content)
+     * and renders it as a single string of Twig markup against the "code" attribute.
      * @param array  $value
      * @return void
      */
@@ -578,90 +605,60 @@ class Page extends ContentBase
         $this->attributes['placeholders'] = $placeholders;
     }
 
+    /**
+     * getProcessedMarkup will return the processed markup of a page
+     */
     public function getProcessedMarkup()
     {
         if ($this->processedMarkupCache !== false) {
             return $this->processedMarkupCache;
         }
 
-        /*
-         * Process snippets
-         */
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName(),
-            $this->theme,
-            $this->markup
-        );
+        $markup = $this->markup;
 
-        /*
-         * Inject global view variables
-         */
+        // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
 
+        // Process content using core parser
+        if (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
+        }
+
+        // Event hook
+        Event::fire('pages.page.getProcessedMarkup', [&$markup]);
+
         return $this->processedMarkupCache = $markup;
     }
 
+    /**
+     * getProcessedPlaceholderMarkup
+     */
     public function getProcessedPlaceholderMarkup($placeholderName, $placeholderContents)
     {
         if (array_key_exists($placeholderName, $this->processedBlockMarkupCache)) {
             return $this->processedBlockMarkupCache[$placeholderName];
         }
 
-        /*
-         * Process snippets
-         */
-        $markup = Snippet::processPageMarkup(
-            $this->getFileName().md5($placeholderName),
-            $this->theme,
-            $placeholderContents
-        );
+        $markup = $placeholderContents;
 
-        /*
-         * Inject global view variables
-         */
+        // Inject global view variables
         $globalVars = ViewHelper::getGlobalVars();
         if (!empty($globalVars)) {
             $markup = TextParser::parse($markup, $globalVars);
         }
 
-        return $this->processedBlockMarkupCache[$placeholderName] = $markup;
-    }
-
-    //
-    // Snippets
-    //
-
-    /**
-     * Initializes CMS components associated with the page.
-     */
-    public function initCmsComponents($cmsController)
-    {
-        $snippetComponents = Snippet::listPageComponents(
-            $this->getFileName(),
-            $this->theme,
-            $this->markup.$this->code
-        );
-
-        $componentManager = ComponentManager::instance();
-        foreach ($snippetComponents as $componentInfo) {
-            // Register components for snippet-based components
-            // if they're not defined yet. This is required because
-            // not all snippet components are registered as components,
-            // but it's safe to register them in render-time.
-
-            if (!$componentManager->hasComponent($componentInfo['class'])) {
-                $componentManager->registerComponent($componentInfo['class'], $componentInfo['alias']);
-            }
-
-            $cmsController->addComponent(
-                $componentInfo['class'],
-                $componentInfo['alias'],
-                $componentInfo['properties']
-            );
+        // Process content using core parser
+        if (class_exists(\Cms\Classes\PageManager::class)) {
+            $markup = \Cms\Classes\PageManager::processMarkup($markup);
         }
+
+        // Event hook
+        Event::fire('pages.page.getProcessedPlaceholderMarkup', [&$markup]);
+
+        return $this->processedBlockMarkupCache[$placeholderName] = $markup;
     }
 
     //
@@ -906,7 +903,7 @@ class Page extends ContentBase
         $iterator($pageList->getPageTree(), null, 0);
 
         self::$menuTreeCache = $menuTree;
-        $comboConfig = Config::get('cms.parsedPageCacheTTL', Config::get('cms.template_cache_ttl', 10));
+        $comboConfig = Config::get('cms.template_cache_ttl', 10);
         $expiresAt = now()->addMinutes($comboConfig);
         Cache::put($key, serialize($menuTree), $expiresAt);
 

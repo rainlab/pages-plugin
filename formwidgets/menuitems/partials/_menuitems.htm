@@ -1,5 +1,12 @@
 <?php
-    $mediaPath = Config::get('cms.storage.media.path', Config::get('system.storage.media.path', '/storage/app/media'));
+    $mediaPath = Config::get('filesystems.disks.media.url',
+        Config::get('cms.storage.media.path',
+            Config::get('system.storage.media.path',
+                '/storage/app/media'
+            )
+        )
+    );
+    list($editorTemplate, $editorScripts) = $this->makeEditorTemplate();
 ?>
 <div
     class="layout-absolute"
@@ -18,8 +25,10 @@
     </div>
 
     <script type="text/template" data-editor-template>
-        <?= $this->makePartial('editortemplate') ?>
+        <?= $editorTemplate ?>
     </script>
+
+    <?= $editorScripts ?>
 
     <script type="text/template" data-item-template>
         <?= $this->makePartial('item', ['item' => $emptyItem]) ?>

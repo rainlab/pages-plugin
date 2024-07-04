@@ -18,7 +18,8 @@
         }
     ],
     "require": {
-        "php": ">=5.5.9",
+        "php": "^8.0.2",
+        "october/rain": ">=3.4",
         "composer/installers": "~1.0"
     },
     "minimum-stability": "dev"
