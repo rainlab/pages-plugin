@@ -5,6 +5,16 @@
         $dataId = $this->dataIdPrefix.'-'.$fileName;
         $searchMode = strlen($this->getSearchTerm()) > 0;
         $cbId = 'cb'.md5($fileName);
+
+        $pageTitle = $pageObj->page->getViewBag()->property('title');
+        $pageUrl = $pageObj->page->getViewBag()->property('url');
+
+        if (class_exists('RainLab\Translate\Behaviors\TranslatableModel')) {
+            $locale = \RainLab\Translate\Classes\Translator::instance()->getLocale();
+            $localeTitle = isset($pageObj->page->viewBag['title']) ? $pageObj->page->viewBag['title'] : $pageTitle;
+            $localeUrl = isset($pageObj->page->getViewBag()->property('localeUrl')[$locale]) ? $pageObj->page->getViewBag()->property('localeUrl')[$locale] : $pageUrl;
+        }
+
     ?>
     <li
         class="<?= $pageObj->subpages ? 'has-subitems' : null ?>"
@@ -16,8 +26,8 @@
     >
         <div>
             <a href="#">
-                <?= e($pageObj->page->getViewBag()->property('title')) ?>
-                <span class="comment"><?= e($pageObj->page->getViewBag()->property('url')) ?></span>
+                <?= e($pageTitle) ?>
+                <span class="comment"><?= e($pageUrl) ?></span>
             </a>
 
             <input type="hidden" name="object[<?= e($fileName) ?>]" value="0"/>
