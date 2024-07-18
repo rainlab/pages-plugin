@@ -70,7 +70,7 @@
     'external_link' => 'Ulkoinen linkki',
     'external_link_comment' => 'Avaa linkki tämän valikon kohteesta uudessa ikkunassa.',
     'static_page' => 'Staattinen sivu',
-    'all_static_pages' => 'Kaikki staattiset sivut',
+    'all_static_pages' => 'Kaikki staattiset sivut'
   ],
   'content' => [
     'menu_label' => 'Sisältö',
@@ -79,6 +79,7 @@
   ],
   'sidebar' => [
     'add' => 'Lisää',
+    'search' => 'Hae...'
   ],
   'object' => [
     'invalid_type' => 'Tuntematon kohdetyyppi',
@@ -98,11 +99,36 @@
     'exit_fullscreen' => 'Poistu kokoruudun tilasta',
     'hidden' => 'Piilotettu',
     'hidden_comment' => 'Piilotetut sivut ovat saatavilla ainoastaan hallintaan kirjautuneille.',
-    'navigation_hidden' => 'Piilota navigaatiossa',
+    'navigation_hidden' => 'Piilota navigaatiosta',
     'navigation_hidden_comment' => 'Käytä tätä valintaruutua piilottaaksesi tämä sivu automaattisesti generoiduista valikoista ja leivänmuruista.',
   ],
   'snippet' => [
+    'partialtab' => 'Osat',
+    'settings_popup_title' => 'Staattisten sivujen koodinpätkä',
+    'code' => 'Osan koodi',
+    'code_comment' => 'Syötä koodi, jotta tämä osio on käytettävissä Staattisten sivujen -lisäosassa.',
+    'code_required' => 'Ole hyvä ja lisää koodin pätkä',
+    'name' => 'Nimi',
+    'name_comment' => 'Nimi näkyy osiolistassa Staattisten sivujen -sivupalkissa ja sivuilla kun osa on lisätty.',
+    'name_required' => 'Pätkällä on oltava nimi',
+    'no_records' => 'Osia ei löydy',
     'menu_label' => 'Osat',
+    'properties' => 'Koodin pätkän ominaisuudet',
+    'column_property' => 'Ominaisuuden otsikko',
+    'title_required' => 'Ole hyvä ja lisää ominaisuuden otsikko',
+    'type_required' => 'Valitse ominaisuuden tyyppi',
+    'property_required' => 'Ominaisuuden nimi on pakollinen',
+    'column_type' => 'Tyyppi',
+    'column_type_placeholder' => 'Valitse',
+    'column_code' => 'Koodi',
+    'column_default' => 'Oletus',
+    'column_options' => 'Vaihtoehdot',
+    'column_type_string' => 'Merkkijono',
+    'column_type_checkbox' => 'Valintaruutu',
+    'column_type_dropdown' => 'Alasvetovalikko',
+    'not_found' => 'Osaa pyydetyllä koodilla :code ei löytynyt teemasta.',
+    'property_format_error' => 'Ominaisuuden koodin tulisi alkaa latinalaisella kirjaimella ja voi sisältää ainoastaan latinalaisia merkkejä ja kokonaislukuja',
+    'invalid_option_key' => 'Kelvoton alasvetovalikon vaihtoehtoavain :key. Vaihtoehtojen avaimet voivat sisältää ainoastaan kokonaislukuja, latinalaisia merkkejä, ja merkkejä _ ja -',
   ],
   'component' => [
     'static_page_name' => 'Staattinen sivu',
@@ -121,5 +147,5 @@
     'static_breadcrumbs_description' => 'Näyttää murupolun staattisella sivulla.',
     'child_pages_name' => 'Alasivut',
     'child_pages_description' => 'Näyttää listan nykyisen sivun alasivuista',
-  ],
+  ]
 ];
