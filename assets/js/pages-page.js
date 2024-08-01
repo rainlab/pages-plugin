@@ -15,12 +15,13 @@
     PagesPage.prototype.constructor = PagesPage
 
     PagesPage.prototype.init = function() {
-        this.$masterTabs = $('#pages-master-tabs')
-        this.$sidePanel = $('#pages-side-panel')
-        this.$pageTree = $('[data-control=treeview]', this.$sidePanel)
-        this.masterTabsObj = this.$masterTabs.data('oc.tab')
+        this.$masterTabs = $('#pages-master-tabs');
+        this.$sidePanel = $('#pages-side-panel');
+        this.$pageTree = $('[data-control=treeview]', this.$sidePanel);
+        this.masterTabsObj = this.$masterTabs.data('oc.tab');
 
-        this.registerHandlers()
+        this.registerHandlers();
+        this.loadStoredOpenTabs();
     }
 
     PagesPage.prototype.registerHandlers = function() {
@@ -75,25 +76,25 @@
      * Displays the concurrency resolution form.
      */
     PagesPage.prototype.handleMtimeMismatch = function (form) {
-        var $form = $(form)
+        var $form = $(form);
 
-        $form.popup({ handler: 'onOpenConcurrencyResolveForm' })
+        $form.popup({ handler: 'onOpenConcurrencyResolveForm' });
 
         var popup = $form.data('oc.popup'),
-            self = this
+            self = this;
 
         $(popup.$container).on('click', 'button[data-action=reload]', function(){
-            popup.hide()
-            self.reloadForm($form)
-        })
+            popup.hide();
+            self.reloadForm($form);
+        });
 
         $(popup.$container).on('click', 'button[data-action=save]', function(){
-            popup.hide()
+            popup.hide();
 
             $('input[name=objectForceSave]', $form).val(1);
             $('a[data-request=onSave]', $form).get(0).click();
             $('input[name=objectForceSave]', $form).val(0);
-        })
+        });
     }
 
     /*
@@ -107,23 +108,24 @@
             },
             tabId = data.type + '-' + data.theme + '-' + data.path,
             tab = this.masterTabsObj.findByIdentifier(tabId),
-            self = this
+            self = this;
 
         /*
          * Update tab
          */
 
-        $.oc.stripeLoadIndicator.show()
-        $form.request('onOpen', {
-            data: data
-        }).done(function(data) {
-            $.oc.stripeLoadIndicator.hide()
-            self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab)
-            self.$masterTabs.ocTab('unmodifyTab', tab)
-            self.updateModifiedCounter()
-        }).always(function(){
-            $.oc.stripeLoadIndicator.hide()
-        })
+        $.oc.stripeLoadIndicator.show();
+        $form
+            .request('onOpen', {
+                data: data
+            }).done(function(data) {
+                $.oc.stripeLoadIndicator.hide();
+                self.$masterTabs.ocTab('updateTab', tab, data.tabTitle, data.tab);
+                self.$masterTabs.ocTab('unmodifyTab', tab);
+                self.updateModifiedCounter();
+            }).always(function(){
+                $.oc.stripeLoadIndicator.hide();
+            });
     }
 
     /*
@@ -165,6 +167,8 @@
         } else if ($tabControl.hasClass('secondary')) {
             // TODO: Focus the code or rich editor here
         }
+
+        this.storeOpenTabs();
     }
 
     /*
@@ -180,7 +184,8 @@
      * Triggered when a master tab is closed.
      */
     PagesPage.prototype.onTabClosed = function() {
-        this.updateModifiedCounter()
+        this.updateModifiedCounter();
+        this.storeOpenTabs();
     }
 
     /*
@@ -232,7 +237,7 @@
 
         // Disable fancy layout on nested forms in repeater items
         $('.field-repeater-item .form-tabless-fields', $tabPane).addClass('not-fancy');
-        
+
         var objectType = $('input[name=objectType]', $form).val()
         if (objectType.length > 0 &&
             (context.handler == 'onSave' || context.handler == 'onCommit' || context.handler == 'onReset')
@@ -323,26 +328,21 @@
             },
             tabId = data.type + '-' + data.theme + '-' + data.path
 
-        /*
-         * Find if the tab is already opened
-         */
-
-         if (this.masterTabsObj.goTo(tabId)) {
+        // Find if the tab is already opened
+        if (this.masterTabsObj.goTo(tabId)) {
             return false;
          }
 
-        /*
-         * Open a new tab
-         */
-
+        // Open a new tab
         $.oc.stripeLoadIndicator.show()
-        $form.request('onOpen', {
-            data: data
-        }).done(function(data) {
-            self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'));
-        }).always(function() {
-            $.oc.stripeLoadIndicator.hide();
-        })
+        $form
+            .request('onOpen', {
+                data: data
+            }).done(function(data) {
+                self.$masterTabs.ocTab('addTab', data.tabTitle, data.tab, tabId, $form.data('type-icon'));
+            }).always(function() {
+                $.oc.stripeLoadIndicator.hide();
+            });
 
         return false
     }
@@ -639,11 +639,75 @@
         if (parts.length >= 2)
             return parts.pop().toLowerCase()
 
-        return 'htm'
+        return 'htm';
+    }
+
+    /*
+     * Store open tabs in a cookie
+     */
+    PagesPage.prototype.storeOpenTabs = function () {
+        if (!Cookies) {
+            return;
+        }
+
+        var openTabs = [];
+        document.querySelectorAll('#pages-master-tabs .tab-pane').forEach((pane) => {
+            var objectPath = pane.querySelector('[name=objectPath]'),
+                objectType = pane.querySelector('[name=objectType]');
+
+            if (!objectPath || !objectType) {
+                return;
+            }
+
+            openTabs.push({
+                path: objectPath.value,
+                type: objectType.value,
+            });
+        });
+
+        Cookies.set('oc-rainlab-pages-open-tabs', JSON.stringify(openTabs), { expires: 365, path: '/' });
+    }
+
+    PagesPage.prototype.loadStoredOpenTabs = function () {
+        var cookieValue = Cookies.get('oc-rainlab-pages-open-tabs');
+        if (!cookieValue) {
+            return;
+        }
+
+        var openTabs = JSON.parse(cookieValue);
+        if (!Array.isArray(openTabs) || !openTabs.length) {
+            return;
+        }
+
+        var self = this,
+            $form = $('#pages-side-panel form');
+
+        $.oc.stripeLoadIndicator.show();
+        $form
+            .request('onOpenMultiple', {
+                data: {
+                    openTabs: openTabs
+                }
+            }).done(function(data) {
+                if (!data.multiObjects || !Array.isArray(data.multiObjects)) {
+                    return;
+                }
+
+                $.each(data.multiObjects, function(index, item) {
+                    var tabId = item.type + '-' + item.theme + '-' + item.path,
+                        $sideForm = $('[data-object-type='+item.type+']');
+
+                    self.$masterTabs.ocTab('addTab', item.tabTitle, item.tab, tabId, $sideForm.data('type-icon'));
+                });
+
+                self.updateModifiedCounter();
+            }).always(function(){
+                $.oc.stripeLoadIndicator.hide()
+            });
     }
 
     $(document).ready(function(){
-        $.oc.pagesPage = new PagesPage()
-    })
+        $.oc.pagesPage = new PagesPage();
+    });
 
 }(window.jQuery);
