@@ -6,9 +6,7 @@ use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use Cms\Classes\Theme;
-use Cms\Classes\Snippet;
 use Cms\Classes\Controller as CmsController;
-use Cms\Classes\SnippetManager;
 use System\Classes\PluginBase;
 
 class Plugin extends PluginBase

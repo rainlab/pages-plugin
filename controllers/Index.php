@@ -143,8 +143,6 @@ class Index extends Controller
             return;
         }
 
-        traceLog(post());
-
         foreach ($openTabs as $obj) {
             $type = $obj['type'] ?? null;
             $path = $obj['path'] ?? null;
