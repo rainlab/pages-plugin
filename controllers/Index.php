@@ -143,6 +143,15 @@ class Index extends Controller
             return;
         }
 
+        $maxTabs = Config::get('rainlab.pages::remember_tabs_max', 5);
+        if ($maxTabs === false) {
+            return;
+        }
+
+        if ($maxTabs !== 0) {
+            $openTabs = array_slice($openTabs, -($maxTabs));
+        }
+
         foreach ($openTabs as $obj) {
             $type = $obj['type'] ?? null;
             $path = $obj['path'] ?? null;
