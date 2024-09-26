@@ -177,6 +177,8 @@ class Router
      */
     public function clearCache()
     {
+        self::$cache = [];
+        self::$urlMap = [];
         Cache::forget($this->getCacheKey('static-page-url-map'));
     }
 }
