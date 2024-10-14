@@ -26,7 +26,7 @@
         // Submenu item is clicked in the master tabs
         this.$el.on('submenu.oc.treeview', $.proxy(this.onSubmenuItemClick, this))
 
-        this.$el.on('click', 'a[data-control="add-item"]', function(e) {
+        this.$el.on('click', 'a[data-control~="add-item"]', function(e) {
             self.onCreateItem(e.target)
             return false
         })
