@@ -200,7 +200,7 @@ class Plugin extends PluginBase
     {
         return [
             'filters' => [
-                'staticPage' => [\RainLab\Pages\Classes\Page::class, 'url']
+                'staticPage' => [\RainLab\Pages\Classes\Page::class, 'url', false]
             ]
         ];
     }
