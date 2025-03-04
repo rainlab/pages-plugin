@@ -114,7 +114,7 @@ class Plugin extends PluginBase
 
             // Get rendered content
             $contents = Controller::instance()->getPageContents($page);
-            if (strlen($contents)) {
+            if ($contents && strlen($contents)) {
                 return $contents;
             }
         });
@@ -127,7 +127,7 @@ class Plugin extends PluginBase
             }
 
             $contents = Controller::instance()->getPlaceholderContents($page, $blockName, $blockContents);
-            if (strlen($contents)) {
+            if ($contents && strlen($contents)) {
                 return $contents;
             }
         });
