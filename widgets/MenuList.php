@@ -5,6 +5,7 @@ use Lang;
 use Input;
 use Request;
 use Response;
+use Config;
 use RainLab\Pages\Classes\Menu;
 use Backend\Classes\WidgetBase;
 use Cms\Classes\Theme;
@@ -93,6 +94,10 @@ class MenuList extends WidgetBase
 
             $menus = $filteredMenus;
         }
+
+        if ($sortMenusBy = Config::get('rainlab.pages::menus_sort_by', false)) {
+            return $menus->sortBy($sortMenusBy);
+        } 
 
         return $menus;
     }
