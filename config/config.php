@@ -12,5 +12,16 @@ return [
     | set to `0` to allow unlimited tabs.
     |
     */
-    'remember_tabs_max' => 5,
+    'remember_tabs_max' => false,
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Sort Menus List By Filename
+    |--------------------------------------------------------------------------
+    |
+    | You can force the menus list to be sorted by filename
+    | Keep empty to use the default sorting order.
+    |
+    */
+    'menus_sort_by' => false // fileName, name, mtime
 ];
