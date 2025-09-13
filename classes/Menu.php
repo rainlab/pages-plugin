@@ -196,7 +196,7 @@ class Menu extends Meta
                                         $reference->viewBag = isset($item['viewBag']) ? $item['viewBag'] : [];
                                         $reference->code = isset($item['code']) ? $item['code'] : null;
 
-                                        if (!strlen($parentReference->url)) {
+                                        if (!$parentReference->url) {
                                             $parentReference->url = $reference->url;
                                             $parentReference->isActive = $reference->isActive;
                                         }
