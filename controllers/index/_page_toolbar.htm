@@ -4,6 +4,7 @@
         class="btn btn-primary oc-icon-check save"
         data-request="onSave"
         data-load-indicator="<?= e(trans('backend::lang.form.saving')) ?>"
+        data-load-indicator-size="small"
         data-hotkey="ctrl+s, cmd+s">
         <?= e(trans('backend::lang.form.save')) ?>
     </a>
@@ -25,6 +26,7 @@
         data-request="onCommit"
         data-request-confirm="<?= e(trans('cms::lang.editor.commit_confirm')) ?>"
         data-load-indicator="<?= e(trans('cms::lang.editor.committing')) ?>"
+        data-load-indicator-size="small"
         data-control="commit-button">
         <?= e(trans('cms::lang.editor.commit')) ?>
     </button>
@@ -35,6 +37,7 @@
         data-request="onReset"
         data-request-confirm="<?= e(trans('cms::lang.editor.reset_confirm')) ?>"
         data-load-indicator="<?= e(trans('cms::lang.editor.resetting')) ?>"
+        data-load-indicator-size="small"
         data-control="reset-button">
         <?= e(trans('cms::lang.editor.reset')) ?>
     </button>
