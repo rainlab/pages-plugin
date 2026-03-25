@@ -557,6 +557,7 @@ class Index extends Controller
         $widgetConfig->model = $object;
         $widgetConfig->alias = $alias ?: 'form' . studly_case($type) . md5($object->exists ? $object->getFileName() : uniqid());
         $widgetConfig->context = !$object->exists ? 'create' : 'update';
+        $widgetConfig->useTranslatable = false;
 
         $widget = $this->makeWidget('Backend\Widgets\Form', $widgetConfig);
 
