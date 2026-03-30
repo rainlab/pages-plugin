@@ -50,4 +50,9 @@ class MenuItemReference
      * @var array Specifies the item custom view bag properties.
      */
     public $viewBag = [];
+
+    /**
+     * @var array attributes contains additional item properties.
+     */
+    public $attributes = [];
 }
