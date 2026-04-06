@@ -39,6 +39,11 @@ class Index extends Controller
     public $requiredPermissions = ['rainlab.pages.*'];
 
     /**
+     * @var string turboRouter
+     */
+    public $turboRouter = 'reload';
+
+    /**
      * @var bool turboVisitControl
      */
     public $turboVisitControl = 'reload';
