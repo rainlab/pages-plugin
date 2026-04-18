@@ -482,7 +482,7 @@
         }
 
         $secondaryPanel.find('> .tab-content > .tab-pane').not(':has(>.form-group[data-field-name=markup],>div>div.stretch)').addClass('padded-pane');
-        $secondaryPanel.find('> .layout-row > .nav-tabs > li:gt(0)').addClass('tab-content-bg');
+        $secondaryPanel.find('> .layout-row > .nav-tabs > li:gt(0), > .form-tab-nav > .nav-tabs > li:gt(0)').addClass('tab-content-bg');
 
         $collapseIcon.click(function(){
             $panel.toggleClass('collapsed')
