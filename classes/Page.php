@@ -482,7 +482,7 @@ class Page extends ContentBase
 
         $result = [];
         $bodyNode = $layout->getTwigNodeTree()->getNode('body')->getNode(0);
-        $nodes = $this->flattenTwigNode($bodyNode);
+        $nodes = array_merge([$bodyNode], $this->flattenTwigNode($bodyNode));
 
         foreach ($nodes as $node) {
             if (!$node instanceof \Cms\Twig\PlaceholderNode) {
