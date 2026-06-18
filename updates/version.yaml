@@ -86,3 +86,4 @@ v2.2.0: Adds sort configuration to page list
 v2.2.1: Compatibility fixes for October v4.2
 v2.2.2: Fixes translatable globe showing for fields
 v2.2.3: Fixes placeholder tab missing from the Static Page editor on Twig 3.12+
+v2.2.4: Fixes tab rendering in Firefox
