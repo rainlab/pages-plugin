@@ -243,7 +243,7 @@
                                 title: propertyValue.substring(1)
                             }];
 
-                            var mediafinder = $(this).data('oc.mediaFinder') || oc.fetchControl(this, 'mediafinder');
+                            var mediafinder = $(this).data('oc.mediaFinder') || oc.observeControl(this, 'mediafinder');
                             mediafinder.addItems(items);
                             mediafinder.setValue();
                             mediafinder.evalIsPopulated();
