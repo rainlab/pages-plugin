@@ -232,14 +232,11 @@
         this.$el.data('oc.active-item', dataId)
     }
 
-    // It seems the method is not used anymore as we re-create the control
-    // instead of updating it. Remove later if nothing weird is noticed.
-    // -ab Apr 26 2015
-    //
     TreeView.prototype.update = function() {
         this.$allItems = $('li', this.$el)
         this.createItemControls()
-        //this.initSortable()
+        this.fixSubItems()
+        this.initSortable()
 
         var dataId = this.$el.data('oc.active-item')
         if (dataId !== undefined) {
@@ -401,7 +398,14 @@
             var $this = $(this)
             var data  = $this.data('oc.treeView')
             var options = $.extend({}, TreeView.DEFAULTS, $this.data(), typeof option == 'object' && option)
-            if (!data) $this.data('oc.treeView', (data = new TreeView(this, options)))
+            if (!data) {
+                $this.data('oc.treeView', (data = new TreeView(this, options)))
+            }
+            else if (typeof option !== 'string') {
+                // Inner contents may have been replaced by an AJAX partial update,
+                // refresh item controls so expand/drag handles reattach.
+                data.update()
+            }
 
             if (typeof option == 'string' && data) {
                 var methodArgs = [];

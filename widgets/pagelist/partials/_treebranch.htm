@@ -25,6 +25,7 @@
         data-id="<?= e($dataId) ?>"
     >
         <div>
+            <span class="expand">Expand</span>
             <a href="#">
                 <?= e($pageTitle) ?>
                 <span class="comment"><?= e($pageUrl) ?></span>
@@ -54,6 +55,9 @@
                     </a>
                 </li>
             </ul>
+
+            <span class="drag-handle"<?php if ($searchMode): ?> title="Dragging is disabled when the Search is active"<?php endif ?>>Drag</span>
+            <span class="borders"></span>
         </div>
 
         <ol>
