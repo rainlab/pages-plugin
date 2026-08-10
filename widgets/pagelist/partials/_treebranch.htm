@@ -1,7 +1,7 @@
 <?php foreach ($items as $pageObj): ?>
     <?php
         $fileName = $pageObj->page->getBaseFileName();
-        $groupStatus = $this->getCollapseStatus($fileName);
+        $groupStatus = $this->getCollapseStatus($fileName, false);
         $dataId = $this->dataIdPrefix.'-'.$fileName;
         $searchMode = strlen($this->getSearchTerm()) > 0;
         $cbId = 'cb'.md5($fileName);
@@ -18,7 +18,7 @@
     ?>
     <li
         class="<?= $pageObj->subpages ? 'has-subitems' : null ?>"
-        data-status="<?= $groupStatus || !$pageObj->subpages ? 'expanded' : 'collapsed' ?>"
+        data-status="<?= $searchMode || $groupStatus || !$pageObj->subpages ? 'expanded' : 'collapsed' ?>"
         data-group-id="<?= e($fileName) ?>"
         data-item-path="<?= e($fileName) ?>"
         <?php if ($searchMode): ?>data-no-drag-mode<?php endif ?>

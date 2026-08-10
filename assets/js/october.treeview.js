@@ -32,7 +32,7 @@
     TreeView.prototype.constructor = TreeView
 
     TreeView.prototype.init = function () {
-        this.$allItems = $('li', this.$el)
+        this.$allItems = $('ol > li', this.$el)
         this.$scrollbar = this.$el.closest('[data-control=scrollbar]')
 
         /*
@@ -94,25 +94,30 @@
     }
 
     TreeView.prototype.createItemControls = function() {
-        $('li', this.$el).each(function() {
-            var $container = $('> div', this),
-                $expand = $('> span.expand', $container)
+        // Scoped to ol > li to exclude submenu items, using vanilla DOM for performance on large trees
+        var items = this.$el.get(0).querySelectorAll('ol > li'),
+            itemCount = items.length
 
-            if ($expand.length > 0)
-                return
+        for (var i = 0; i < itemCount; i++) {
+            var item = items[i],
+                container = item.firstElementChild
 
-            $expand = $('<span class="expand">Expand</span>')
+            if (!container || container.tagName !== 'DIV' || container.querySelector(':scope > span.expand')) {
+                continue
+            }
 
-            $container.prepend($expand)
+            container.insertAdjacentHTML('afterbegin', '<span class="expand">Expand</span>')
 
-            if (!$('.drag-handle', $container).length)
-                $container.append($('<span class="drag-handle">Drag</span>'))
+            if (!container.querySelector(':scope > span.drag-handle')) {
+                var dragTitle = item.hasAttribute('data-no-drag-mode')
+                    ? ' title="Dragging is disabled when the Search is active"'
+                    : ''
 
-            $container.append($('<span class="borders"></span>'))
+                container.insertAdjacentHTML('beforeend', '<span class="drag-handle"' + dragTitle + '>Drag</span>')
+            }
 
-            if ($(this).attr('data-no-drag-mode') !== undefined)
-              $('span.drag-handle', this).attr('title', 'Dragging is disabled when the Search is active')
-        })
+            container.insertAdjacentHTML('beforeend', '<span class="borders"></span>')
+        }
     }
 
     TreeView.prototype.collapseGroup = function($group) {
@@ -157,11 +162,14 @@
     }
 
     TreeView.prototype.fixSubItems = function() {
-        $('li', this.$el).each(function(){
-            var $li = $(this),
-            $subitems = $('> ol > li', $li)
-            $li.toggleClass('has-subitems', $subitems.length > 0)
-        })
+        var items = this.$el.get(0).querySelectorAll('ol > li'),
+            itemCount = items.length
+
+        for (var i = 0; i < itemCount; i++) {
+            var childList = items[i].querySelector(':scope > ol')
+
+            items[i].classList.toggle('has-subitems', !!(childList && childList.firstElementChild))
+        }
     }
 
     TreeView.prototype.toggleGroup = function(group) {
@@ -224,7 +232,7 @@
     }
 
     TreeView.prototype.markActive = function(dataId) {
-        $('li', this.$el).removeClass('active')
+        $('ol > li', this.$el).removeClass('active')
 
         if (dataId)
             $('li[data-id="'+dataId+'"]', this.$el).addClass('active')
@@ -233,7 +241,7 @@
     }
 
     TreeView.prototype.update = function() {
-        this.$allItems = $('li', this.$el)
+        this.$allItems = $('ol > li', this.$el)
         this.createItemControls()
         this.fixSubItems()
         this.initSortable()
