@@ -1,140 +1,145 @@
 /* Content-region tabs use the shared backend-tabs component with the
    "primary" style (modules/backend/vuecomponents/tabs). No plugin CSS needed. */
 
-/* Menu editor: tree list + item form panel. */
-.pages-menu-editor .menu-item-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    user-select: none;
-    border: 1px solid transparent;
-}
+/* Menu editor: item list + item form panel. */
+.pages-menu-editor {
+    .menu-item-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
 
-.pages-menu-editor .menu-item-row:hover {
-    background: var(--oc-list-hover-bg, rgba(0, 0, 0, .03));
-}
+        &:hover {
+            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .03));
+        }
 
-.pages-menu-editor .menu-item-row.selected {
-    background: var(--oc-primary-color, #6a70f2);
-    color: #fff;
-}
+        &.selected {
+            background: var(--oc-primary-color, #6a70f2);
+            color: #fff;
 
-.pages-menu-editor .menu-item-row.selected .menu-item-subtitle {
-    color: rgba(255, 255, 255, .8);
-}
+            .menu-item-subtitle {
+                color: rgba(255, 255, 255, .8);
+            }
 
-.pages-menu-editor .menu-item-icon {
-    flex: 0 0 auto;
-    width: 18px;
-    text-align: center;
-    opacity: .7;
-}
+            .menu-item-actions {
+                opacity: 1;
+            }
 
-.pages-menu-editor .menu-item-label {
-    flex: 1 1 auto;
-    min-width: 0;
-}
+            /* Keep actions legible on the dark selected background. */
+            .menu-item-action {
+                color: rgba(255, 255, 255, .8);
 
-.pages-menu-editor .menu-item-title {
-    display: block;
-    font-size: 13px;
-    line-height: 16px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+                &:hover {
+                    background: rgba(255, 255, 255, .18);
+                    color: #fff;
+                }
+            }
+        }
 
-.pages-menu-editor .menu-item-subtitle {
-    display: block;
-    font-size: 11px;
-    line-height: 14px;
-    color: var(--oc-text-muted-color, #97a1ab);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+        &:hover .menu-item-actions {
+            opacity: 1;
+        }
 
-.pages-menu-editor .menu-item-drag {
-    cursor: grab;
-    opacity: .35;
-    flex: 0 0 auto;
-}
+        /* Drop cues (mirror the sidebar page tree). before/after = a drop line to
+           reorder; inside = a border around the row you'd nest into. */
+        &.drop-before::before,
+        &.drop-after::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--oc-primary-color, #6a70f2);
+        }
 
-/* Flat, subtle icon actions matching the editor toolbar (transparent, muted icon,
-   light hover), revealed on row hover to keep the list clean at rest. */
-.pages-menu-editor .menu-item-actions {
-    display: flex;
-    gap: 2px;
-    flex: 0 0 auto;
-    opacity: 0;
-    transition: opacity .12s;
-}
+        &.drop-before::before {
+            top: -1px;
+        }
 
-.pages-menu-editor .menu-item-row:hover .menu-item-actions,
-.pages-menu-editor .menu-item-row.selected .menu-item-actions {
-    opacity: 1;
-}
+        &.drop-after::after {
+            bottom: -1px;
+        }
 
-.pages-menu-editor .menu-item-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    padding: 0;
-    border: none;
-    border-radius: 4px;
-    background: transparent;
-    color: var(--oc-text-muted, #72809d);
-    font-size: 13px;
-    cursor: pointer;
-    box-shadow: none;
-}
+        &.drop-inside {
+            border-color: var(--oc-primary-color, #6a70f2);
+            background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
+        }
+    }
 
-.pages-menu-editor .menu-item-action:hover {
-    background: var(--oc-list-hover-bg, rgba(0, 0, 0, .06));
-    color: var(--oc-text-color, #33414f);
-}
+    .menu-item-icon {
+        flex: 0 0 auto;
+        width: 18px;
+        text-align: center;
+        opacity: .7;
+    }
 
-.pages-menu-editor .menu-item-action-danger:hover {
-    color: var(--oc-danger-color, #cc3300);
-}
+    .menu-item-drag {
+        flex: 0 0 auto;
+        cursor: grab;
+        opacity: .35;
+    }
 
-/* Keep actions legible when the row is selected (dark background). */
-.pages-menu-editor .menu-item-row.selected .menu-item-action {
-    color: rgba(255, 255, 255, .8);
-}
+    .menu-item-label {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
 
-.pages-menu-editor .menu-item-row.selected .menu-item-action:hover {
-    background: rgba(255, 255, 255, .18);
-    color: #fff;
-}
+    .menu-item-title {
+        display: block;
+        font-size: 13px;
+        line-height: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-/* Drop cues (mirror the sidebar page tree). before/after = a drop line to reorder;
-   inside = a border around the row you'd nest into. */
-.pages-menu-editor .menu-item-row.drop-before::before,
-.pages-menu-editor .menu-item-row.drop-after::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: var(--oc-primary-color, #6a70f2);
-}
+    .menu-item-subtitle {
+        display: block;
+        font-size: 11px;
+        line-height: 14px;
+        color: var(--oc-text-muted-color, #97a1ab);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-.pages-menu-editor .menu-item-row.drop-before::before {
-    top: -1px;
-}
+    /* Flat, subtle icon actions matching the editor toolbar (transparent, muted icon,
+       light hover), revealed on row hover to keep the list clean at rest. */
+    .menu-item-actions {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity .12s;
+    }
 
-.pages-menu-editor .menu-item-row.drop-after::after {
-    bottom: -1px;
-}
+    .menu-item-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--oc-text-muted, #72809d);
+        font-size: 13px;
+        cursor: pointer;
+        box-shadow: none;
 
-.pages-menu-editor .menu-item-row.drop-inside {
-    border-color: var(--oc-primary-color, #6a70f2);
-    background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
+        &:hover {
+            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .06));
+            color: var(--oc-text-color, #33414f);
+        }
+
+        &.menu-item-action-danger:hover {
+            color: var(--oc-danger-color, #cc3300);
+        }
+    }
 }
