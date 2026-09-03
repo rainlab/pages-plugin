@@ -99,6 +99,7 @@ trait HasMenuCrud
     protected function menuToDocumentArray(Menu $menu): array
     {
         return [
+            'name' => $menu->name,
             'code' => $menu->getBaseFileName(),
             'items' => $this->itemsToArray($menu->items),
             'settings' => [

@@ -3,6 +3,7 @@
 
 /* Menu editor: tree list + item form panel. */
 .pages-menu-editor .menu-item-row {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -10,6 +11,7 @@
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
+    border: 1px solid transparent;
 }
 
 .pages-menu-editor .menu-item-row:hover {
@@ -62,6 +64,77 @@
     flex: 0 0 auto;
 }
 
-.pages-menu-editor .menu-item-row.drop-target {
-    box-shadow: inset 0 2px 0 var(--oc-primary-color, #6a70f2);
+/* Flat, subtle icon actions matching the editor toolbar (transparent, muted icon,
+   light hover), revealed on row hover to keep the list clean at rest. */
+.pages-menu-editor .menu-item-actions {
+    display: flex;
+    gap: 2px;
+    flex: 0 0 auto;
+    opacity: 0;
+    transition: opacity .12s;
+}
+
+.pages-menu-editor .menu-item-row:hover .menu-item-actions,
+.pages-menu-editor .menu-item-row.selected .menu-item-actions {
+    opacity: 1;
+}
+
+.pages-menu-editor .menu-item-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: var(--oc-text-muted, #72809d);
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.pages-menu-editor .menu-item-action:hover {
+    background: var(--oc-list-hover-bg, rgba(0, 0, 0, .06));
+    color: var(--oc-text-color, #33414f);
+}
+
+.pages-menu-editor .menu-item-action-danger:hover {
+    color: var(--oc-danger-color, #cc3300);
+}
+
+/* Keep actions legible when the row is selected (dark background). */
+.pages-menu-editor .menu-item-row.selected .menu-item-action {
+    color: rgba(255, 255, 255, .8);
+}
+
+.pages-menu-editor .menu-item-row.selected .menu-item-action:hover {
+    background: rgba(255, 255, 255, .18);
+    color: #fff;
+}
+
+/* Drop cues (mirror the sidebar page tree). before/after = a drop line to reorder;
+   inside = a border around the row you'd nest into. */
+.pages-menu-editor .menu-item-row.drop-before::before,
+.pages-menu-editor .menu-item-row.drop-after::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--oc-primary-color, #6a70f2);
+}
+
+.pages-menu-editor .menu-item-row.drop-before::before {
+    top: -1px;
+}
+
+.pages-menu-editor .menu-item-row.drop-after::after {
+    bottom: -1px;
+}
+
+.pages-menu-editor .menu-item-row.drop-inside {
+    border-color: var(--oc-primary-color, #6a70f2);
+    background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
 }

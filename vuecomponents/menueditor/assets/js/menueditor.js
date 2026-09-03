@@ -5,6 +5,7 @@ export default {
     data: function() {
         return {
             documentSettingsPopupTitle: this.trans('Menu') || 'Menu',
+            documentTitleProperty: 'name',
             items: [],
             selectedItem: null,
             itemFormLoaded: false,
@@ -12,7 +13,8 @@ export default {
             newItemTitle: this.trans('New menu item'),
             nextItemId: 1,
             dragItemId: null,
-            dropTargetId: null
+            dropTargetId: null,
+            dropMode: null
         };
     },
     computed: {
@@ -256,7 +258,9 @@ export default {
             return found;
         },
 
-        // --- Drag and drop reordering -------------------------------------
+        // --- Drag and drop reordering + nesting ---------------------------
+        // Mirrors the sidebar page tree: dropping on the top/bottom edge of a row reorders
+        // it before/after that row; dropping on the middle nests it inside that row.
 
         onDragStart: function(entry, ev) {
             this.dragItemId = entry.item._id;
@@ -270,36 +274,72 @@ export default {
             if (this.dragItemId === null || this.dragItemId === entry.item._id) {
                 return;
             }
+
+            // Cannot drop a node into its own descendant.
+            const dragged = this.findEntryById(this.dragItemId);
+            if (dragged && this.isDescendant(dragged.item, entry.item)) {
+                return;
+            }
+
             ev.preventDefault();
+
+            // Which third of the row is the cursor over? top = before, middle = inside,
+            // bottom = after.
+            const rect = ev.currentTarget.getBoundingClientRect();
+            const offset = ev.clientY - rect.top;
+            const third = rect.height / 3;
+
+            let mode;
+            if (offset < third) {
+                mode = 'before';
+            }
+            else if (offset > third * 2) {
+                mode = 'after';
+            }
+            else {
+                mode = 'inside';
+            }
+
             this.dropTargetId = entry.item._id;
+            this.dropMode = mode;
         },
 
         onDrop: function(entry) {
             const draggedId = this.dragItemId;
+            const mode = this.dropMode;
             this.dropTargetId = null;
+            this.dropMode = null;
             this.dragItemId = null;
+
             if (draggedId === null || draggedId === entry.item._id) {
                 return;
             }
 
             const dragged = this.findEntryById(draggedId);
-            if (!dragged) {
+            if (!dragged || this.isDescendant(dragged.item, entry.item)) {
                 return;
             }
 
-            // Do not drop a node into its own descendant.
-            if (this.isDescendant(dragged.item, entry.item)) {
-                return;
-            }
-
-            // Remove from old position.
+            // Detach the dragged item from its current parent list.
             const fromArr = dragged.siblings;
             fromArr.splice(fromArr.indexOf(dragged.item), 1);
 
-            // Insert before the drop target within its sibling list.
-            const toArr = entry.siblings;
-            const targetIdx = toArr.indexOf(entry.item);
-            toArr.splice(targetIdx, 0, dragged.item);
+            if (mode === 'inside') {
+                // Nest as the first child of the target.
+                if (!entry.item._children) {
+                    entry.item._children = [];
+                }
+                entry.item._children.unshift(dragged.item);
+            }
+            else {
+                // Reorder within the target's sibling list, before or after it.
+                const toArr = entry.siblings;
+                let targetIdx = toArr.indexOf(entry.item);
+                if (mode === 'after') {
+                    targetIdx += 1;
+                }
+                toArr.splice(targetIdx, 0, dragged.item);
+            }
 
             this.syncItemsToDocument();
         },
@@ -307,6 +347,7 @@ export default {
         onDragEnd: function() {
             this.dragItemId = null;
             this.dropTargetId = null;
+            this.dropMode = null;
         },
 
         findEntryById: function(id) {

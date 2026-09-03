@@ -31,7 +31,12 @@
                     v-for="entry in flatItems"
                     :key="entry.item._id"
                     class="menu-item-row"
-                    :class="{ selected: entry.item._selected, 'drop-target': dropTargetId === entry.item._id }"
+                    :class="{
+                        selected: entry.item._selected,
+                        'drop-before': dropTargetId === entry.item._id && dropMode === 'before',
+                        'drop-after': dropTargetId === entry.item._id && dropMode === 'after',
+                        'drop-inside': dropTargetId === entry.item._id && dropMode === 'inside'
+                    }"
                     :style="{ marginLeft: (entry.depth * 24) + 'px' }"
                     draggable="true"
                     @dragstart="onDragStart(entry, $event)"
@@ -47,11 +52,11 @@
                         <span class="menu-item-subtitle">{{ itemSubtitle(entry.item) }}</span>
                     </span>
                     <span class="menu-item-actions" @click.stop>
-                        <button type="button" title="<?= e(trans('Move up')) ?>" @click="moveItemUp(entry)" class="btn btn-default btn-sm"><i class="icon-arrow-up"></i></button>
-                        <button type="button" title="<?= e(trans('Move down')) ?>" @click="moveItemDown(entry)" class="btn btn-default btn-sm"><i class="icon-arrow-down"></i></button>
-                        <button type="button" title="<?= e(trans('Indent')) ?>" @click="indentItem(entry)" class="btn btn-default btn-sm"><i class="icon-arrow-right"></i></button>
-                        <button type="button" title="<?= e(trans('Outdent')) ?>" @click="outdentItem(entry)" class="btn btn-default btn-sm"><i class="icon-arrow-left"></i></button>
-                        <button type="button" title="<?= e(trans('Delete')) ?>" @click="deleteItem(entry.item, entry.siblings)" class="btn btn-default btn-sm"><i class="icon-times"></i></button>
+                        <button type="button" title="<?= e(trans('Move up')) ?>" @click="moveItemUp(entry)" class="menu-item-action"><i class="icon-arrow-up"></i></button>
+                        <button type="button" title="<?= e(trans('Move down')) ?>" @click="moveItemDown(entry)" class="menu-item-action"><i class="icon-arrow-down"></i></button>
+                        <button type="button" title="<?= e(trans('Indent')) ?>" @click="indentItem(entry)" class="menu-item-action"><i class="icon-arrow-right"></i></button>
+                        <button type="button" title="<?= e(trans('Outdent')) ?>" @click="outdentItem(entry)" class="menu-item-action"><i class="icon-arrow-left"></i></button>
+                        <button type="button" title="<?= e(trans('Delete')) ?>" @click="deleteItem(entry.item, entry.siblings)" class="menu-item-action menu-item-action-danger"><i class="icon-times"></i></button>
                     </span>
                 </li>
             </ul>
