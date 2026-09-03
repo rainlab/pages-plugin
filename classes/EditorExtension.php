@@ -42,12 +42,12 @@ class EditorExtension extends ExtensionBase
     }
 
     /**
-     * getEditorContexts scopes this extension to its own Pages page only, keeping it out
+     * getEditorContext scopes this extension to its own Pages page only, keeping it out
      * of the global Editor IDE (and keeping the global extensions out of the Pages page).
      */
-    public function getEditorContexts(): array
+    public function getEditorContext(): string
     {
-        return [self::CONTEXT];
+        return self::CONTEXT;
     }
 
     /**

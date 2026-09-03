@@ -22,11 +22,17 @@ class Index extends Controller
     public $requiredPermissions = ['rainlab.pages.*'];
 
     /**
-     * @var array implement behaviors, using a scoped Editor state manager.
+     * @var array implement the core Editor state manager behavior.
      */
     public $implement = [
-        \RainLab\Pages\Behaviors\EditorState::class
+        \Editor\Behaviors\StateManager::class
     ];
+
+    /**
+     * @var string editorContext scopes the Editor state to the Pages context, so only
+     * Pages extensions are hosted here (read by Editor\Behaviors\StateManager).
+     */
+    public $editorContext = EditorExtension::CONTEXT;
 
     /**
      * @var string turboRouter forces a full reload, Turbo cannot patch a Vue-mounted DOM.
@@ -75,13 +81,13 @@ class Index extends Controller
         $this->registerVueComponent(\Editor\VueComponents\EditorConflictResolver::class);
         $this->registerVueComponent(\Editor\VueComponents\Application::class);
 
-        // Register only the assets of extensions in the Pages context, keeping the page
-        // scoped to it.
+        // The StateManager behavior has already scoped the manager to the Pages context
+        // (via $editorContext), so these list only Pages-context extension assets.
         $manager = ExtensionManager::instance();
-        foreach ($manager->listJsFiles(EditorExtension::CONTEXT) as $jsFile) {
+        foreach ($manager->listJsFiles() as $jsFile) {
             $this->addJs($jsFile, ['type' => 'module']);
         }
-        foreach ($manager->listVueComponents(EditorExtension::CONTEXT) as $componentClass) {
+        foreach ($manager->listVueComponents() as $componentClass) {
             $this->registerVueComponent($componentClass);
         }
 
@@ -102,7 +108,7 @@ class Index extends Controller
         // Only run commands for extensions belonging to the Pages context, keeping this
         // page isolated from the global editor extensions.
         $extension = ExtensionManager::instance()->getExtensionByNamespace($namespace);
-        if (!$extension->hasEditorContext(EditorExtension::CONTEXT)) {
+        if ($extension->getEditorContext() !== EditorExtension::CONTEXT) {
             throw new SystemException('Unsupported extension: '.$namespace);
         }
 
@@ -130,7 +136,7 @@ class Index extends Controller
         }
 
         $extension = ExtensionManager::instance()->getExtensionByNamespace($namespace);
-        if (!$extension->hasEditorContext(EditorExtension::CONTEXT)) {
+        if ($extension->getEditorContext() !== EditorExtension::CONTEXT) {
             throw new SystemException('Unsupported extension namespace');
         }
 
