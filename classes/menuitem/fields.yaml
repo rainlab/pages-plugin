@@ -5,65 +5,65 @@
 fields:
 
     search:
-        type: Rainlab\Pages\FormWidgets\MenuItemSearch
+        type: RainLab\Pages\FormWidgets\MenuItemSearch
 
     title:
         span: left
-        label: rainlab.pages::lang.menuitem.title
+        label: Title
 
     type:
         span: right
-        label: rainlab.pages::lang.menuitem.type
+        label: Type
         type: dropdown
 
     url:
-        label: rainlab.pages::lang.menuitem.url
+        label: URL
 
     reference:
-        label: rainlab.pages::lang.menuitem.reference
+        label: Reference
         type: dropdown
         cssClass: input-sidebar-control
 
     cmsPage:
-        label: rainlab.pages::lang.menuitem.cms_page
-        comment: rainlab.pages::lang.menuitem.cms_page_comment
+        label: CMS Page
+        comment: Select a page to open when the menu item is clicked.
         type: dropdown
         cssClass: input-sidebar-control
 
     nesting:
-        label: rainlab.pages::lang.menuitem.allow_nested_items
-        comment: rainlab.pages::lang.menuitem.allow_nested_items_comment
+        label: Allow nested items
+        comment: Nested items could be generated dynamically by static page and some other item types
         type: checkbox
         default: true
 
     replace:
-        label: rainlab.pages::lang.menuitem.replace
-        comment: rainlab.pages::lang.menuitem.replace_comment
+        label: Replace this item with its generated children
+        comment: Use this checkbox to push generated menu items to the same level with this item. This item itself will be hidden.
         type: checkbox
         default: true
 
 tabs:
     fields:
         viewBag[isHidden]:
-            label: rainlab.pages::lang.menuitem.hidden
-            comment: rainlab.pages::lang.menuitem.hidden_comment
+            label: Hidden
+            comment: Hide this menu item from appearing on the front-end.
             type: checkbox
-            tab: rainlab.pages::lang.menuitem.display_tab
+            tab: Display
 
         code:
-            label: rainlab.pages::lang.menuitem.code
-            comment: rainlab.pages::lang.menuitem.code_comment
-            tab: rainlab.pages::lang.menuitem.attributes_tab
+            label: Code
+            comment: Enter the menu item code if you want to access it with the API.
+            tab: Attributes
             span: auto
 
         viewBag[cssClass]:
-            label: rainlab.pages::lang.menuitem.css_class
-            comment: rainlab.pages::lang.menuitem.css_class_comment
-            tab: rainlab.pages::lang.menuitem.attributes_tab
+            label: CSS Class
+            comment: Enter a CSS class name to give this menu item a custom appearance.
+            tab: Attributes
             span: auto
 
         viewBag[isExternal]:
-            label: rainlab.pages::lang.menuitem.external_link
-            comment: rainlab.pages::lang.menuitem.external_link_comment
+            label: External link
+            comment: Open links for this menu item in a new window.
             type: checkbox
-            tab: rainlab.pages::lang.menuitem.attributes_tab
+            tab: Attributes

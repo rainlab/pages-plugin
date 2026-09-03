@@ -4,19 +4,22 @@ use Cms\Classes\Meta;
 use RainLab\Pages\Classes\Page;
 
 /**
- * The page list class reads and manages the static page hierarchy.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * PageList reads and manages the static page hierarchy.
  */
 class PageList
 {
+    /**
+     * @var \Cms\Classes\Theme theme parent theme
+     */
     protected $theme;
 
+    /**
+     * @var mixed configCache
+     */
     protected static $configCache = false;
 
     /**
-     * Creates the page list object.
+     * __construct creates the page list object
      * @param \Cms\Classes\Theme $theme Specifies a parent theme.
      */
     public function __construct($theme)
@@ -25,8 +28,7 @@ class PageList
     }
 
     /**
-     * Returns a list of static pages in the specified theme.
-     * This method is used internally by the system.
+     * listPages returns a list of static pages in the specified theme
      * @param boolean $skipCache Indicates if objects should be reloaded from the disk bypassing the cache.
      * @return object Returns an array of static pages.
      */
@@ -36,10 +38,7 @@ class PageList
     }
 
     /**
-     * Returns a list of top-level pages with subpages.
-     * The method uses the theme's meta/static-pages.yaml file to build the hierarchy. The pages are returned
-     * in the order defined in the YAML file. The result of the method is used for building the back-end UI
-     * and for generating the menus.
+     * getPageTree returns a list of top-level pages with subpages
      * @param boolean $skipCache Indicates if objects should be reloaded from the disk bypassing the cache.
      * @return array Returns a nested array of objects: object('page': $pageObj, 'subpages'=>[...])
      */
@@ -72,7 +71,7 @@ class PageList
     }
 
     /**
-     * Returns the parent name of the specified page.
+     * getPageParent returns the parent name of the specified page
      * @param \Cms\Classes\Page $page Specifies a page object.
      * @param string Returns the parent page name.
      */
@@ -104,7 +103,7 @@ class PageList
     }
 
     /**
-     * Returns a part of the page hierarchy starting from the specified page.
+     * getPageSubTree returns a part of the page hierarchy starting from the specified page
      * @param \Cms\Classes\Page $page Specifies a page object.
      * @param array Returns a nested array of page names.
      */
@@ -137,8 +136,7 @@ class PageList
     }
 
     /**
-     * Appends page to the page hierarchy.
-     * The page can be added to the end of the hierarchy or as a subpage to any existing page.
+     * appendPage appends a page to the page hierarchy
      */
     public function appendPage($page)
     {
@@ -171,7 +169,7 @@ class PageList
     }
 
     /**
-     * Removes a part of the page hierarchy starting from the specified page.
+     * removeSubtree removes a part of the page hierarchy starting from the specified page
      * @param \Cms\Classes\Page $page Specifies a page object.
      */
     public function removeSubtree($page)
@@ -198,7 +196,7 @@ class PageList
     }
 
     /**
-     * Returns the parsed meta/static-pages.yaml file contents.
+     * getPagesConfig returns the parsed meta/static-pages.yaml file contents
      * @return mixed
      */
     protected function getPagesConfig()
@@ -224,7 +222,7 @@ class PageList
     }
 
     /**
-     * Updates the page hierarchy structure in the theme's meta/static-pages.yaml file.
+     * updateStructure updates the page hierarchy structure in the theme's meta/static-pages.yaml file
      * @param array $structure A nested associative array representing the page structure
      */
     public function updateStructure($structure)

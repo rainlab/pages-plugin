@@ -1,6 +1,5 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Lang;
 use Cache;
 use Event;
 use Config;
@@ -10,30 +9,27 @@ use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
 
 /**
- * A router for static pages.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * Router for static pages.
  */
 class Router
 {
     /**
-     * @var \Cms\Classes\Theme A reference to the CMS theme containing the object.
+     * @var \Cms\Classes\Theme theme reference containing the object
      */
     protected $theme;
 
     /**
-     * @var array Contains the URL map - the list of page file names and corresponding URL patterns.
+     * @var array urlMap of page file names and corresponding URL patterns
      */
     private static $urlMap = [];
 
     /**
-     * @var array Request-level cache
+     * @var array cache is a request-level cache
      */
     private static $cache = [];
 
     /**
-     * Creates the router instance.
+     * __construct creates the router instance
      * @param \Cms\Classes\Theme $theme Specifies the theme being processed.
      */
     public function __construct(Theme $theme)
@@ -42,9 +38,9 @@ class Router
     }
 
     /**
-     * Finds a static page by its URL.
+     * findByUrl finds a static page by its URL
      * @param string $url The requested URL string.
-     * @return \RainLab\Pages\Classes\Page Returns \RainLab\Pages\Classes\Page object or null if the page cannot be found.
+     * @return \RainLab\Pages\Classes\Page Returns the page object or null if the page cannot be found.
      */
     public function findByUrl($url)
     {
@@ -77,7 +73,7 @@ class Router
     }
 
     /**
-     * Autoloads the URL map only allowing a single execution.
+     * getUrlMap autoloads the URL map only allowing a single execution
      * @return array Returns the URL map.
      */
     protected function getUrlMap()
@@ -90,10 +86,7 @@ class Router
     }
 
     /**
-     * Loads the URL map - a list of page file names and corresponding URL patterns.
-     * The URL map can is cached. The clearUrlMap() method resets the cache. By default
-     * the map is updated every time when a page is saved in the back-end, or
-     * when the interval defined with the cms.urlCacheTtl expires.
+     * loadUrlMap loads the URL map - a list of page file names and corresponding URL patterns
      * @return boolean Returns true if the URL map was loaded from the cache. Otherwise returns false.
      */
     protected function loadUrlMap()
@@ -150,7 +143,7 @@ class Router
     }
 
     /**
-     * Returns the caching URL key depending on the theme.
+     * getCacheKey returns the caching URL key depending on the theme
      * @param string $keyName Specifies the base key name.
      * @return string Returns the theme-specific key name.
      */
@@ -173,7 +166,7 @@ class Router
     }
 
     /**
-     * Clears the router cache.
+     * clearCache clears the router cache
      */
     public function clearCache()
     {

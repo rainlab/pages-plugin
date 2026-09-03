@@ -3,28 +3,12 @@
 use Cms\Classes\Content as ContentBase;
 
 /**
- * Represents a content template.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * Content represents a content template.
  */
 class Content extends ContentBase
 {
-    public $implement = ['@RainLab.Translate.Behaviors.TranslatableCmsObject'];
-
     /**
-     * @var array Attributes that support translation, if available.
-     */
-    public $translatable = [
-        'markup'
-    ];
-
-    public $translatableModel = 'RainLab\Translate\Classes\MLContent';
-
-    /**
-     * Converts the content object file name in to something nicer
-     * for humans to read.
-     * @return string
+     * getNiceTitleAttribute converts the file name into something nicer for humans to read
      */
     public function getNiceTitleAttribute()
     {

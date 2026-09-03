@@ -8,20 +8,17 @@ use Cms\Classes\Meta;
 use October\Rain\Support\Str;
 
 /**
- * Represents a front-end menu.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * Menu represents a front-end menu.
  */
 class Menu extends Meta
 {
     /**
-     * @var string The container name associated with the model, eg: pages.
+     * @var string dirName associated with the model, eg: pages.
      */
     protected $dirName = 'meta/menus';
 
     /**
-     * @var array The attributes that are mass assignable.
+     * @var array fillable attributes that are mass assignable.
      */
     protected $fillable = [
         'content',
@@ -31,29 +28,29 @@ class Menu extends Meta
     ];
 
     /**
-     * @var array List of attribute names which are not considered "settings".
+     * @var array purgeable attribute names which are not considered "settings".
      */
     protected $purgeable = [
         'code',
     ];
 
     /**
-     * @var array The rules to be applied to the data.
+     * @var array rules to be applied to the data.
      */
     public $rules = [
         'code' => 'required|regex:/^[0-9a-z\-\_]+$/i',
     ];
 
     /**
-     * @var array The array of custom error messages.
+     * @var array customMessages for validation errors.
      */
     public $customMessages = [
-        'required' => 'rainlab.pages::lang.menu.code_required',
-        'regex' => 'rainlab.pages::lang.menu.invalid_code',
+        'required' => 'The Code is required',
+        'regex' => 'Invalid Code format. The Code can contain digits, Latin letters and the following symbols: _-',
     ];
 
     /**
-     * Returns the menu code.
+     * getCodeAttribute returns the menu code
      * @return string
      */
     public function getCodeAttribute()
@@ -62,7 +59,7 @@ class Menu extends Meta
     }
 
     /**
-     * Sets the menu code.
+     * setCodeAttribute sets the menu code
      * @param string $code Specifies the file code.
      * @return \Cms\Classes\CmsObject Returns the object instance.
      */
@@ -79,7 +76,7 @@ class Menu extends Meta
     }
 
     /**
-     * Returns a default value for items attribute.
+     * getItemsAttribute returns a default value for the items attribute
      * Items are objects of the \RainLab\Pages\Classes\MenuItem class.
      * @return array
      */
@@ -94,10 +91,8 @@ class Menu extends Meta
     }
 
     /**
-     * Store the itemData in the items attribute
-     *
+     * setItemDataAttribute stores the itemData in the items attribute
      * @param array $data
-     * @return void
      */
     public function setItemDataAttribute($data)
     {
@@ -106,7 +101,7 @@ class Menu extends Meta
     }
 
     /**
-     * Processes the content attribute to an array of menu data.
+     * parseContent processes the content attribute to an array of menu data
      * @return array|null
      */
     protected function parseContent()
@@ -121,7 +116,7 @@ class Menu extends Meta
     }
 
     /**
-     * Initializes a cache item.
+     * initCacheItem initializes a cache item
      * @param array &$item The cached item array.
      */
     public static function initCacheItem(&$item)
@@ -132,9 +127,8 @@ class Menu extends Meta
     }
 
     /**
-     * Returns the menu item references.
-     * This function is used on the front-end.
-     * @param Cms\Classes\Page $page The current page object.
+     * generateReferences returns the menu item references, used on the front-end
+     * @param \Cms\Classes\Page $page The current page object.
      * @return array Returns an array of the \RainLab\Pages\Classes\MenuItemReference objects.
      */
     public function generateReferences($page)
