@@ -10,6 +10,10 @@
     <template v-slot:header>
         <backend-document-header
             title-property="title"
+            subtitle-property="url"
+            subtitle-label="<?= e(trans('URL')) ?>"
+            subtitle-preset-type="url"
+            :subtitle-preset-remove-words="true"
             ref="documentHeader"
             :data="documentData"
             :disabled="processing"
@@ -42,10 +46,13 @@
             <div class="flex-fill position-relative editor-panel">
                 <!-- WYSIWYG richeditor for the active rich surface. Only one connector is
                      mounted at a time so it lays out exactly like the native editor (no
-                     absolute-positioned stacking, which broke the resizer's responsiveness). -->
+                     absolute-positioned stacking, which broke the resizer's responsiveness).
+                     The surfaceToolbars check defers mounting until documentCreatedOrLoaded
+                     has created the toolbar array - the render flush from loadDocument runs
+                     before that hook, and the connector crashes on an undefined container. -->
                 <template v-for="surface in contentSurfaces" :key="'rich-' + surface.key">
                     <backend-richeditor-document-connector
-                        v-if="surface.mode === 'rich' && surface.key === activeSurfaceKey"
+                        v-if="surface.mode === 'rich' && surface.key === activeSurfaceKey && surfaceToolbars[surface.key]"
                         :allow-resizing="true"
                         :toolbar-container="surfaceToolbars[surface.key]"
                         :use-media-manager="true"
@@ -78,6 +85,16 @@
                         class="pages-syntax-fields-panel"
                         style="position:absolute; inset:0; overflow:auto; padding:20px; background:var(--oc-panel-bg, #fff);"
                     >
+                        <!-- Opaque loading overlay shown until the group's form island has
+                             loaded, like the document loader. The form stays rendered
+                             underneath so injected widgets initialize with real dimensions. -->
+                        <div
+                            v-if="!loadedSyntaxGroups[surface.key]"
+                            class="d-flex align-items-center justify-content-center"
+                            style="position:absolute; inset:0; z-index:10; background:var(--oc-panel-bg, #fff);"
+                        >
+                            <backend-loading-indicator size="small"></backend-loading-indicator>
+                        </div>
                         <form :ref="'form_' + surface.containerId" role="form" data-change-monitor>
                             <div :id="surface.containerId"></div>
                         </form>

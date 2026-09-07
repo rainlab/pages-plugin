@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Cms;
+use Site;
 use File;
 use Cache;
 use Event;
@@ -230,9 +231,11 @@ class Page extends ContentBase
         }
 
         /*
-         * Delete the object
+         * Delete the object, along with any translated mirror files
          */
         $result = array_merge($result, [$this->getBaseFileName()]);
+
+        $this->deleteLocaleMirrors();
 
         parent::delete();
 
@@ -272,7 +275,7 @@ class Page extends ContentBase
             return null;
         }
 
-        $url = array_get($page->attributes, 'viewBag.url');
+        $url = $page->getTranslatableUrl() ?: array_get($page->attributes, 'viewBag.url');
 
         return Cms::url($url);
     }
@@ -569,6 +572,111 @@ class Page extends ContentBase
         $this->attributes['placeholders'] = $placeholders;
     }
 
+    //
+    // Localization
+    //
+
+    /**
+     * @var string|null appliedSiteLocale is set once locale overrides have been applied,
+     * also used to differentiate the Twig cache between locales.
+     */
+    protected $appliedSiteLocale = null;
+
+    /**
+     * applySiteContext overlays translated content for the active site's locale.
+     *
+     * Translated page content lives in a locale-suffixed mirror directory
+     * (content/static-pages-{locale}/) controlled entirely by this plugin - the
+     * core content/{locale}/ convention only applies to the {% content %} tag.
+     * Mirror values (view bag, markup, placeholders) override the base page
+     * where present. Translated URLs come from viewBag.localeUrl in the base
+     * file via the HasTranslatableBag trait.
+     */
+    public function applySiteContext($site = null)
+    {
+        if ($this->appliedSiteLocale !== null || !Site::hasMultiSite()) {
+            return;
+        }
+
+        $site = $site ?: Site::getActiveSite();
+        $primary = Site::getPrimarySite();
+        if (!$site || !$primary) {
+            return;
+        }
+
+        $locale = (string) $site->hard_locale;
+        if (!strlen($locale) || $locale === (string) $primary->hard_locale) {
+            return;
+        }
+
+        foreach (Site::getLocaleKeyChain($locale) as $localeKey) {
+            if ($mirror = PageLocale::findLocale($localeKey, $this)) {
+                $this->applyLocaleMirror($mirror);
+                $this->appliedSiteLocale = $localeKey;
+                return;
+            }
+        }
+
+        $this->appliedSiteLocale = $locale;
+    }
+
+    /**
+     * applyLocaleMirror overlays a translated mirror's values over this page.
+     */
+    protected function applyLocaleMirror(PageLocale $mirror)
+    {
+        // Non-empty view bag values override the base. The URL and layout stay
+        // structural - the URL is resolved via getTranslatableUrl and the layout
+        // always comes from the base page.
+        foreach ((array) $mirror->getViewBag()->getProperties() as $name => $value) {
+            if (in_array($name, ['url', 'layout']) || $value === null || $value === '') {
+                continue;
+            }
+
+            $this->getViewBag()->setProperty($name, $value);
+        }
+
+        $this->fillViewBagArray();
+
+        if (strlen(trim((string) $mirror->markup))) {
+            $this->markup = $mirror->markup;
+            $this->processedMarkupCache = false;
+        }
+
+        // Placeholder content is stored as {% put %} blocks in the code section
+        if (strlen(trim((string) $mirror->code))) {
+            $this->attributes['code'] = $mirror->code;
+            unset($this->attributes['placeholders']);
+        }
+    }
+
+    /**
+     * getTwigCacheKey differentiates compiled templates per applied locale, since
+     * translated markup is rendered under the base page's file path.
+     */
+    public function getTwigCacheKey()
+    {
+        $key = parent::getTwigCacheKey();
+
+        if ($this->appliedSiteLocale !== null) {
+            $key .= '-'.$this->appliedSiteLocale;
+        }
+
+        return $key;
+    }
+
+    /**
+     * deleteLocaleMirrors removes any translated mirror files for this page.
+     */
+    protected function deleteLocaleMirrors()
+    {
+        $pattern = $this->theme->getPath().'/content/static-pages-*/'.$this->fileName;
+
+        foreach (File::glob($pattern) ?: [] as $filePath) {
+            File::delete($filePath);
+        }
+    }
+
     /**
      * getProcessedMarkup will return the processed markup of a page
      */
@@ -632,9 +740,19 @@ class Page extends ContentBase
     /**
      * getMenuCacheKey returns a cache key for this record
      */
-    protected static function getMenuCacheKey($theme)
+    protected static function getMenuCacheKey($theme, $locale = null)
     {
         $key = crc32($theme->getPath()).'static-page-menu';
+
+        // Menu trees hold translated URLs and titles, cache them per locale
+        if ($locale === null && Site::hasMultiSite()) {
+            $locale = Site::getActiveSite()?->hard_locale;
+        }
+
+        if ($locale) {
+            $key .= '-'.$locale;
+        }
+
         /**
          * @event pages.page.getMenuCacheKey
          * Enables modifying the key used to reference cached RainLab.Pages menu trees
@@ -665,10 +783,19 @@ class Page extends ContentBase
     public static function clearMenuCache($theme)
     {
         Cache::forget(self::getMenuCacheKey($theme));
+
+        // Clear every locale's menu tree
+        if (Site::hasMultiSite()) {
+            foreach (Site::listSites() as $site) {
+                if ($site->hard_locale) {
+                    Cache::forget(self::getMenuCacheKey($theme, $site->hard_locale));
+                }
+            }
+        }
     }
 
     /**
-     * getMenuTypeInfo is the handler for the pages.menuitem.getTypeInfo event
+     * getMenuTypeInfo is the handler for the cms.pageLookup.getTypeInfo event
      *
      * The type information is returned as array with the following elements:
      * - references - a list of the item type reference options. The options are returned in the
@@ -702,7 +829,7 @@ class Page extends ContentBase
     }
 
     /**
-     * resolveMenuItem is the handler for the pages.menuitem.resolveItem event
+     * resolveMenuItem is the handler for the cms.pageLookup.resolveItem event
      *
      * The result is an array with the following keys:
      * - url - the menu item URL. Not required for menu item types that return all available records.
@@ -835,9 +962,13 @@ class Page extends ContentBase
             $result = [];
 
             foreach ($items as $item) {
+                // Overlay the active site's translated title and URL, if any
+                $item->page->applySiteContext();
+
                 $viewBag = $item->page->viewBag;
                 $pageCode = $item->page->getBaseFileName();
-                $pageUrl = Str::lower(RouterHelper::normalizeUrl(array_get($viewBag, 'url')));
+                $pageUrl = $item->page->getTranslatableUrl() ?: array_get($viewBag, 'url');
+                $pageUrl = Str::lower(RouterHelper::normalizeUrl($pageUrl));
 
                 $itemData = [
                     'url'    => $pageUrl,

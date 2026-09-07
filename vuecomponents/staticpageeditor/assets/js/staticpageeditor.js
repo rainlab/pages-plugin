@@ -1,10 +1,18 @@
 import { DocumentComponentBase } from '../../../../../../../modules/editor/assets/js/editor.extension.documentcomponent.base.js';
 import EditorModelDefinition from '../../../../../../../modules/backend/vuecomponents/monacoeditor/assets/js/modeldefinition.js';
 
+// Each open page document renders its own syntax-field islands; a per-instance
+// counter keeps the container ids and form widget alias (which prefixes every
+// field id) unique so labels always target their own tab's inputs.
+let syntaxIslandUid = 0;
+
 export default {
     extends: DocumentComponentBase,
     data: function() {
+        const uid = ++syntaxIslandUid;
+
         return {
+            syntaxFormUid: uid,
             documentSettingsPopupTitle: this.trans('Static page') || 'Static Page',
             // Monaco backs only the "code" surfaces (text-type placeholders).
             codeEditorModelDefinitions: [],
@@ -14,6 +22,7 @@ export default {
             // layout syntax-field group.
             activeSurfaceKey: 'markup',
             loadedSyntaxGroups: {},
+            loadingSyntaxGroups: {},
             // Each rich surface's richeditor connector owns its own toolbar-button array,
             // keyed by surface key. The document toolbar renders the active surface's array
             // (activeToolbarExtension) so switching tabs just swaps which array is shown -
@@ -49,7 +58,7 @@ export default {
                     title: group.title,
                     mode: 'syntax',
                     tab: group.title,
-                    containerId: 'pagesSyntax_' + group.key.replace(/[^a-z0-9]/gi, '')
+                    containerId: 'pagesSyntax' + this.syntaxFormUid + '_' + group.key.replace(/[^a-z0-9]/gi, '')
                 });
             });
 
@@ -128,6 +137,20 @@ export default {
                     tooltip: this.trans('editor::lang.common.toggle_document_header')
                 }
             ]);
+        }
+    },
+    watch: {
+        // The header subtitle edits the top-level url; saving and the settings
+        // popup read settings.url - keep the two in sync both ways.
+        'documentData.url': function(value) {
+            if (this.documentData && this.documentData.settings && this.documentData.settings.url !== value) {
+                this.documentData.settings.url = value;
+            }
+        },
+        'documentData.settings.url': function(value) {
+            if (this.documentData && this.documentData.url !== value) {
+                this.documentData.url = value;
+            }
         }
     },
     methods: {
@@ -350,9 +373,11 @@ export default {
         loadSyntaxGroup: function(surface) {
             const form = this.$refs['form_' + surface.containerId];
             const el = Array.isArray(form) ? form[0] : form;
-            if (!el) {
+            if (!el || this.loadingSyntaxGroups[surface.key]) {
                 return;
             }
+
+            this.loadingSyntaxGroups[surface.key] = true;
 
             // Load the group's Form-widget island. Core's MutationObserver auto-initializes
             // the injected controls (repeater, mediafinder, richeditor, ...).
@@ -360,11 +385,18 @@ export default {
                 data: {
                     path: this.documentMetadata.path,
                     tab: surface.tab,
-                    containerId: surface.containerId
+                    containerId: surface.containerId,
+                    formAlias: 'pagesSyntaxForm' + this.syntaxFormUid
                 }
-            }).then(() => {
-                this.loadedSyntaxGroups[surface.key] = true;
-            });
+            }).then(
+                () => {
+                    this.loadedSyntaxGroups[surface.key] = true;
+                    this.loadingSyntaxGroups[surface.key] = false;
+                },
+                () => {
+                    this.loadingSyntaxGroups[surface.key] = false;
+                }
+            );
         },
 
         onToolbarCommand: function(command, isHotkey, ev) {
@@ -403,6 +435,7 @@ export default {
             this.ensurePlaceholderKeys();
             this.buildCodeModels();
             this.loadedSyntaxGroups = {};
+            this.loadingSyntaxGroups = {};
 
             // Pre-create a stable toolbar array for every rich surface before the editor
             // panel renders, so each connector binds to (and mutates) its own live array.

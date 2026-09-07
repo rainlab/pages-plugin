@@ -1,6 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Event;
+use Cms\Models\PageLookupItem;
 
 /**
  * MenuItem represents a menu item, used in the back-end for managing the menu items.
@@ -126,7 +126,9 @@ class MenuItem
     }
 
     /**
-     * getTypeOptions returns a list of registered menu item types
+     * getTypeOptions returns a list of registered menu item types, sourced from
+     * the shared page lookup system (cms.pageLookup.listTypes), which normalizes
+     * nesting flags and filters out types with no available CMS pages.
      * @return array Returns an array of registered item types
      */
     public function getTypeOptions($keyValue = null)
@@ -139,19 +141,7 @@ class MenuItem
             'header' => 'Header',
         ];
 
-        $apiResult = Event::fire('pages.menuitem.listTypes');
-
-        if (is_array($apiResult)) {
-            foreach ($apiResult as $typeList) {
-                if (!is_array($typeList)) {
-                    continue;
-                }
-
-                foreach ($typeList as $typeCode => $typeName) {
-                    $result[$typeCode] = $typeName;
-                }
-            }
-        }
+        $result += (new PageLookupItem)->getTypeOptions();
 
         return $result;
     }
@@ -173,42 +163,12 @@ class MenuItem
     }
 
     /**
-     * getTypeInfo returns type information resolved from menu item providers
+     * getTypeInfo returns type information resolved from page lookup providers
+     * via the shared page lookup system (cms.pageLookup.getTypeInfo).
      */
     public static function getTypeInfo($type)
     {
-        $result = [];
-        $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
-
-        if (is_array($apiResult)) {
-            foreach ($apiResult as $typeInfo) {
-                if (!is_array($typeInfo)) {
-                    continue;
-                }
-
-                foreach ($typeInfo as $name => $value) {
-                    if ($name == 'cmsPages') {
-                        $cmsPages = [];
-
-                        foreach ($value as $page) {
-                            $baseName = $page->getBaseFileName();
-                            $pos = strrpos($baseName, '/');
-
-                            $dir = $pos !== false ? substr($baseName, 0, $pos).' / ' : null;
-                            $cmsPages[$baseName] = strlen($page->title)
-                                ? $dir.$page->title
-                                : $baseName;
-                        }
-
-                        $value = $cmsPages;
-                    }
-
-                    $result[$name] = $value;
-                }
-            }
-        }
-
-        return $result;
+        return (new PageLookupItem)->getTypeInfo((string) $type);
     }
 
     /**

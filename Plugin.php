@@ -146,18 +146,11 @@ class Plugin extends PluginBase
         Event::listen('cms.pageLookup.listTypes', function() {
             return [
                 'static-page'      => 'Static page',
-                'all-static-pages' => ['All static pages', true]
+                'all-static-pages' => ['label' => 'All static pages', 'nesting' => true]
             ];
         });
 
-        Event::listen('pages.menuitem.listTypes', function() {
-            return [
-                'static-page'      => 'Static page',
-                'all-static-pages' => 'All static pages'
-            ];
-        });
-
-        Event::listen(['cms.pageLookup.getTypeInfo', 'pages.menuitem.getTypeInfo'], function($type) {
+        Event::listen('cms.pageLookup.getTypeInfo', function($type) {
             if ($type == 'url') {
                 return [];
             }
@@ -167,7 +160,7 @@ class Plugin extends PluginBase
             }
         });
 
-        Event::listen(['cms.pageLookup.resolveItem', 'pages.menuitem.resolveItem'], function($type, $item, $url, $theme) {
+        Event::listen('cms.pageLookup.resolveItem', function($type, $item, $url, $theme) {
             if ($type == 'static-page' || $type == 'all-static-pages') {
                 return StaticPage::resolveMenuItem($item, $url, $theme);
             }
@@ -175,6 +168,16 @@ class Plugin extends PluginBase
 
         Event::listen('cms.template.save', function($controller, $template, $type) {
             Plugin::clearCache();
+        });
+
+        // Resolve translated static page URLs when switching sites via the site picker
+        Event::listen('cms.sitePicker.overridePattern', function($page, $pattern, $currentSite, $proposedSite) {
+            if (isset($page->apiBag['staticPage'])) {
+                $staticPage = $page->apiBag['staticPage'];
+
+                return $staticPage->getTranslatableUrl($proposedSite)
+                    ?: array_get($staticPage->attributes, 'viewBag.url');
+            }
         });
 
         Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {

@@ -201,31 +201,33 @@ To prevent a placeholder from appearing in the editor set the `type` attribute t
 
 ## Creating New Menu Item Types
 
-Plugins can extend the Static Pages plugin with new menu item types. Please refer to the [Blog plugin](https://octobercms.com/plugin/rainlab-blog) for the integration example. New item types are registered with the API events triggered by the Static Pages plugin. The event handlers should be defined in the `boot()` method of the [plugin registration file](https://octobercms.com/docs/plugin/registration#registration-file). There are three events that should be handled in the plugin.
+Plugins can extend the Static Pages plugin with new menu item types. Please refer to the [Blog plugin](https://octobercms.com/plugin/rainlab-blog) for the integration example. New item types are registered with the core page lookup API events, shared with the CMS `pagefinder` form widget — one registration makes a type available in both the menu editor and the page finder. The event handlers should be defined in the `boot()` method of the [plugin registration file](https://octobercms.com/docs/plugin/registration#registration-file). There are three events that should be handled in the plugin.
 
-- `pages.menuitem.listType` event handler should return a list of new menu item types supported by the plugin.
-- `pages.menuitem.getTypeInfo` event handler returns detailed information about a menu item type.
-- `pages.menuitem.resolveItem` event handler "resolves" a menu item information and returns the actual item URL, title, an indicator whether the item is currently active, and subitems, if any.
+- `cms.pageLookup.listTypes` event handler should return a list of new menu item types supported by the plugin.
+- `cms.pageLookup.getTypeInfo` event handler returns detailed information about a menu item type.
+- `cms.pageLookup.resolveItem` event handler "resolves" a menu item information and returns the actual item URL, title, an indicator whether the item is currently active, and subitems, if any.
+
+> **Note**: earlier versions of this plugin used `pages.menuitem.*` events for this purpose; these are no longer fired and plugins should migrate to the `cms.pageLookup.*` events above (same handler signatures).
 
 The next example shows an event handler registration code for the Blog plugin. The Blog plugin registers two item types. As you can see, the Blog plugin uses the Category class to handle the events. That's a recommended approach.
 
 ```php
 public function boot()
 {
-    Event::listen('pages.menuitem.listTypes', function() {
+    Event::listen('cms.pageLookup.listTypes', function() {
         return [
             'blog-category'=>'Blog category',
             'all-blog-categories'=>'All blog categories',
         ];
     });
 
-    Event::listen('pages.menuitem.getTypeInfo', function($type) {
+    Event::listen('cms.pageLookup.getTypeInfo', function($type) {
         if ($type == 'blog-category' || $type == 'all-blog-categories') {
             return Category::getMenuTypeInfo($type);
         }
     });
 
-    Event::listen('pages.menuitem.resolveItem', function($type, $item, $url, $theme) {
+    Event::listen('cms.pageLookup.resolveItem', function($type, $item, $url, $theme) {
         if ($type == 'blog-category' || $type == 'all-blog-categories') {
             return Category::resolveMenuItem($item, $url, $theme);
         }
@@ -235,17 +237,25 @@ public function boot()
 
 ### Registering New Menu Item Types
 
-New menu item types are registered with the `pages.menuitem.listTypes` event handlers. The handler should return an associative array with the type codes in indexes and type names in values. It's highly recommended to use the plugin name in the type codes, to avoid conflicts with other menu item type providers. Example:
+New menu item types are registered with the `cms.pageLookup.listTypes` event handlers. The handler should return an associative array with the type codes in indexes and type names in values. It's highly recommended to use the plugin name in the type codes, to avoid conflicts with other menu item type providers. Example:
 
 ```php
 [
-    `my-plugin-item-type` => 'My plugin menu item type'
+    'my-plugin-item-type' => 'My plugin menu item type'
+]
+```
+
+Types that generate nested items can use the extended label format so that single-URL contexts (such as the page finder in single mode) can exclude them:
+
+```php
+[
+    'all-my-plugin-items' => ['label' => 'All my plugin items', 'nesting' => true]
 ]
 ```
 
 ### Returning Information About an Item Type
 
-Plugins should provide detailed information about the supported menu item types with the `pages.menuitem.getTypeInfo` event handlers. The handler gets a single parameter - the menu item type code (one of the codes you registered with the `pages.menuitem.listTypes` handler). The handler code must check whether the requested item type code belongs to the plugin. The handler should return an associative array in the following format:
+Plugins should provide detailed information about the supported menu item types with the `cms.pageLookup.getTypeInfo` event handlers. The handler gets a single parameter - the menu item type code (one of the codes you registered with the `cms.pageLookup.listTypes` handler). The handler code must check whether the requested item type code belongs to the plugin. The handler should return an associative array in the following format:
 
 ```
 Array (
@@ -287,7 +297,7 @@ The format for references with subitems is
 ['item-key' => ['title'=>'Item title', 'items'=>[...]]]
 ```
 
-The reference keys should reflect the object identifier they represent. For blog categories keys match the category identifiers. A plugin should be able to load an object by its key in the `pages.menuitem.resolveItem` event handler. The references element is optional, it is required only if a menu item type supports the Reference drop-down, or, in other words, if the user should be able to select an object the menu item refers to.
+The reference keys should reflect the object identifier they represent. For blog categories keys match the category identifiers. A plugin should be able to load an object by its key in the `cms.pageLookup.resolveItem` event handler. The references element is optional, it is required only if a menu item type supports the Reference drop-down, or, in other words, if the user should be able to select an object the menu item refers to.
 
 #### cmsPages element
 
@@ -320,10 +330,10 @@ return $result;
 
 ### Resolving Menu Items
 
-When the Static Pages plugin generates a menu on the front-end, every menu item should **resolved** by the plugin that supplies the menu item type. The process of resolving involves generating the real item URL, determining whether the menu item is active, and generating the subitems (if required). Plugins should register the `pages.menuitem.resolveItem` event handler in order to resolve menu items. The event handler takes four arguments:
+When the Static Pages plugin generates a menu on the front-end, every menu item should **resolved** by the plugin that supplies the menu item type. The process of resolving involves generating the real item URL, determining whether the menu item is active, and generating the subitems (if required). Plugins should register the `cms.pageLookup.resolveItem` event handler in order to resolve menu items. The event handler takes four arguments:
 
 * `$type` - the item type name. Plugins must only handle item types they provide and ignore other types.
-* `$item` - the menu item object (RainLab\Pages\Classes\MenuItem). The menu item object represents the menu item configuration provided by the user. The object has the following properties: `title`, `type`, `reference`, `cmsPage`, `nesting`.
+* `$item` - the item object (`RainLab\Pages\Classes\MenuItem` when resolving a menu, or `Cms\Models\PageLookupItem` when resolving a page finder link). The item object represents the configuration provided by the user. Both objects expose the following properties: `title`, `type`, `reference`, `cmsPage`, `nesting`.
 * `$url` - specifies the current absolute URL, in lower case. Always use the `Url::to()` helper to generate menu item links and compare them with the current URL.
 * `$theme` - the current theme object (`Cms\Classes\Theme`).
 

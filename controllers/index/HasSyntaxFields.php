@@ -36,7 +36,7 @@ trait HasSyntaxFields
 
         $config = $this->makeConfig(['fields' => []]);
         $config->model = $page;
-        $config->alias = 'pagesSyntaxForm';
+        $config->alias = $this->getSyntaxFieldsAlias();
         $config->arrayName = 'syntaxFields';
         $config->context = $page->exists ? 'update' : 'create';
 
@@ -90,6 +90,19 @@ trait HasSyntaxFields
     }
 
     /**
+     * getSyntaxFieldsAlias returns the client-supplied form alias. Each open page
+     * document uses its own alias so the generated field ids are unique, keeping
+     * checkbox labels bound to their own document's inputs. The alias also rides
+     * along on nested widget AJAX requests via the pagesSyntaxAlias hidden field.
+     */
+    protected function getSyntaxFieldsAlias(): string
+    {
+        $alias = preg_replace('/[^a-zA-Z0-9]/', '', (string) (post('formAlias') ?: post('pagesSyntaxAlias')));
+
+        return strlen($alias) ? $alias : 'pagesSyntaxForm';
+    }
+
+    /**
      * bindSyntaxFieldsWidget rebuilds the widget on any request carrying a page path.
      *
      * Nested widgets (repeater, mediafinder) fire their own AJAX handlers, which require the
@@ -124,7 +137,8 @@ trait HasSyntaxFields
         // Hidden fields let the per-request rebind (bindSyntaxFieldsWidget) rebuild the exact
         // same widget so nested repeater/mediafinder AJAX handlers resolve.
         $hidden = '<input type="hidden" name="pagesSyntaxPath" value="'.e($path).'" />'
-            .'<input type="hidden" name="pagesSyntaxTab" value="'.e((string) $tab).'" />';
+            .'<input type="hidden" name="pagesSyntaxTab" value="'.e((string) $tab).'" />'
+            .'<input type="hidden" name="pagesSyntaxAlias" value="'.e($this->getSyntaxFieldsAlias()).'" />';
 
         return [
             '#'.$containerId => $hidden.$widget->render(['useContainer' => false])

@@ -29,7 +29,7 @@ trait HasMenuItemForm
 
         $config = $this->makeConfig('~/plugins/rainlab/pages/classes/menuitem/fields.yaml');
         $config->model = $menuItem;
-        $config->alias = 'menuItemForm';
+        $config->alias = $this->getMenuItemFormAlias();
         $config->arrayName = 'menuItem';
 
         $widget = $this->makeWidget(\Backend\Widgets\Form::class, $config);
@@ -39,14 +39,31 @@ trait HasMenuItemForm
     }
 
     /**
+     * getMenuItemFormAlias returns the client-supplied form alias. Each open menu
+     * document uses its own alias so the generated field ids are unique, keeping
+     * checkbox labels bound to their own document's inputs.
+     */
+    protected function getMenuItemFormAlias(): string
+    {
+        $alias = preg_replace('/[^a-zA-Z0-9]/', '', (string) post('formAlias'));
+
+        return strlen($alias) ? $alias : 'menuItemForm';
+    }
+
+    /**
      * onLoadMenuItemForm renders the per-item Form widget over AJAX.
      */
     public function onLoadMenuItemForm()
     {
         $widget = $this->makeMenuItemFormWidget();
 
+        $containerId = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) post('containerId'));
+        if (!strlen($containerId)) {
+            $containerId = 'pagesMenuItemForm';
+        }
+
         return [
-            '#pagesMenuItemForm' => $widget->render(['useContainer' => false])
+            '#'.$containerId => $widget->render(['useContainer' => false])
         ];
     }
 
@@ -69,7 +86,12 @@ trait HasMenuItemForm
     {
         $alias = trim((string) post('alias'));
 
-        $widget = new MenuItemSearch($this, ['alias' => $alias]);
+        $formField = new \Backend\Classes\FormField([
+            'fieldName' => 'referenceSearch',
+            'arrayName' => 'menuItem'
+        ]);
+
+        $widget = new MenuItemSearch($this, $formField, ['alias' => $alias]);
 
         return $widget->onSearch();
     }

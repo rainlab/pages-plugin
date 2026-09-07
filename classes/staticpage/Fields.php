@@ -7,31 +7,11 @@ class Fields
 {
     /**
      * defineSettingsFields returns the Inspector field definitions for a static page.
+     * The title and URL are edited in the document header, not here.
      */
     public function defineSettingsFields(): array
     {
         return [
-            'title' => [
-                'title' => "Title",
-                'placeholder' => "New page title",
-                'type' => 'string',
-                'validation' => [
-                    'required' => ['message' => "The Title is required."]
-                ]
-            ],
-            'url' => [
-                'title' => "URL",
-                'placeholder' => "/",
-                'type' => 'string',
-                'preset' => ['property' => "title", 'type' => 'url'],
-                'validation' => [
-                    'required' => ['message' => "The URL is required."],
-                    'regex' => [
-                        'message' => "Invalid URL format. The URL should start with the forward slash symbol and can contain digits, Latin letters and the following symbols: _-/.",
-                        'pattern' => '^/[a-z0-9/_\\-\\.]*$'
-                    ]
-                ]
-            ],
             'fileName' => [
                 'title' => "File Name",
                 'type' => 'string',

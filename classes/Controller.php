@@ -44,6 +44,9 @@ class Controller
             return null;
         }
 
+        // Overlay translated content for the active site's locale
+        $page->applySiteContext();
+
         $viewBag = $page->viewBag;
 
         $cmsPage = CmsPage::inTheme($this->theme);

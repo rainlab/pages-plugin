@@ -62,11 +62,20 @@ trait HasMenuCrud
 
         $settings = (array) array_get($documentData, 'settings', []);
         $items = array_get($documentData, 'items', []);
+        $items = is_array($items) ? $this->normalizeItems($items) : [];
+
+        // With a non-primary-locale site selected, posted title/url values are
+        // stored as per-item locale translations and the base values are kept.
+        if (strlen($code) && ($locale = $this->getEditLocale())) {
+            $originalItems = (array) array_get($menu->attributes, 'items', []);
+            $items = $this->localizeItemData($items, $originalItems, $locale);
+        }
 
         $menu->fill([
             'name' => (string) array_get($settings, 'name'),
-            'code' => (string) array_get($settings, 'code', $code),
-            'itemData' => is_array($items) ? $this->normalizeItems($items) : []
+            // The code is a root document property (edited in the header)
+            'code' => (string) (array_get($documentData, 'code') ?: array_get($settings, 'code', $code)),
+            'itemData' => $items
         ]);
 
         $menu->save();
@@ -98,15 +107,97 @@ trait HasMenuCrud
      */
     protected function menuToDocumentArray(Menu $menu): array
     {
+        $items = $this->itemsToArray($menu->items);
+
+        // When the backend site picker selects a non-primary locale, show that
+        // locale's item translations (viewBag.locale.{locale}.{field}).
+        if ($locale = $this->getEditLocale()) {
+            $items = $this->applyItemsEditLocale($items, $locale);
+        }
+
         return [
             'name' => $menu->name,
             'code' => $menu->getBaseFileName(),
-            'items' => $this->itemsToArray($menu->items),
+            'items' => $items,
             'settings' => [
                 'name' => $menu->name,
                 'code' => $menu->getBaseFileName()
             ]
         ];
+    }
+
+    /**
+     * applyItemsEditLocale replaces item fields with their translated values for
+     * display in the editor, matching the storage format used by earlier versions
+     * of this plugin (viewBag.locale.{locale}.{field}).
+     */
+    protected function applyItemsEditLocale(array $items, string $locale): array
+    {
+        foreach ($items as &$item) {
+            $localeFields = (array) array_get($item, 'viewBag.locale.'.$locale, []);
+
+            foreach (['title', 'url'] as $fieldName) {
+                $value = array_get($localeFields, $fieldName);
+                if ($value !== null && $value !== '' && array_key_exists($fieldName, $item)) {
+                    $item[$fieldName] = $value;
+                }
+            }
+
+            if (!empty($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->applyItemsEditLocale($item['items'], $locale);
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * localizeItemData stores the posted title/url values as locale translations
+     * and restores the base values from the menu on disk, mirroring the original
+     * RainLab.Translate save behavior. The url is only translated for url-type items.
+     */
+    protected function localizeItemData(array $postedItems, array $originalItems, string $locale): array
+    {
+        foreach ($postedItems as $index => &$item) {
+            $original = (array) ($originalItems[$index] ?? []);
+            $localeData = (array) array_get($original, 'viewBag.locale', []);
+
+            foreach (['title', 'url'] as $fieldName) {
+                $value = array_get($item, $fieldName);
+                if ($value === null) {
+                    continue;
+                }
+
+                // Restore the base value; for items new to this locale session the
+                // posted value becomes the base value too.
+                $originalValue = array_get($original, $fieldName, $value);
+                array_set($item, $fieldName, $originalValue);
+
+                $localeData[$locale][$fieldName] = $value;
+            }
+
+            // Only url-type items carry a translated URL
+            if (array_get($item, 'type', 'url') !== 'url') {
+                foreach ($localeData as &$targetData) {
+                    unset($targetData['url']);
+                }
+                unset($targetData);
+            }
+
+            if ($localeData) {
+                array_set($item, 'viewBag.locale', $localeData);
+            }
+
+            if (!empty($item['items']) && is_array($item['items'])) {
+                $item['items'] = $this->localizeItemData(
+                    $item['items'],
+                    (array) array_get($original, 'items', []),
+                    $locale
+                );
+            }
+        }
+
+        return $postedItems;
     }
 
     /**

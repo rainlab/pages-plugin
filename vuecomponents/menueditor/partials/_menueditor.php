@@ -10,6 +10,10 @@
     <template v-slot:header>
         <backend-document-header
             title-property="name"
+            subtitle-property="code"
+            subtitle-label="<?= e(trans('Code')) ?>"
+            subtitle-preset-type="file"
+            :subtitle-preset-remove-words="true"
             ref="documentHeader"
             :data="documentData"
             :disabled="processing"
@@ -26,7 +30,7 @@
 
     <template v-slot:content>
         <div class="pages-menu-editor" style="height:100%; overflow:auto; padding:16px 20px;">
-            <ul style="list-style:none; margin:0; padding:0; max-width:720px;">
+            <ul style="list-style:none; margin:0; padding:0; max-width:960px;">
                 <li
                     v-for="entry in flatItems"
                     :key="entry.item._id"
@@ -52,6 +56,7 @@
                         <span class="menu-item-subtitle">{{ itemSubtitle(entry.item) }}</span>
                     </span>
                     <span class="menu-item-actions" @click.stop>
+                        <button type="button" title="<?= e(trans('Add subitem')) ?>" @click="addSubItem(entry)" class="menu-item-action"><i class="icon-plus"></i></button>
                         <button type="button" title="<?= e(trans('Move up')) ?>" @click="moveItemUp(entry)" class="menu-item-action"><i class="icon-arrow-up"></i></button>
                         <button type="button" title="<?= e(trans('Move down')) ?>" @click="moveItemDown(entry)" class="menu-item-action"><i class="icon-arrow-down"></i></button>
                         <button type="button" title="<?= e(trans('Indent')) ?>" @click="indentItem(entry)" class="menu-item-action"><i class="icon-arrow-right"></i></button>
@@ -69,23 +74,32 @@
         <!-- Edit Menu Item modal (hosts the legacy Form widget island). -->
         <div
             v-show="modalVisible"
-            class="pages-menu-modal-overlay"
-            style="position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:1050; display:flex; align-items:flex-start; justify-content:center; padding-top:60px;"
+            class="pages-menu-modal-overlay modal fade in show"
+            style="display:block;"
             @click.self="closeModal"
         >
-            <div class="pages-menu-modal" style="background:var(--oc-panel-bg,#fff); border-radius:6px; width:640px; max-width:92%; max-height:80vh; display:flex; flex-direction:column; box-shadow:0 10px 40px rgba(0,0,0,.3);">
-                <div class="pages-menu-modal-header" style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid rgba(0,0,0,.08);">
-                    <h4 style="margin:0;"><?= e(trans('Edit Menu Item')) ?></h4>
-                    <button type="button" class="btn btn-default btn-sm" @click="closeModal"><i class="icon-times"></i></button>
-                </div>
-                <div class="pages-menu-modal-body" style="padding:20px; overflow:auto; flex:1 1 auto;">
-                    <form ref="menuItemForm" role="form" data-change-monitor>
-                        <div id="pagesMenuItemForm"></div>
-                    </form>
-                </div>
-                <div class="pages-menu-modal-footer" style="padding:12px 20px; border-top:1px solid rgba(0,0,0,.08); text-align:right;">
-                    <button type="button" class="btn btn-default" @click="closeModal"><?= e(trans('Cancel')) ?></button>
-                    <button type="button" class="btn btn-primary" @click="applyAndClose"><?= e(trans('Apply')) ?></button>
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title"><?= e(trans('Edit Menu Item')) ?></h4>
+                        <button type="button" class="btn-close" @click="closeModal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Loading indicator shown until the item form is rendered, populated
+                             and the type field visibility applied, like the document loader. -->
+                        <div v-if="modalLoading" class="pages-menu-modal-loading d-flex align-items-center justify-content-center">
+                            <backend-loading-indicator size="small"></backend-loading-indicator>
+                        </div>
+                        <form v-show="!modalLoading" ref="menuItemForm" role="form" data-change-monitor>
+                            <div :id="menuItemFormContainerId"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" :disabled="modalLoading" @click="applyAndClose"><?= e(trans('Apply')) ?></button>
+                        <button type="button" class="btn btn-link" @click="closeModal"><?= e(trans('Cancel')) ?></button>
+                        <span class="pages-menu-modal-footer-spacer"></span>
+                        <button type="button" class="btn btn-link pages-menu-delete-btn" :disabled="modalLoading" @click="deleteSelectedItem"><?= e(trans('Delete')) ?></button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -1,9 +1,11 @@
 <?php namespace RainLab\Pages\Classes\EditorExtension;
 
+use Site;
 use Event;
 use SystemException;
 use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page as StaticPage;
+use RainLab\Pages\Classes\PageLocale;
 use RainLab\Pages\Classes\EditorExtension;
 
 /**
@@ -24,10 +26,88 @@ trait HasStaticPageCrud
             throw new SystemException(sprintf('The static page %s was not found.', $path));
         }
 
+        // When the backend site picker selects a non-primary locale, overlay the
+        // translated mirror (content/static-pages-{locale}/) so the editor shows
+        // and saves that locale's content.
+        $document = $this->pageToDocumentArray($page);
+        $metadata = $this->pageMetadata($page);
+
+        if ($locale = $this->getEditLocale()) {
+            $mirror = PageLocale::findLocale($locale, $page);
+            $document = $this->overlayLocaleDocument($document, $page, $mirror, $locale);
+            $metadata['locale'] = $locale;
+            $metadata['mtime'] = $mirror ? $mirror->mtime : null;
+        }
+
         return [
-            'document' => $this->pageToDocumentArray($page),
-            'metadata' => $this->pageMetadata($page)
+            'document' => $document,
+            'metadata' => $metadata
         ];
+    }
+
+    /**
+     * getEditLocale returns the locale being edited when the backend site picker
+     * has a non-primary-locale site selected, otherwise null.
+     */
+    protected function getEditLocale(): ?string
+    {
+        if (!Site::hasMultiSite()) {
+            return null;
+        }
+
+        $site = Site::getSiteFromContext();
+        $primary = Site::getPrimarySite();
+        if (!$site || !$primary || $site->id === $primary->id) {
+            return null;
+        }
+
+        $locale = (string) $site->hard_locale;
+
+        return (strlen($locale) && $locale !== (string) $primary->hard_locale) ? $locale : null;
+    }
+
+    /**
+     * overlayLocaleDocument overrides the base document values with the translated
+     * mirror's content. The URL comes from viewBag.localeUrl in the base file.
+     */
+    protected function overlayLocaleDocument(array $document, StaticPage $page, ?PageLocale $mirror, string $locale): array
+    {
+        // Translated URL lives in the base page's view bag
+        $localeUrl = array_get($page->viewBag, 'localeUrl.'.$locale);
+        if ($localeUrl !== null && $localeUrl !== '') {
+            $document['url'] = $localeUrl;
+            $document['settings']['url'] = $localeUrl;
+        }
+
+        if (!$mirror) {
+            return $document;
+        }
+
+        // Mirror view bag values (title, syntax field data) override the base
+        foreach ((array) $mirror->getViewBag()->getProperties() as $name => $value) {
+            if (in_array($name, ['url', 'layout']) || $value === null || $value === '') {
+                continue;
+            }
+
+            $document['settings'][$name] = $value;
+            if (array_key_exists($name, $document)) {
+                $document[$name] = $value;
+            }
+        }
+
+        if (strlen(trim((string) $mirror->markup))) {
+            $document['markup'] = $mirror->markup;
+        }
+
+        // Mirror placeholders override where present
+        $mirrorPlaceholders = (array) $mirror->placeholders;
+        foreach ($mirrorPlaceholders as $code => $content) {
+            if (array_key_exists($code, (array) $document['placeholders']) && strlen(trim((string) $content))) {
+                $document['placeholders'][$code] = $content;
+            }
+        }
+
+        return $document;
     }
 
     /**
@@ -41,6 +121,12 @@ trait HasStaticPageCrud
 
         $theme = $this->getEditTheme();
         $path = trim((string) array_get($metadata, 'path'));
+
+        // Editing an existing page with a non-primary-locale site selected writes
+        // to that locale's mirror file instead. New pages always create the base.
+        if (strlen($path) && ($locale = $this->getEditLocale())) {
+            return $this->saveLocalizedPageDocument($controller, $locale);
+        }
 
         $page = strlen($path)
             ? StaticPage::load($theme, $path)
@@ -83,6 +169,100 @@ trait HasStaticPageCrud
         return [
             'metadata' => $this->pageMetadata($page)
         ];
+    }
+
+    /**
+     * saveLocalizedPageDocument writes the posted document to the locale's mirror
+     * file (content/static-pages-{locale}/), leaving the base page untouched except
+     * for the translated URL, which is stored in the base view bag as localeUrl.
+     */
+    protected function saveLocalizedPageDocument($controller, string $locale)
+    {
+        $documentData = (array) post('documentData');
+        $metadata = (array) post('documentMetadata');
+        $forceSave = (bool) post('documentForceSave');
+
+        $theme = $this->getEditTheme();
+        $path = trim((string) array_get($metadata, 'path'));
+
+        $page = StaticPage::load($theme, $path);
+        if (!$page) {
+            throw new SystemException(sprintf('The static page %s was not found.', $path));
+        }
+
+        $mirror = PageLocale::findLocale($locale, $page);
+
+        // Concurrency guard against the mirror file
+        if (
+            $mirror &&
+            !$forceSave &&
+            $mirror->mtime &&
+            array_get($metadata, 'mtime') != $mirror->mtime
+        ) {
+            return ['mtimeMismatch' => true];
+        }
+
+        $settings = $this->cleanSyntaxFieldData((array) array_get($documentData, 'settings', []));
+
+        // A URL differing from the base URL is stored as localeUrl.{locale} in the
+        // base file, matching the translated URL storage read by HasTranslatableBag.
+        $postedUrl = trim((string) array_get($settings, 'url'));
+        $baseUrl = (string) array_get($page->viewBag, 'url');
+        $localeUrls = (array) array_get($page->viewBag, 'localeUrl', []);
+        $newLocaleUrls = $localeUrls;
+
+        if (strlen($postedUrl) && $postedUrl !== $baseUrl) {
+            $newLocaleUrls[$locale] = $postedUrl;
+        }
+        else {
+            unset($newLocaleUrls[$locale]);
+        }
+
+        if ($newLocaleUrls != $localeUrls) {
+            $baseViewBag = (array) $page->getViewBag()->getProperties();
+            $baseViewBag['localeUrl'] = $newLocaleUrls;
+
+            $page->fill(['settings' => ['viewBag' => $baseViewBag]]);
+            $page->save();
+        }
+
+        // Mirrors never store structural fields; the layout is copied from the
+        // base so placeholder pruning resolves against the correct layout.
+        unset($settings['url']);
+        $settings['layout'] = array_get($page->viewBag, 'layout');
+
+        $fillData = [
+            'settings' => ['viewBag' => $settings],
+            'markup' => (string) array_get($documentData, 'markup'),
+        ];
+
+        $placeholders = array_get($documentData, 'placeholders');
+        if (is_array($placeholders)) {
+            $fillData['placeholders'] = $placeholders;
+        }
+
+        $mirror = PageLocale::withLocale($locale, function() use ($theme, $page, $mirror, $fillData) {
+            if (!$mirror) {
+                $mirror = PageLocale::inTheme($theme);
+                $mirror->fileName = $page->fileName;
+            }
+
+            // Fill the settings first so the layout is resolvable when the
+            // placeholder fill prunes against the layout's placeholder list.
+            $mirror->fill(['settings' => $fillData['settings']]);
+            $mirror->fill(array_diff_key($fillData, ['settings' => true]));
+            $mirror->save();
+
+            return $mirror;
+        });
+
+        Event::fire('cms.template.save', [$controller, $mirror, 'static-page']);
+
+        $result = $this->pageMetadata($page);
+        $result['locale'] = $locale;
+        $result['mtime'] = $mirror->mtime;
+
+        return ['metadata' => $result];
     }
 
     /**

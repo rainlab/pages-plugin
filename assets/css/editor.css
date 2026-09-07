@@ -1,6 +1,58 @@
 /* Content-region tabs use the shared backend-tabs component with the
    "primary" style (modules/backend/vuecomponents/tabs). No plugin CSS needed. */
 
+/* Edit Menu Item modal: reuses the standard backend popup markup (.modal-content /
+   .modal-header / .btn-close / .modal-footer) so it inherits the admin popup styling;
+   only the overlay positioning + footer layout are added here. */
+.pages-menu-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    overflow: auto;
+    background: rgba(0, 0, 0, .4);
+
+    .modal-dialog {
+        margin: 60px auto;
+        max-width: 640px;
+    }
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 120px);
+    }
+
+    .modal-header {
+        position: relative;
+    }
+
+    .modal-body {
+        flex: 1 1 auto;
+        overflow: auto;
+    }
+
+    .modal-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 15px;
+        border-top: var(--oc-popup-border);
+    }
+
+    .pages-menu-modal-footer-spacer {
+        flex: 1 1 auto;
+    }
+
+    /* Keeps the modal body height stable while the item form loads. */
+    .pages-menu-modal-loading {
+        min-height: 220px;
+    }
+
+    .pages-menu-delete-btn:hover {
+        color: var(--oc-danger-color, #cc3300);
+    }
+}
+
 /* Menu editor: item list + item form panel. */
 .pages-menu-editor {
     .menu-item-row {
@@ -91,8 +143,8 @@
 
     .menu-item-title {
         display: block;
-        font-size: 13px;
-        line-height: 16px;
+        font-size: 14px;
+        line-height: 18px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -100,8 +152,8 @@
 
     .menu-item-subtitle {
         display: block;
-        font-size: 11px;
-        line-height: 14px;
+        font-size: 12px;
+        line-height: 15px;
         color: var(--oc-text-muted-color, #97a1ab);
         white-space: nowrap;
         overflow: hidden;

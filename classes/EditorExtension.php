@@ -135,12 +135,13 @@ class EditorExtension extends ExtensionBase
 
     /**
      * getSettingsForms returns the Inspector settings forms per document type.
+     * Menus have no settings form - the name and code are edited in the
+     * document header, which hides the Settings toolbar button.
      */
     public function getSettingsForms()
     {
         return [
-            self::DOCUMENT_TYPE_PAGE => $this->loadLocalizedSettingsFields(\RainLab\Pages\Classes\StaticPage\Fields::class),
-            self::DOCUMENT_TYPE_MENU => $this->loadLocalizedSettingsFields(\RainLab\Pages\Classes\Menu\Fields::class)
+            self::DOCUMENT_TYPE_PAGE => $this->loadLocalizedSettingsFields(\RainLab\Pages\Classes\StaticPage\Fields::class)
         ];
     }
 
@@ -175,7 +176,7 @@ class EditorExtension extends ExtensionBase
             ]
         );
 
-        $description->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small');
+        $description->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
         $description->setInitialDocumentData([
             'fileName' => '',
             'markup' => '',
@@ -192,11 +193,13 @@ class EditorExtension extends ExtensionBase
             ]
         );
 
-        $menuDescription->setIcon(self::ICON_COLOR_MENU, 'backend-icon-background entity-small');
+        $menuDescription->setIcon(self::ICON_COLOR_MENU, 'backend-icon-background entity-small text');
+        // No top-level `code` here: the document header only auto-generates the
+        // code from the name while the code is untouched (undefined).
         $menuDescription->setInitialDocumentData([
-            'code' => '',
+            'name' => __("New menu"),
             'items' => [],
-            'settings' => ['name' => __("New menu"), 'code' => 'new-menu']
+            'settings' => ['name' => __("New menu")]
         ]);
 
         $contentDescription = new NewDocumentDescription(
@@ -209,7 +212,7 @@ class EditorExtension extends ExtensionBase
             ]
         );
 
-        $contentDescription->setIcon(self::ICON_COLOR_CONTENT, 'backend-icon-background entity-small');
+        $contentDescription->setIcon(self::ICON_COLOR_CONTENT, 'backend-icon-background entity-small cms-content');
         $contentDescription->setInitialDocumentData([
             'fileName' => '',
             'markup' => '',
@@ -300,21 +303,24 @@ class EditorExtension extends ExtensionBase
             ->setChildKeyPrefix(self::DOCUMENT_TYPE_CONTENT.':')
             ->setUserData(['topLevel' => true]);
 
+        $this->addNodeCreateMenu($rootNode, self::DOCUMENT_TYPE_CONTENT, __("New Content Block"));
+
         // Folder nodes are cached by path so files sharing a directory nest under one folder.
         $folderNodes = [];
 
         foreach (Content::listInTheme($theme, true) as $content) {
             $fileName = ltrim($content->fileName, '/');
 
-            // Static page content is managed by the page document type, not as content blocks.
-            if (starts_with($fileName, 'static-pages/') || starts_with($fileName, 'static-pages-fr/')) {
+            // Static page content is managed by the page document type, not as content
+            // blocks. This includes translated mirror directories (static-pages-{locale}).
+            if (preg_match('#^static-pages(-[^/]+)?/#', $fileName)) {
                 continue;
             }
 
             $parentNode = $this->resolveContentFolderNode($rootNode, $fileName, $folderNodes);
 
             $node = $parentNode->addNode(basename($fileName), $fileName);
-            $node->setIcon(self::ICON_COLOR_CONTENT, 'backend-icon-background entity-small');
+            $node->setIcon(self::ICON_COLOR_CONTENT, 'backend-icon-background entity-small cms-content');
         }
     }
 
@@ -338,8 +344,8 @@ class EditorExtension extends ExtensionBase
                 $folder = $parentNode->addNode($segment, 'folder:'.$accumulated);
                 $folder
                     ->setDisplayMode(NodeDefinition::DISPLAY_MODE_TREE)
-                    ->setIcon('#c0c0c0', 'backend-icon-background folder-small')
                     ->setUserData(['isFolder' => true]);
+                $folder->setFolderIcon();
                 $folderNodes[$accumulated] = $folder;
             }
 
@@ -359,9 +365,11 @@ class EditorExtension extends ExtensionBase
             ->setChildKeyPrefix(self::DOCUMENT_TYPE_MENU.':')
             ->setUserData(['topLevel' => true]);
 
+        $this->addNodeCreateMenu($rootNode, self::DOCUMENT_TYPE_MENU, __("New Menu"));
+
         foreach (Menu::listInTheme($theme, true) as $menu) {
             $node = $rootNode->addNode($menu->name ?: $menu->getBaseFileName(), $menu->getBaseFileName());
-            $node->setIcon(self::ICON_COLOR_MENU, 'backend-icon-background entity-small');
+            $node->setIcon(self::ICON_COLOR_MENU, 'backend-icon-background entity-small text');
         }
     }
 
@@ -379,6 +387,8 @@ class EditorExtension extends ExtensionBase
             ->setDragAndDropMode([NodeDefinition::DND_SORT, NodeDefinition::DND_MOVE])
             ->setUserData(['topLevel' => true]);
 
+        $this->addNodeCreateMenu($rootNode, self::DOCUMENT_TYPE_PAGE, __("New Page"));
+
         $pageList = new PageList($theme);
         $this->addPageTreeNodes($pageList->getPageTree(true), $rootNode);
     }
@@ -394,7 +404,7 @@ class EditorExtension extends ExtensionBase
             $title = $page->getViewBag()->property('title') ?: $baseName;
 
             $node = $parentNode->addNode($title, $baseName);
-            $node->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small');
+            $node->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
             // path drives the drag-move handler; it identifies which page moved where.
             $node->setUserData(['path' => $baseName]);
 
@@ -402,6 +412,20 @@ class EditorExtension extends ExtensionBase
                 $this->addPageTreeNodes($pageInfo->subpages, $node);
             }
         }
+    }
+
+    /**
+     * addNodeCreateMenu adds a "create document" action to a top-level navigator node, so
+     * each type (Static Pages / Menus / Content) offers creating a new object in context,
+     * mirroring the main Editor IDE.
+     */
+    protected function addNodeCreateMenu($node, string $documentType, string $label)
+    {
+        $node->addRootMenuItem(
+            ItemDefinition::TYPE_TEXT,
+            $label,
+            'pages:create-document@'.$documentType
+        )->setIcon('icon-create');
     }
 
     /**

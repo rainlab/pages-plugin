@@ -1,6 +1,7 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Url;
+use Site;
 use Event;
 use Request;
 use SystemException;
@@ -162,10 +163,11 @@ class Menu extends Meta
                 }
                 else {
                     /*
-                     * If the item type is not URL, use the API to request the item type's provider to
+                     * If the item type is not URL, use the shared page lookup system
+                     * (cms.pageLookup.resolveItem) to request the item type's provider to
                      * return the item URL, subitems and determine whether the item is active.
                      */
-                    $apiResult = Event::fire('pages.menuitem.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
+                    $apiResult = Event::fire('cms.pageLookup.resolveItem', [$item->type, $item, $currentUrl, $this->theme]);
                     if (is_array($apiResult)) {
                         foreach ($apiResult as $itemInfo) {
                             if (!is_array($itemInfo)) {
@@ -257,6 +259,12 @@ class Menu extends Meta
         $iterator($items);
 
         /*
+         * Apply per-item locale overrides stored by the menu editor in the item
+         * view bag (viewBag.locale.{locale}.{field}) for the active site's locale.
+         */
+        $this->applyLocaleOverrides($items);
+
+        /*
          * @event pages.menu.referencesGenerated
          * Provides opportunity to dynamically change menu entries right after reference generation.
          *
@@ -290,5 +298,45 @@ class Menu extends Meta
         Event::fire('pages.menu.referencesGenerated', [&$items]);
 
         return $items;
+    }
+
+    /**
+     * applyLocaleOverrides replaces item fields with translated values stored in
+     * the item view bag (viewBag.locale.{locale}.{field}), matching the storage
+     * format used by earlier versions of this plugin.
+     */
+    protected function applyLocaleOverrides($items)
+    {
+        if (!Site::hasMultiSite()) {
+            return;
+        }
+
+        $site = Site::getActiveSite();
+        $primary = Site::getPrimarySite();
+        if (!$site || !$primary) {
+            return;
+        }
+
+        $locale = (string) $site->hard_locale;
+        if (!strlen($locale) || $locale === (string) $primary->hard_locale) {
+            return;
+        }
+
+        $iterator = function($menuItems) use (&$iterator, $locale) {
+            foreach ($menuItems as $item) {
+                $localeFields = array_get($item->viewBag, "locale.{$locale}", []);
+                foreach ($localeFields as $fieldName => $fieldValue) {
+                    if ($fieldValue) {
+                        $item->$fieldName = $fieldValue;
+                    }
+                }
+
+                if ($item->items) {
+                    $iterator($item->items);
+                }
+            }
+        };
+
+        $iterator($items);
     }
 }

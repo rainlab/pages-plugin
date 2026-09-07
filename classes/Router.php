@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
+use Site;
 use Cache;
 use Event;
 use Config;
@@ -113,7 +114,8 @@ class Router
                     continue;
                 }
 
-                $url = $page->getViewBag()->property('url');
+                // Prefer the translated URL for the active site, if any
+                $url = $page->getTranslatableUrl() ?: $page->getViewBag()->property('url');
                 if (!$url) {
                     continue;
                 }
@@ -147,9 +149,19 @@ class Router
      * @param string $keyName Specifies the base key name.
      * @return string Returns the theme-specific key name.
      */
-    protected function getCacheKey($keyName)
+    protected function getCacheKey($keyName, $locale = null)
     {
         $key = crc32($this->theme->getPath()).$keyName;
+
+        // URL maps hold translated URLs, cache them per locale
+        if ($locale === null && Site::hasMultiSite()) {
+            $locale = Site::getActiveSite()?->hard_locale;
+        }
+
+        if ($locale) {
+            $key .= '-'.$locale;
+        }
+
         /**
          * @event pages.router.getCacheKey
          * Enables modifying the key used to reference cached RainLab.Pages routes
@@ -173,5 +185,14 @@ class Router
         self::$cache = [];
         self::$urlMap = [];
         Cache::forget($this->getCacheKey('static-page-url-map'));
+
+        // Clear every locale's map
+        if (Site::hasMultiSite()) {
+            foreach (Site::listSites() as $site) {
+                if ($site->hard_locale) {
+                    Cache::forget($this->getCacheKey('static-page-url-map', $site->hard_locale));
+                }
+            }
+        }
     }
 }

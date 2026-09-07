@@ -1,15 +1,25 @@
 import { DocumentComponentBase } from '../../../../../../../modules/editor/assets/js/editor.extension.documentcomponent.base.js';
 
+// Each open menu document renders its own item form island; a per-instance
+// counter keeps the container id and form widget alias (which prefixes every
+// field id) unique, so checkbox labels always target their own tab's inputs.
+let menuItemFormUid = 0;
+
 export default {
     extends: DocumentComponentBase,
     data: function() {
+        const uid = ++menuItemFormUid;
+
         return {
             documentSettingsPopupTitle: this.trans('Menu') || 'Menu',
             documentTitleProperty: 'name',
+            menuItemFormContainerId: 'pagesMenuItemForm' + uid,
+            menuItemFormAlias: 'menuItemForm' + uid,
             items: [],
             selectedItem: null,
             itemFormLoaded: false,
             modalVisible: false,
+            modalLoading: false,
             newItemTitle: this.trans('New menu item'),
             nextItemId: 1,
             dragItemId: null,
@@ -75,6 +85,20 @@ export default {
                     tooltip: this.trans('editor::lang.common.toggle_document_header')
                 }
             ];
+        }
+    },
+    watch: {
+        // The header subtitle edits the top-level code; saving and the settings
+        // popup read settings.code - keep the two in sync both ways.
+        'documentData.code': function(value) {
+            if (this.documentData && this.documentData.settings && this.documentData.settings.code !== value) {
+                this.documentData.settings.code = value;
+            }
+        },
+        'documentData.settings.code': function(value) {
+            if (this.documentData && this.documentData.code !== value) {
+                this.documentData.code = value;
+            }
         }
     },
     methods: {
@@ -182,6 +206,18 @@ export default {
             this.editItem(item);
         },
 
+        // Creates a new child item under the given row and opens it for editing,
+        // matching the original plugin's "Add subitem" action.
+        addSubItem: function(entry) {
+            const item = this.newBlankItem();
+            if (!entry.item._children) {
+                entry.item._children = [];
+            }
+            entry.item._children.push(item);
+            this.syncItemsToDocument();
+            this.editItem(item);
+        },
+
         deleteItem: function(item, list) {
             const arr = list || this.items;
             const idx = arr.indexOf(item);
@@ -192,6 +228,25 @@ export default {
                 }
                 this.syncItemsToDocument();
             }
+        },
+
+        // Delete the item open in the modal, wherever it lives in the tree, then close.
+        deleteSelectedItem: function() {
+            const target = this.selectedItem;
+            if (!target) {
+                return;
+            }
+            const removeFrom = (list) => {
+                const idx = list.indexOf(target);
+                if (idx !== -1) {
+                    list.splice(idx, 1);
+                    return true;
+                }
+                return list.some((item) => item._children && removeFrom(item._children));
+            };
+            removeFrom(this.items);
+            this.closeModal();
+            this.syncItemsToDocument();
         },
 
         moveItemUp: function(entry) {
@@ -379,6 +434,7 @@ export default {
             this.selectedItem = item;
             item._selected = true;
             this.modalVisible = true;
+            this.modalLoading = true;
 
             this.$nextTick(() => {
                 this.loadItemForm(item);
@@ -387,27 +443,46 @@ export default {
 
         closeModal: function() {
             this.modalVisible = false;
+
+            // The row highlight only marks the item being edited - clear it when
+            // the modal closes.
+            if (this.selectedItem) {
+                this.selectedItem._selected = false;
+                this.selectedItem = null;
+            }
         },
 
         applyAndClose: function() {
             this.applyItemForm();
-            this.modalVisible = false;
+            this.closeModal();
         },
 
         loadItemForm: function(item) {
             const container = this.$refs.menuItemForm;
             if (!container) {
+                this.modalLoading = false;
                 return;
             }
 
+            // The form is hidden behind a loading indicator until it is fully
+            // rendered, populated and the type field visibility applied - otherwise
+            // the previous item's content flashes and the fields jump around.
             oc.request(container, 'onLoadMenuItemForm', {
-                data: { bindMenuItemForm: 1 }
+                data: {
+                    bindMenuItemForm: 1,
+                    containerId: this.menuItemFormContainerId,
+                    formAlias: this.menuItemFormAlias
+                }
             }).then(() => {
                 this.itemFormLoaded = true;
                 this.populateItemForm(item);
                 this.bindTypeChange();
-                this.refreshReferenceOptions(item.reference, item.cmsPage);
-            });
+                this.bindReferenceSearch();
+                return this.refreshReferenceOptions(item.reference, item.cmsPage);
+            }).then(
+                () => { this.modalLoading = false; },
+                () => { this.modalLoading = false; }
+            );
         },
 
         // Wire the Type dropdown so switching type reloads the reference/cmsPage options,
@@ -426,20 +501,58 @@ export default {
             }
         },
 
-        // Fetch type info for the current type and (re)populate the reference + cmsPage
-        // dropdowns, selecting the given values when present.
-        refreshReferenceOptions: function(selectedReference, selectedCmsPage) {
+        // Wire the "Search all references" field so picking a result (value format
+        // "type::reference" from MenuItemSearch) populates the Type + Reference fields,
+        // matching the original plugin behavior.
+        bindReferenceSearch: function() {
             const form = this.$refs.menuItemForm;
             if (!form) {
                 return;
             }
+            const searchInput = form.querySelector('[name="referenceSearch"]');
+            if (searchInput && !searchInput._pagesSearchBound) {
+                searchInput._pagesSearchBound = true;
+                searchInput.addEventListener('change', () => {
+                    const value = searchInput.value || '';
+                    const pos = value.indexOf('::');
+                    if (pos === -1) {
+                        return;
+                    }
+
+                    const type = value.substring(0, pos);
+                    const reference = value.substring(pos + 2);
+
+                    const typeInput = form.querySelector('[name="menuItem[type]"]');
+                    if (typeInput && typeInput.value !== type) {
+                        typeInput.value = type;
+                        // Update the select2 display without firing regular change
+                        // handlers, the type cascade would clear the selection made here.
+                        if (window.jQuery) {
+                            window.jQuery(typeInput).trigger('change.select2');
+                        }
+                    }
+
+                    this.refreshReferenceOptions(reference, '');
+                });
+            }
+        },
+
+        // Fetch type info for the current type, (re)populate the reference + cmsPage
+        // dropdowns, and restrict field visibility to what the type supports - the
+        // same rules the original plugin applied (url only for the url type, reference/
+        // cmsPage/nesting/replace only when the type info advertises them).
+        refreshReferenceOptions: function(selectedReference, selectedCmsPage) {
+            const form = this.$refs.menuItemForm;
+            if (!form) {
+                return Promise.resolve();
+            }
             const typeInput = form.querySelector('[name="menuItem[type]"]');
             const type = typeInput ? typeInput.value : '';
             if (!type) {
-                return;
+                return Promise.resolve();
             }
 
-            oc.request(form, 'onGetMenuItemTypeInfo', {
+            return oc.request(form, 'onGetMenuItemTypeInfo', {
                 data: { type: type }
             }).then((data) => {
                 const info = (data && data.menuItemTypeInfo) || {};
@@ -453,7 +566,31 @@ export default {
                     info.cmsPages || {},
                     selectedCmsPage
                 );
+
+                this.applyTypeFieldVisibility(type, info);
             });
+        },
+
+        // Show only the fields relevant to the selected type, mirroring the original
+        // plugin's applyTypeInfo behavior.
+        applyTypeFieldVisibility: function(type, info) {
+            const form = this.$refs.menuItemForm;
+            if (!form) {
+                return;
+            }
+
+            const toggleGroup = (name, visible) => {
+                const group = form.querySelector('[data-field-name="' + name + '"]');
+                if (group) {
+                    group.style.display = visible ? '' : 'none';
+                }
+            };
+
+            toggleGroup('url', type === 'url');
+            toggleGroup('reference', !!info.references);
+            toggleGroup('cmsPage', !!info.cmsPages);
+            toggleGroup('nesting', !!info.nesting);
+            toggleGroup('replace', !!info.dynamicItems);
         },
 
         // Flatten the (possibly nested) references structure into a flat {key: label} map.
@@ -496,20 +633,42 @@ export default {
                 return;
             }
 
+            // Checkboxes must be matched explicitly - October renders a hidden
+            // "0" input with the same name before each checkbox, which a plain
+            // name selector would match instead.
+            const setField = (name, value) => {
+                const checkbox = form.querySelector('input[type="checkbox"][name="' + name + '"]');
+                if (checkbox) {
+                    checkbox.checked = !!value && value !== '0';
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                    return;
+                }
+
+                const input = form.querySelector('[name="' + name + '"]');
+                if (input) {
+                    input.value = (value === null || value === undefined) ? '' : value;
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            };
+
             Object.keys(item).forEach((key) => {
                 if (key.charAt(0) === '_' || key === 'typeLabel') {
                     return;
                 }
-                const input = form.querySelector('[name="menuItem[' + key + ']"]');
-                if (input) {
-                    if (input.type === 'checkbox') {
-                        input.checked = !!item[key] && item[key] !== '0';
-                    }
-                    else {
-                        input.value = item[key];
-                    }
-                    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+                // View bag values map to nested field names; the locale key holds
+                // per-locale translations, not form fields.
+                if (key === 'viewBag' && item.viewBag && typeof item.viewBag === 'object') {
+                    Object.keys(item.viewBag).forEach((vbKey) => {
+                        if (vbKey === 'locale') {
+                            return;
+                        }
+                        setField('menuItem[viewBag][' + vbKey + ']', item.viewBag[vbKey]);
+                    });
+                    return;
                 }
+
+                setField('menuItem[' + key + ']', item[key]);
             });
         },
 
@@ -532,7 +691,9 @@ export default {
                     this.selectedItem[m[1]] = value;
                 }
             }
-            this.selectedItem.viewBag = viewBag;
+            // Merge over the existing view bag - keys not represented in the form
+            // (e.g. the nested locale translations) must survive the round trip.
+            this.selectedItem.viewBag = Object.assign({}, this.selectedItem.viewBag, viewBag);
 
             // Refresh the row subtitle from the (possibly changed) type.
             const typeInput = form.querySelector('[name="menuItem[type]"]');

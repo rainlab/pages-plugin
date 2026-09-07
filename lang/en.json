@@ -55,6 +55,7 @@
     "Error loading menu": "Error loading menu",
     "Error loading content block": "Error loading content block",
     "Add item": "Add item",
+    "Add subitem": "Add subitem",
     "New menu item": "New menu item",
     "Untitled": "Untitled",
     "Up": "Up",
@@ -71,5 +72,8 @@
     "Move down": "Move down",
     "Apply": "Apply",
     "Cancel": "Cancel",
-    "Error loading page": "Error loading page"
+    "Error loading page": "Error loading page",
+    "New Page": "New Page",
+    "New Menu": "New Menu",
+    "New Content Block": "New Content Block"
 }
