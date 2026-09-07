@@ -941,17 +941,19 @@ class Page extends ContentBase
      */
     public static function buildMenuTree($theme)
     {
-        if (self::$menuTreeCache !== null) {
-            return self::$menuTreeCache;
-        }
-
+        // The request-level cache is keyed per theme and locale, matching the
+        // persistent cache, so iterating sites in one request stays correct.
         $key = self::getMenuCacheKey($theme);
+
+        if (is_array(self::$menuTreeCache) && array_key_exists($key, self::$menuTreeCache)) {
+            return self::$menuTreeCache[$key];
+        }
 
         $cached = Cache::get($key, false);
         $unserialized = $cached ? @unserialize($cached) : false;
 
         if ($unserialized !== false) {
-            return self::$menuTreeCache = $unserialized;
+            return self::$menuTreeCache[$key] = $unserialized;
         }
 
         $menuTree = [
@@ -993,12 +995,12 @@ class Page extends ContentBase
         $pageList = new PageList($theme);
         $iterator($pageList->getPageTree(), null, 0);
 
-        self::$menuTreeCache = $menuTree;
+        self::$menuTreeCache[$key] = $menuTree;
         $comboConfig = Config::get('cms.template_cache_ttl', 10);
         $expiresAt = now()->addMinutes($comboConfig);
         Cache::put($key, serialize($menuTree), $expiresAt);
 
-        return self::$menuTreeCache;
+        return self::$menuTreeCache[$key];
     }
 
     /**

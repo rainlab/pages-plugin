@@ -46,7 +46,7 @@ export default {
         },
 
         // The server tells us which surface to use via documentData.language.
-        // htm/html content blocks edit as WYSIWYG (richeditor), matching the original plugin.
+        // htm/html content blocks edit as WYSIWYG (richeditor).
         isRicheditorDocument: function() {
             return this.documentData && this.documentData.language === 'richeditor';
         },

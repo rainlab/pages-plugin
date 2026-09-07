@@ -206,8 +206,7 @@ export default {
             this.editItem(item);
         },
 
-        // Creates a new child item under the given row and opens it for editing,
-        // matching the original plugin's "Add subitem" action.
+        // Creates a new child item under the given row and opens it for editing.
         addSubItem: function(entry) {
             const item = this.newBlankItem();
             if (!entry.item._children) {
@@ -485,8 +484,7 @@ export default {
             );
         },
 
-        // Wire the Type dropdown so switching type reloads the reference/cmsPage options,
-        // matching the original plugin's cascade.
+        // Wire the Type dropdown so switching type reloads the reference/cmsPage options.
         bindTypeChange: function() {
             const form = this.$refs.menuItemForm;
             if (!form) {
@@ -502,8 +500,7 @@ export default {
         },
 
         // Wire the "Search all references" field so picking a result (value format
-        // "type::reference" from MenuItemSearch) populates the Type + Reference fields,
-        // matching the original plugin behavior.
+        // "type::reference" from MenuItemSearch) populates the Type + Reference fields.
         bindReferenceSearch: function() {
             const form = this.$refs.menuItemForm;
             if (!form) {
@@ -538,9 +535,8 @@ export default {
         },
 
         // Fetch type info for the current type, (re)populate the reference + cmsPage
-        // dropdowns, and restrict field visibility to what the type supports - the
-        // same rules the original plugin applied (url only for the url type, reference/
-        // cmsPage/nesting/replace only when the type info advertises them).
+        // dropdowns, and restrict field visibility to what the type supports (url only
+        // for the url type, reference/cmsPage/nesting/replace only when advertised).
         refreshReferenceOptions: function(selectedReference, selectedCmsPage) {
             const form = this.$refs.menuItemForm;
             if (!form) {
@@ -571,8 +567,7 @@ export default {
             });
         },
 
-        // Show only the fields relevant to the selected type, mirroring the original
-        // plugin's applyTypeInfo behavior.
+        // Show only the fields relevant to the selected type.
         applyTypeFieldVisibility: function(type, info) {
             const form = this.$refs.menuItemForm;
             if (!form) {

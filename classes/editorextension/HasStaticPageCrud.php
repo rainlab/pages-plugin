@@ -1,7 +1,9 @@
 <?php namespace RainLab\Pages\Classes\EditorExtension;
 
+use Url;
 use Site;
 use Event;
+use Config;
 use SystemException;
 use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page as StaticPage;
@@ -41,8 +43,32 @@ trait HasStaticPageCrud
 
         return [
             'document' => $document,
-            'metadata' => $metadata
+            'metadata' => $metadata,
+            'previewUrl' => $this->pagePreviewUrl(array_get($document, 'settings.url')),
+            'hasContentField' => $this->pageHasContentField($page)
         ];
+    }
+
+    /**
+     * pagePreviewUrl returns the frontend URL for a page URL string.
+     */
+    protected function pagePreviewUrl($url): ?string
+    {
+        $url = trim((string) $url);
+
+        return strlen($url) ? Url::to($url) : null;
+    }
+
+    /**
+     * pageHasContentField checks the layout's staticPage component useContent property,
+     * which hides the content field when disabled.
+     */
+    protected function pageHasContentField(StaticPage $page): bool
+    {
+        $layout = $page->getLayoutObject();
+        $component = $layout ? $layout->getComponent('staticPage') : null;
+
+        return $component ? (bool) $component->property('useContent', true) : true;
     }
 
     /**
@@ -148,18 +174,34 @@ trait HasStaticPageCrud
 
         $settings = $this->cleanSyntaxFieldData((array) array_get($documentData, 'settings', []));
 
+        // New pages nest under a parent when created via "Add subpage".
+        $parentFileName = trim((string) array_get($metadata, 'parentFileName'));
+        if (!strlen($path) && strlen($parentFileName)) {
+            $page->parentFileName = $parentFileName;
+        }
+
         $fillData = [
             'settings' => ['viewBag' => $settings],
-            'markup' => (string) array_get($documentData, 'markup'),
+            'markup' => $this->convertLineEndings((string) array_get($documentData, 'markup')),
         ];
 
         // Placeholder content is stored as {% put %} blocks, keyed by placeholder code.
         $placeholders = array_get($documentData, 'placeholders');
         if (is_array($placeholders)) {
-            $fillData['placeholders'] = $placeholders;
+            $fillData['placeholders'] = array_map([$this, 'convertLineEndings'], $placeholders);
         }
 
         $page->fill($fillData);
+
+        // New pages without a chosen layout inherit the parent's child layout, or the
+        // theme layout marked as default.
+        if (!strlen($path) && !strlen((string) array_get($settings, 'layout'))) {
+            $parentPage = strlen($parentFileName)
+                ? StaticPage::load($theme, $parentFileName)
+                : null;
+
+            $page->setDefaultLayout($parentPage);
+        }
 
         $page->validate();
         $page->save();
@@ -167,8 +209,24 @@ trait HasStaticPageCrud
         Event::fire('cms.template.save', [$controller, $page, 'static-page']);
 
         return [
-            'metadata' => $this->pageMetadata($page)
+            'metadata' => $this->pageMetadata($page),
+            'previewUrl' => $this->pagePreviewUrl(array_get($page->viewBag, 'url')),
+            'placeholderInfo' => $this->getPlaceholderInfo($page),
+            'syntaxFieldGroups' => $this->getSyntaxFieldGroups($page),
+            'hasContentField' => $this->pageHasContentField($page)
         ];
+    }
+
+    /**
+     * convertLineEndings normalizes CRLF/CR to LF when enabled by configuration.
+     */
+    protected function convertLineEndings($content)
+    {
+        if (is_string($content) && Config::get('system.convert_line_endings', false) === true) {
+            $content = str_replace(["\r\n", "\r"], "\n", $content);
+        }
+
+        return $content;
     }
 
     /**
@@ -233,12 +291,12 @@ trait HasStaticPageCrud
 
         $fillData = [
             'settings' => ['viewBag' => $settings],
-            'markup' => (string) array_get($documentData, 'markup'),
+            'markup' => $this->convertLineEndings((string) array_get($documentData, 'markup')),
         ];
 
         $placeholders = array_get($documentData, 'placeholders');
         if (is_array($placeholders)) {
-            $fillData['placeholders'] = $placeholders;
+            $fillData['placeholders'] = array_map([$this, 'convertLineEndings'], $placeholders);
         }
 
         $mirror = PageLocale::withLocale($locale, function() use ($theme, $page, $mirror, $fillData) {
@@ -262,7 +320,16 @@ trait HasStaticPageCrud
         $result['locale'] = $locale;
         $result['mtime'] = $mirror->mtime;
 
-        return ['metadata' => $result];
+        $previewUrl = array_get($page->viewBag, 'localeUrl.'.$locale)
+            ?: array_get($page->viewBag, 'url');
+
+        return [
+            'metadata' => $result,
+            'previewUrl' => $this->pagePreviewUrl($previewUrl),
+            'placeholderInfo' => $this->getPlaceholderInfo($page),
+            'syntaxFieldGroups' => $this->getSyntaxFieldGroups($page),
+            'hasContentField' => $this->pageHasContentField($page)
+        ];
     }
 
     /**
@@ -387,10 +454,8 @@ trait HasStaticPageCrud
 
     /**
      * getSyntaxFieldGroups returns the layout syntax fields grouped into editor tabs.
-     *
-     * Each distinct field `tab` becomes one content tab (matching the original plugin);
-     * fields without a tab fall back to a single "Fields" group. Returns an ordered list
-     * of ['key' => <slug>, 'title' => <tab label>].
+     * Each distinct field `tab` becomes one content tab; fields without a tab fall back
+     * to a single "Fields" group.
      */
     protected function getSyntaxFieldGroups(StaticPage $page): array
     {

@@ -302,8 +302,7 @@ class Menu extends Meta
 
     /**
      * applyLocaleOverrides replaces item fields with translated values stored in
-     * the item view bag (viewBag.locale.{locale}.{field}), matching the storage
-     * format used by earlier versions of this plugin.
+     * the item view bag (viewBag.locale.{locale}.{field}).
      */
     protected function applyLocaleOverrides($items)
     {
@@ -322,12 +321,23 @@ class Menu extends Meta
             return;
         }
 
-        $iterator = function($menuItems) use (&$iterator, $locale) {
+        $currentUrl = Request::path();
+        if (!strlen($currentUrl)) {
+            $currentUrl = '/';
+        }
+        $currentUrl = Str::lower(Url::to($currentUrl));
+
+        $iterator = function($menuItems) use (&$iterator, $locale, $currentUrl) {
             foreach ($menuItems as $item) {
                 $localeFields = array_get($item->viewBag, "locale.{$locale}", []);
                 foreach ($localeFields as $fieldName => $fieldValue) {
                     if ($fieldValue) {
                         $item->$fieldName = $fieldValue;
+
+                        // A translated URL changes which item matches the current page
+                        if ($fieldName === 'url') {
+                            $item->isActive = $item->isActive || $currentUrl == Str::lower(Url::to($fieldValue));
+                        }
                     }
                 }
 

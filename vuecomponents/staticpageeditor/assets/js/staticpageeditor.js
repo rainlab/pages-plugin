@@ -14,6 +14,8 @@ export default {
         return {
             syntaxFormUid: uid,
             documentSettingsPopupTitle: this.trans('Static page') || 'Static Page',
+            previewUrl: null,
+            hasContentField: true,
             // Monaco backs only the "code" surfaces (text-type placeholders).
             codeEditorModelDefinitions: [],
             codeModels: {},
@@ -36,9 +38,12 @@ export default {
         //  - mode 'code'   = Monaco (text-type placeholders)
         //  - mode 'syntax' = server-rendered Form-widget island (layout syntax fields)
         contentSurfaces: function() {
-            const surfaces = [
-                { key: 'markup', title: this.trans('Content') || 'Content', mode: 'rich', holder: 'root' }
-            ];
+            const surfaces = [];
+
+            // The layout's staticPage component can disable the content field (useContent).
+            if (this.hasContentField) {
+                surfaces.push({ key: 'markup', title: this.trans('Content') || 'Content', mode: 'rich', holder: 'root' });
+            }
 
             const info = (this.documentData && this.documentData.placeholderInfo) || {};
             Object.keys(info).forEach((code) => {
@@ -109,6 +114,16 @@ export default {
                     hotkey: 'ctrl+s, cmd+s',
                     tooltip: this.trans('backend::lang.form.save'),
                     command: 'save'
+                },
+                {
+                    type: 'button',
+                    target: '_blank',
+                    href: this.previewUrl,
+                    disabled: this.previewUrl === null || this.isNewDocument,
+                    icon: 'icon-location-target',
+                    label: this.trans('Preview') || 'Preview',
+                    tooltip: this.trans('Preview') || 'Preview',
+                    command: 'preview'
                 },
                 {
                     type: 'button',
@@ -413,6 +428,12 @@ export default {
         },
 
         documentLoaded: function(data) {
+            this.previewUrl = (data && data.previewUrl) || null;
+            if (data && data.hasContentField !== undefined) {
+                this.hasContentField = data.hasContentField !== false;
+            }
+            this.ensureActiveSurfaceExists();
+
             this.$nextTick(() => {
                 if (this.$refs.editor) {
                     Object.keys(this.codeModels).forEach((key) => {
@@ -448,7 +469,72 @@ export default {
             this.surfaceToolbars = toolbars;
 
             this.activeSurfaceKey = 'markup';
+            this.ensureActiveSurfaceExists();
             this.modelsReady = true;
+        },
+
+        ensureActiveSurfaceExists: function() {
+            if (!this.contentSurfaces.find((s) => s.key === this.activeSurfaceKey)) {
+                this.activeSurfaceKey = this.contentSurfaces.length ? this.contentSurfaces[0].key : 'markup';
+            }
+        },
+
+        documentSaved: function(data) {
+            if (!data) {
+                return;
+            }
+
+            if (data.previewUrl !== undefined) {
+                this.previewUrl = data.previewUrl;
+            }
+
+            // A layout change alters the placeholder tabs, syntax-field groups and the
+            // content field visibility - rebuild the surfaces when they changed.
+            const infoChanged =
+                (data.placeholderInfo !== undefined &&
+                    JSON.stringify(data.placeholderInfo) !== JSON.stringify(this.documentData.placeholderInfo || {})) ||
+                (data.syntaxFieldGroups !== undefined &&
+                    JSON.stringify(data.syntaxFieldGroups) !== JSON.stringify(this.documentData.syntaxFieldGroups || [])) ||
+                (data.hasContentField !== undefined && (data.hasContentField !== false) !== this.hasContentField);
+
+            if (!infoChanged) {
+                return;
+            }
+
+            if (data.placeholderInfo !== undefined) {
+                this.documentData.placeholderInfo = data.placeholderInfo;
+            }
+            if (data.syntaxFieldGroups !== undefined) {
+                this.documentData.syntaxFieldGroups = data.syntaxFieldGroups;
+            }
+            if (data.hasContentField !== undefined) {
+                this.hasContentField = data.hasContentField !== false;
+            }
+
+            this.ensurePlaceholderKeys();
+            this.buildCodeModels();
+            this.loadedSyntaxGroups = {};
+            this.loadingSyntaxGroups = {};
+
+            const toolbars = {};
+            this.contentSurfaces.forEach((surface) => {
+                if (surface.mode === 'rich') {
+                    toolbars[surface.key] = this.surfaceToolbars[surface.key] || [];
+                }
+            });
+            this.surfaceToolbars = toolbars;
+
+            this.ensureActiveSurfaceExists();
+
+            this.$nextTick(() => {
+                const surface = this.activeSurface;
+                if (surface && surface.mode === 'syntax' && !this.loadedSyntaxGroups[surface.key]) {
+                    this.loadSyntaxGroup(surface);
+                }
+                else if (surface && surface.mode === 'rich') {
+                    this.refreshRichSurface(surface.key);
+                }
+            });
         },
 
         // Keep the active rich surface's resizable width in sync on window resize. The

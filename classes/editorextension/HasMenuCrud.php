@@ -128,8 +128,7 @@ trait HasMenuCrud
 
     /**
      * applyItemsEditLocale replaces item fields with their translated values for
-     * display in the editor, matching the storage format used by earlier versions
-     * of this plugin (viewBag.locale.{locale}.{field}).
+     * display in the editor (viewBag.locale.{locale}.{field}).
      */
     protected function applyItemsEditLocale(array $items, string $locale): array
     {
@@ -153,8 +152,8 @@ trait HasMenuCrud
 
     /**
      * localizeItemData stores the posted title/url values as locale translations
-     * and restores the base values from the menu on disk, mirroring the original
-     * RainLab.Translate save behavior. The url is only translated for url-type items.
+     * and restores the base values from the menu on disk. The url is only
+     * translated for url-type items.
      */
     protected function localizeItemData(array $postedItems, array $originalItems, string $locale): array
     {
@@ -231,8 +230,7 @@ trait HasMenuCrud
         foreach ($items as $item) {
             $data = $item->toArray();
 
-            // typeLabel drives the tree-row subtitle (e.g. "Static page"), matching
-            // the original plugin's item list.
+            // typeLabel drives the tree-row subtitle (e.g. "Static page").
             $data['typeLabel'] = array_get($typeOptions, $item->type, $item->type);
 
             if ($item->items) {

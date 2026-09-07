@@ -4,6 +4,7 @@
     "description": "Pages plugin for October CMS",
     "homepage": "https://octobercms.com/plugin/rainlab-pages",
     "keywords": ["october cms", "october", "pages", "octobercms"],
+    "license": "MIT",
     "authors": [
         {
             "name": "Alexey Bobkov",

@@ -4,7 +4,7 @@ use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page as StaticPage;
 
 /**
- * HasSyntaxFields hosts a legacy Form widget island for a page's layout syntax fields.
+ * HasSyntaxFields hosts a Form widget island for a page's layout syntax fields.
  *
  * Syntax fields (repeater, mediafinder, custom widgets) have no Vue equivalent, so they are
  * rendered by a real Backend\Widgets\Form embedded in the Vue editor via AJAX.
@@ -18,9 +18,8 @@ trait HasSyntaxFields
 
     /**
      * makeSyntaxFieldsWidget builds the Form widget for a page's layout syntax fields.
-     *
-     * When $tab is given only the fields assigned to that tab are included, so each editor
-     * tab hosts its own island (matching the original plugin's per-tab syntax fields).
+     * When $tab is given only the fields assigned to that tab are included, so each
+     * editor tab hosts its own island.
      */
     protected function makeSyntaxFieldsWidget($path, $tab = null)
     {
@@ -122,6 +121,10 @@ trait HasSyntaxFields
      */
     public function onLoadSyntaxFields()
     {
+        if (!$this->user || !$this->user->hasAnyAccess(['rainlab.pages.manage_pages'])) {
+            throw new \ApplicationException(__("You don't have permissions to manage :type documents.", ['type' => 'static-page']));
+        }
+
         $path = trim((string) post('path'));
         $tab = post('tab');
         $tab = is_string($tab) && strlen($tab) ? $tab : null;

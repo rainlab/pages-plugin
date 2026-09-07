@@ -8,10 +8,7 @@ use Cms\Classes\Theme;
 use System\Classes\PluginBase;
 
 /**
- * Plugin for the modernized Pages editor, rebuilt on the Vue Editor module.
- *
- * The file-based data model and frontend components are preserved from the original for
- * drop-in compatibility; only the backend editing experience is modernized.
+ * Plugin Information File
  */
 class Plugin extends PluginBase
 {
@@ -40,7 +37,7 @@ class Plugin extends PluginBase
     }
 
     /**
-     * registerComponents used by the frontend, preserved for theme compatibility.
+     * registerComponents used by the frontend.
      */
     public function registerComponents()
     {
@@ -49,6 +46,17 @@ class Plugin extends PluginBase
             \RainLab\Pages\Components\StaticPage::class => 'staticPage',
             \RainLab\Pages\Components\StaticMenu::class => 'staticMenu',
             \RainLab\Pages\Components\StaticBreadcrumbs::class => 'staticBreadcrumbs'
+        ];
+    }
+
+    /**
+     * registerFormWidgets available for backend forms.
+     */
+    public function registerFormWidgets()
+    {
+        return [
+            \RainLab\Pages\FormWidgets\PagePicker::class => 'staticpagepicker',
+            \RainLab\Pages\FormWidgets\MenuPicker::class => 'staticmenupicker',
         ];
     }
 
@@ -95,7 +103,7 @@ class Plugin extends PluginBase
     }
 
     /**
-     * registerMarkupTags adds the staticPage filter, preserved for theme compatibility.
+     * registerMarkupTags adds the staticPage filter.
      */
     public function registerMarkupTags()
     {

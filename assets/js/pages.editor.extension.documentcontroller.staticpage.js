@@ -1,4 +1,6 @@
 import { DocumentControllerBase } from '../../../../../modules/editor/assets/js/editor.extension.documentcontroller.base.js';
+import { EditorCommand } from '../../../../../modules/editor/assets/js/editor.command.js';
+import { DocumentUri } from '../../../../../modules/editor/assets/js/editor.documenturi.js';
 
 export class DocumentControllerStaticPage extends DocumentControllerBase {
     get documentType() {
@@ -12,6 +14,47 @@ export class DocumentControllerStaticPage extends DocumentControllerBase {
     initListeners() {
         // Persist page order/nesting when a page is dragged in the navigator.
         this.on('pages:navigator-node-moved', this.onPageNodeMoved);
+        this.on('pages:navigator-context-menu-display', this.getNavigatorContextMenuItems);
+    }
+
+    getNavigatorContextMenuItems(commandObj, payload) {
+        const uri = DocumentUri.parse(payload.nodeData.uniqueKey);
+        if (!uri || uri.documentType !== this.documentType) {
+            return;
+        }
+
+        const userData = payload.nodeData.userData || {};
+        if (userData.topLevel || !userData.path) {
+            return;
+        }
+
+        payload.menuItems.push({
+            type: 'text',
+            icon: 'icon-create',
+            command: new EditorCommand('pages:create-document@' + this.documentType, {
+                parentFileName: userData.path,
+                parentUrl: userData.url
+            }),
+            label: this.trans('Add subpage') || 'Add subpage'
+        });
+    }
+
+    onBeforeDocumentCreated(commandObj, payload, documentData) {
+        const userData = commandObj.userData || {};
+        if (!userData.parentFileName) {
+            return;
+        }
+
+        // New subpages nest under their parent and preset the URL with the parent's.
+        documentData.metadata.parentFileName = userData.parentFileName;
+
+        const parentUrl = (userData.parentUrl || '').replace(/\/+$/, '');
+        if (parentUrl.length) {
+            documentData.document.url = parentUrl + '/';
+            if (documentData.document.settings) {
+                documentData.document.settings.url = parentUrl + '/';
+            }
+        }
     }
 
     beforeDocumentOpen(commandObj, nodeData) {

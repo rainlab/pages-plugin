@@ -72,8 +72,12 @@
     "Move down": "Move down",
     "Apply": "Apply",
     "Cancel": "Cancel",
-    "Error loading page": "Error loading page",
     "New Page": "New Page",
     "New Menu": "New Menu",
-    "New Content Block": "New Content Block"
+    "New Content Block": "New Content Block",
+    "Fields": "Fields",
+    "Preview": "Preview",
+    "Add subpage": "Add subpage",
+    "You don't have permissions to manage :type documents.": "You don't have permissions to manage :type documents.",
+    "Content files cannot be saved in the static pages directory.": "Content files cannot be saved in the static pages directory."
 }

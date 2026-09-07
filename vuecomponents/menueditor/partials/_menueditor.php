@@ -71,7 +71,7 @@
             </p>
         </div>
 
-        <!-- Edit Menu Item modal (hosts the legacy Form widget island). -->
+        <!-- Edit Menu Item modal (hosts the Form widget island). -->
         <div
             v-show="modalVisible"
             class="pages-menu-modal-overlay modal fade in show"

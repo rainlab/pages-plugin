@@ -47,11 +47,15 @@ class Router
     {
         $url = Str::lower(RouterHelper::normalizeUrl($url));
 
-        if (array_key_exists($url, self::$cache)) {
-            return self::$cache[$url];
+        // Request-level caches are keyed per theme and locale, matching the
+        // persistent cache, so iterating sites in one request stays correct.
+        $cacheKey = $this->getCacheKey('static-page-url-map');
+
+        if (isset(self::$cache[$cacheKey]) && array_key_exists($url, self::$cache[$cacheKey])) {
+            return self::$cache[$cacheKey][$url];
         }
 
-        $urlMap = $this->getUrlMap();
+        $urlMap = $this->getUrlMap($cacheKey);
         $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
 
         if (!array_key_exists($url, $urlMap)) {
@@ -67,35 +71,33 @@ class Router
              */
             $this->clearCache();
 
-            return self::$cache[$url] = Page::loadCached($this->theme, $fileName);
+            return self::$cache[$cacheKey][$url] = Page::loadCached($this->theme, $fileName);
         }
 
-        return self::$cache[$url] = $page;
+        return self::$cache[$cacheKey][$url] = $page;
     }
 
     /**
      * getUrlMap autoloads the URL map only allowing a single execution
      * @return array Returns the URL map.
      */
-    protected function getUrlMap()
+    protected function getUrlMap($cacheKey)
     {
-        if (!count(self::$urlMap)) {
-            $this->loadUrlMap();
+        if (empty(self::$urlMap[$cacheKey])) {
+            $this->loadUrlMap($cacheKey);
         }
 
-        return self::$urlMap;
+        return self::$urlMap[$cacheKey];
     }
 
     /**
      * loadUrlMap loads the URL map - a list of page file names and corresponding URL patterns
      * @return boolean Returns true if the URL map was loaded from the cache. Otherwise returns false.
      */
-    protected function loadUrlMap()
+    protected function loadUrlMap($cacheKey)
     {
-        $key = $this->getCacheKey('static-page-url-map');
-
         $cacheable = Config::get('cms.enable_route_cache', false);
-        $cached = $cacheable ? Cache::get($key, false) : false;
+        $cached = $cacheable ? Cache::get($cacheKey, false) : false;
 
         if (!$cached || ($unserialized = @unserialize($cached)) === false) {
             /*
@@ -128,18 +130,18 @@ class Router
                 $map['titles'][$file] = $page->getViewBag()->property('title');
             }
 
-            self::$urlMap = $map;
+            self::$urlMap[$cacheKey] = $map;
 
             if ($cacheable) {
                 $comboConfig = Config::get('cms.url_cache_ttl', 10);
                 $expiresAt = now()->addMinutes($comboConfig);
-                Cache::put($key, serialize($map), $expiresAt);
+                Cache::put($cacheKey, serialize($map), $expiresAt);
             }
 
             return false;
         }
 
-        self::$urlMap = $unserialized;
+        self::$urlMap[$cacheKey] = $unserialized;
 
         return true;
     }

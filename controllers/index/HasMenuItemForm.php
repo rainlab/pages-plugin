@@ -4,10 +4,10 @@ use RainLab\Pages\Classes\MenuItem;
 use RainLab\Pages\FormWidgets\MenuItemSearch;
 
 /**
- * HasMenuItemForm hosts the legacy per-menu-item Form widget island and its helpers.
+ * HasMenuItemForm hosts the per-menu-item Form widget island and its helpers.
  *
  * The per-item form is a real Backend\Widgets\Form bound to a MenuItem model so that
- * backend.form.extendFields keeps firing for third-party field extensions.
+ * backend.form.extendFields fires for third-party field extensions.
  */
 trait HasMenuItemForm
 {
@@ -55,6 +55,8 @@ trait HasMenuItemForm
      */
     public function onLoadMenuItemForm()
     {
+        $this->assertMenuPermissions();
+
         $widget = $this->makeMenuItemFormWidget();
 
         $containerId = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) post('containerId'));
@@ -72,6 +74,8 @@ trait HasMenuItemForm
      */
     public function onGetMenuItemTypeInfo()
     {
+        $this->assertMenuPermissions();
+
         $type = trim((string) post('type'));
 
         return [
@@ -84,6 +88,8 @@ trait HasMenuItemForm
      */
     public function onMenuItemReferenceSearch()
     {
+        $this->assertMenuPermissions();
+
         $alias = trim((string) post('alias'));
 
         $formField = new \Backend\Classes\FormField([
@@ -94,5 +100,15 @@ trait HasMenuItemForm
         $widget = new MenuItemSearch($this, $formField, ['alias' => $alias]);
 
         return $widget->onSearch();
+    }
+
+    /**
+     * assertMenuPermissions guards the menu item handlers.
+     */
+    protected function assertMenuPermissions()
+    {
+        if (!$this->user || !$this->user->hasAnyAccess(['rainlab.pages.manage_menus'])) {
+            throw new \ApplicationException(__("You don't have permissions to manage :type documents.", ['type' => 'menu']));
+        }
     }
 }

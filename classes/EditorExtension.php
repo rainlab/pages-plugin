@@ -1,5 +1,8 @@
 <?php namespace RainLab\Pages\Classes;
 
+use BackendAuth;
+use SystemException;
+use ApplicationException;
 use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Menu;
@@ -26,6 +29,12 @@ class EditorExtension extends ExtensionBase
     const ICON_COLOR_PAGE = '#6a70f2';
     const ICON_COLOR_MENU = '#e15b64';
     const ICON_COLOR_CONTENT = '#4f9d69';
+
+    const DOCUMENT_TYPE_PERMISSIONS = [
+        self::DOCUMENT_TYPE_PAGE => ['rainlab.pages.manage_pages'],
+        self::DOCUMENT_TYPE_MENU => ['rainlab.pages.manage_menus'],
+        self::DOCUMENT_TYPE_CONTENT => ['rainlab.pages.manage_content']
+    ];
 
     /**
      * @var string CONTEXT is the editor context this extension is hosted in - its own
@@ -59,11 +68,46 @@ class EditorExtension extends ExtensionBase
     }
 
     /**
+     * hasAccessToDocType returns true if the user can manage a document type.
+     */
+    public static function hasAccessToDocType($user, $documentType): bool
+    {
+        if (!array_key_exists($documentType, self::DOCUMENT_TYPE_PERMISSIONS)) {
+            throw new SystemException(sprintf('Unknown document type: %s', $documentType));
+        }
+
+        return $user && $user->hasAnyAccess(self::DOCUMENT_TYPE_PERMISSIONS[$documentType]);
+    }
+
+    /**
+     * assertDocumentTypePermissions guards a command against unauthorized access.
+     */
+    protected function assertDocumentTypePermissions($documentType)
+    {
+        if (!self::hasAccessToDocType(BackendAuth::getUser(), $documentType)) {
+            throw new ApplicationException(__("You don't have permissions to manage :type documents.", ['type' => $documentType]));
+        }
+    }
+
+    /**
+     * resolveRequestDocumentType normalizes a posted document type value.
+     */
+    protected function resolveRequestDocumentType($value): string
+    {
+        return in_array($value, [self::DOCUMENT_TYPE_MENU, self::DOCUMENT_TYPE_CONTENT], true)
+            ? $value
+            : self::DOCUMENT_TYPE_PAGE;
+    }
+
+    /**
      * command_onOpenDocument dispatches to the handler for the requested document type.
      */
     protected function command_onOpenDocument($controller)
     {
-        switch (array_get((array) post('documentData'), 'type')) {
+        $type = $this->resolveRequestDocumentType(array_get((array) post('documentData'), 'type'));
+        $this->assertDocumentTypePermissions($type);
+
+        switch ($type) {
             case self::DOCUMENT_TYPE_MENU:
                 return $this->openMenuDocument($controller);
             case self::DOCUMENT_TYPE_CONTENT:
@@ -78,7 +122,10 @@ class EditorExtension extends ExtensionBase
      */
     protected function command_onSaveDocument($controller)
     {
-        switch (array_get((array) post('documentMetadata'), 'type')) {
+        $type = $this->resolveRequestDocumentType(array_get((array) post('documentMetadata'), 'type'));
+        $this->assertDocumentTypePermissions($type);
+
+        switch ($type) {
             case self::DOCUMENT_TYPE_MENU:
                 return $this->saveMenuDocument($controller);
             case self::DOCUMENT_TYPE_CONTENT:
@@ -93,6 +140,8 @@ class EditorExtension extends ExtensionBase
      */
     protected function command_onPageStructureUpdate($controller)
     {
+        $this->assertDocumentTypePermissions(self::DOCUMENT_TYPE_PAGE);
+
         return $this->updatePageStructure($controller);
     }
 
@@ -101,7 +150,10 @@ class EditorExtension extends ExtensionBase
      */
     protected function command_onDeleteDocument($controller)
     {
-        switch (array_get((array) post('documentMetadata'), 'type')) {
+        $type = $this->resolveRequestDocumentType(array_get((array) post('documentMetadata'), 'type'));
+        $this->assertDocumentTypePermissions($type);
+
+        switch ($type) {
             case self::DOCUMENT_TYPE_MENU:
                 return $this->deleteMenuDocument($controller);
             case self::DOCUMENT_TYPE_CONTENT:
@@ -258,10 +310,12 @@ class EditorExtension extends ExtensionBase
             'editor::lang.common.toggle_document_header',
             // Plain-English strings the Vue editor components resolve via trans().
             'Add item',
+            'Add subpage',
             'Content',
             'Custom Fields',
             'Menu',
             'New menu item',
+            'Preview',
             'Static page',
         ];
     }
@@ -271,6 +325,7 @@ class EditorExtension extends ExtensionBase
      */
     public function listNavigatorSections(SectionList $sectionList, $documentType = null)
     {
+        $user = BackendAuth::getUser();
         $theme = Theme::getEditTheme();
 
         $section = $sectionList->addSection(__("Pages"), 'pages');
@@ -279,15 +334,24 @@ class EditorExtension extends ExtensionBase
 
         $this->addSectionMenuItems($section);
 
-        if (!$documentType || $documentType === self::DOCUMENT_TYPE_PAGE) {
+        if (
+            self::hasAccessToDocType($user, self::DOCUMENT_TYPE_PAGE) &&
+            (!$documentType || $documentType === self::DOCUMENT_TYPE_PAGE)
+        ) {
             $this->addPagesNavigatorNodes($section, $theme);
         }
 
-        if (!$documentType || $documentType === self::DOCUMENT_TYPE_MENU) {
+        if (
+            self::hasAccessToDocType($user, self::DOCUMENT_TYPE_MENU) &&
+            (!$documentType || $documentType === self::DOCUMENT_TYPE_MENU)
+        ) {
             $this->addMenusNavigatorNodes($section, $theme);
         }
 
-        if (!$documentType || $documentType === self::DOCUMENT_TYPE_CONTENT) {
+        if (
+            self::hasAccessToDocType($user, self::DOCUMENT_TYPE_CONTENT) &&
+            (!$documentType || $documentType === self::DOCUMENT_TYPE_CONTENT)
+        ) {
             $this->addContentNavigatorNodes($section, $theme);
         }
     }
@@ -382,8 +446,7 @@ class EditorExtension extends ExtensionBase
         $rootNode
             ->setDisplayMode(NodeDefinition::DISPLAY_MODE_TREE)
             ->setChildKeyPrefix(self::DOCUMENT_TYPE_PAGE.':')
-            // Pages can be dragged to reorder (sort) and re-nest (move), matching the
-            // original plugin's drag-tree. The reorder is persisted via command_onPageMove.
+            // Drag to reorder (sort) and re-nest (move), persisted via command_onPageStructureUpdate.
             ->setDragAndDropMode([NodeDefinition::DND_SORT, NodeDefinition::DND_MOVE])
             ->setUserData(['topLevel' => true]);
 
@@ -405,8 +468,12 @@ class EditorExtension extends ExtensionBase
 
             $node = $parentNode->addNode($title, $baseName);
             $node->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
-            // path drives the drag-move handler; it identifies which page moved where.
-            $node->setUserData(['path' => $baseName]);
+            // path drives the drag-move handler; url presets new subpage URLs.
+            $node->setUserData([
+                'path' => $baseName,
+                'url' => (string) $page->getViewBag()->property('url')
+            ]);
+            $node->setHasApiMenuItems(true);
 
             if ($pageInfo->subpages) {
                 $this->addPageTreeNodes($pageInfo->subpages, $node);
@@ -433,35 +500,43 @@ class EditorExtension extends ExtensionBase
      */
     protected function addSectionMenuItems($section)
     {
+        $user = BackendAuth::getUser();
+
         $section->addMenuItem(ItemDefinition::TYPE_TEXT, __("Refresh"), 'pages:refresh-navigator')
             ->setIcon('icon-refresh');
 
         $createMenuItem = new ItemDefinition(ItemDefinition::TYPE_TEXT, __("Add"), 'pages:create');
         $createMenuItem->setIcon('icon-create');
 
-        $createMenuItem->addItemObject(
-            $section->addCreateMenuItem(
-                ItemDefinition::TYPE_TEXT,
-                __("Page"),
-                'pages:create-document@'.self::DOCUMENT_TYPE_PAGE
-            )
-        );
+        if (self::hasAccessToDocType($user, self::DOCUMENT_TYPE_PAGE)) {
+            $createMenuItem->addItemObject(
+                $section->addCreateMenuItem(
+                    ItemDefinition::TYPE_TEXT,
+                    __("Page"),
+                    'pages:create-document@'.self::DOCUMENT_TYPE_PAGE
+                )
+            );
+        }
 
-        $createMenuItem->addItemObject(
-            $section->addCreateMenuItem(
-                ItemDefinition::TYPE_TEXT,
-                __("Menu"),
-                'pages:create-document@'.self::DOCUMENT_TYPE_MENU
-            )
-        );
+        if (self::hasAccessToDocType($user, self::DOCUMENT_TYPE_MENU)) {
+            $createMenuItem->addItemObject(
+                $section->addCreateMenuItem(
+                    ItemDefinition::TYPE_TEXT,
+                    __("Menu"),
+                    'pages:create-document@'.self::DOCUMENT_TYPE_MENU
+                )
+            );
+        }
 
-        $createMenuItem->addItemObject(
-            $section->addCreateMenuItem(
-                ItemDefinition::TYPE_TEXT,
-                __("Content block"),
-                'pages:create-document@'.self::DOCUMENT_TYPE_CONTENT
-            )
-        );
+        if (self::hasAccessToDocType($user, self::DOCUMENT_TYPE_CONTENT)) {
+            $createMenuItem->addItemObject(
+                $section->addCreateMenuItem(
+                    ItemDefinition::TYPE_TEXT,
+                    __("Content block"),
+                    'pages:create-document@'.self::DOCUMENT_TYPE_CONTENT
+                )
+            );
+        }
 
         if ($createMenuItem->hasItems()) {
             $section->addMenuItemObject($createMenuItem);

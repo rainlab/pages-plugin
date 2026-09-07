@@ -1,0 +1,12 @@
+name: 'All Pages'
+items:
+    -
+        title: 'All pages'
+        nesting: '0'
+        type: all-static-pages
+        url: ''
+        code: all
+        reference: ''
+        cmsPage: ''
+        replace: '1'
+        viewBag: {  }

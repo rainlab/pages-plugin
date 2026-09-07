@@ -1,0 +1,36 @@
+name: 'Main Menu'
+items:
+    -
+        title: Home
+        nesting: '0'
+        type: static-page
+        url: ''
+        code: home
+        reference: index
+        cmsPage: ''
+        replace: '0'
+        viewBag:
+            isHidden: '0'
+            locale:
+                fr:
+                    title: Accueil
+    -
+        title: About
+        nesting: '1'
+        type: static-page
+        url: ''
+        code: about
+        reference: about
+        cmsPage: ''
+        replace: '0'
+        viewBag: {  }
+    -
+        title: External
+        nesting: '0'
+        type: url
+        url: 'https://example.com'
+        code: external
+        reference: ''
+        cmsPage: ''
+        replace: '0'
+        viewBag: {  }

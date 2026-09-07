@@ -2,7 +2,9 @@
 
 use File;
 use Event;
+use Config;
 use SystemException;
+use ApplicationException;
 use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\EditorExtension;
@@ -62,10 +64,20 @@ trait HasContentCrud
 
         $fileName = (string) array_get($documentData, 'fileName');
         if (strlen($fileName)) {
+            // Static page storage is managed by the page document type.
+            if (preg_match('#^/?static-pages(-[^/]+)?(/|$)#', ltrim($fileName, '/'))) {
+                throw new ApplicationException(__("Content files cannot be saved in the static pages directory."));
+            }
+
             $content->fileName = $fileName;
         }
 
-        $content->markup = (string) array_get($documentData, 'markup');
+        $markup = (string) array_get($documentData, 'markup');
+        if (Config::get('system.convert_line_endings', false) === true) {
+            $markup = str_replace(["\r\n", "\r"], "\n", $markup);
+        }
+
+        $content->markup = $markup;
         $content->save();
 
         Event::fire('cms.template.save', [$controller, $content, 'content']);
@@ -106,9 +118,8 @@ trait HasContentCrud
 
     /**
      * contentLanguage maps a content file extension to an editor surface id.
-     *
-     * htm/html content blocks open in the WYSIWYG richeditor (parity with the original
-     * plugin); md uses the markdown editor; everything else is a plain code editor.
+     * htm/html opens in the richeditor, md in the markdown editor, everything
+     * else in a plain code editor.
      */
     protected function contentLanguage(string $extension): string
     {
