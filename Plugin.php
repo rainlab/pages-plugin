@@ -2,11 +2,9 @@
 
 use Event;
 use Backend;
-use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use Cms\Classes\Theme;
-use Cms\Classes\Controller as CmsController;
 use System\Classes\PluginBase;
 
 /**
@@ -109,101 +107,11 @@ class Plugin extends PluginBase
     }
 
     /**
-     * boot wires the frontend routing and rendering of static pages, preserved from the original.
+     * boot the plugin events.
      */
     public function boot()
     {
-        Event::listen('cms.router.beforeRoute', function($url) {
-            return Controller::instance()->initCmsPage($url);
-        });
-
-        Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
-            // Before twig renders
-            $twig = $controller->getTwig();
-            $loader = $controller->getLoader();
-            Controller::instance()->injectPageTwig($page, $loader, $twig);
-
-            // Get rendered content
-            $contents = Controller::instance()->getPageContents($page);
-            if ($contents && strlen($contents)) {
-                return $contents;
-            }
-        });
-
-        Event::listen('cms.block.render', function($blockName, $blockContents) {
-            $page = CmsController::getController()->getPage();
-
-            if (!isset($page->apiBag['staticPage'])) {
-                return;
-            }
-
-            $contents = Controller::instance()->getPlaceholderContents($page, $blockName, $blockContents);
-            if ($contents && strlen($contents)) {
-                return $contents;
-            }
-        });
-
-        Event::listen('cms.pageLookup.listTypes', function() {
-            return [
-                'static-page'      => 'Static page',
-                'all-static-pages' => ['label' => 'All static pages', 'nesting' => true]
-            ];
-        });
-
-        Event::listen('cms.pageLookup.getTypeInfo', function($type) {
-            if ($type == 'url') {
-                return [];
-            }
-
-            if ($type == 'static-page'|| $type == 'all-static-pages') {
-                return StaticPage::getMenuTypeInfo($type);
-            }
-        });
-
-        Event::listen('cms.pageLookup.resolveItem', function($type, $item, $url, $theme) {
-            if ($type == 'static-page' || $type == 'all-static-pages') {
-                return StaticPage::resolveMenuItem($item, $url, $theme);
-            }
-        });
-
-        Event::listen('cms.template.save', function($controller, $template, $type) {
-            Plugin::clearCache();
-        });
-
-        // Resolve translated static page URLs when switching sites via the site picker
-        Event::listen('cms.sitePicker.overridePattern', function($page, $pattern, $currentSite, $proposedSite) {
-            if (isset($page->apiBag['staticPage'])) {
-                $staticPage = $page->apiBag['staticPage'];
-
-                return $staticPage->getTranslatableUrl($proposedSite)
-                    ?: array_get($staticPage->attributes, 'viewBag.url');
-            }
-        });
-
-        Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
-            if ($template instanceof \Cms\Classes\Layout) {
-                $dataHolder->content = Controller::instance()->parseSyntaxFields($dataHolder->content);
-            }
-        });
-
-        Event::listen('backend.richeditor.listTypes', function () {
-            return [
-                'static-page' => 'Static page',
-            ];
-        });
-
-        Event::listen('backend.richeditor.getTypeInfo', function ($type) {
-            if ($type === 'static-page') {
-                return StaticPage::getRichEditorTypeInfo($type);
-            }
-        });
-
-        Event::listen('system.console.theme.sync.getAvailableModelClasses', function () {
-            return [
-                Classes\Menu::class,
-                Classes\Page::class,
-            ];
-        });
+        Event::subscribe(\RainLab\Pages\Classes\ExtendCmsModule::class);
     }
 
     /**
