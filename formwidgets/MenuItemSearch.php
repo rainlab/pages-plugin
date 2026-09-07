@@ -1,25 +1,18 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
 use Str;
-use Lang;
 use Input;
-use Request;
-use Response;
 use Backend\Classes\FormWidgetBase;
-use Cms\Classes\Theme;
 use RainLab\Pages\Classes\MenuItem;
 
 /**
- * Menu item reference search.
- *
- * @package october\backend
- * @author Alexey Bobkov, Samuel Georges
+ * MenuItemSearch is a form widget for searching menu item references.
  */
 class MenuItemSearch extends FormWidgetBase
 {
     use \Backend\Traits\SearchableWidget;
 
-    public $searchPlaceholderMessage = 'rainlab.pages::lang.menuitem.search_placeholder';
+    public $searchPlaceholderMessage = 'Search all references...';
 
     /**
      * Renders the widget.

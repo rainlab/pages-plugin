@@ -1,0 +1,197 @@
+/* Content-region tabs use the shared backend-tabs component with the
+   "primary" style (modules/backend/vuecomponents/tabs). No plugin CSS needed. */
+
+/* Edit Menu Item modal: reuses the standard backend popup markup (.modal-content /
+   .modal-header / .btn-close / .modal-footer) so it inherits the admin popup styling;
+   only the overlay positioning + footer layout are added here. */
+.pages-menu-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    overflow: auto;
+    background: rgba(0, 0, 0, .4);
+
+    .modal-dialog {
+        margin: 60px auto;
+        max-width: 640px;
+    }
+
+    .modal-content {
+        display: flex;
+        flex-direction: column;
+        max-height: calc(100vh - 120px);
+    }
+
+    .modal-header {
+        position: relative;
+    }
+
+    .modal-body {
+        flex: 1 1 auto;
+        overflow: auto;
+    }
+
+    .modal-footer {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 15px;
+        border-top: var(--oc-popup-border);
+    }
+
+    .pages-menu-modal-footer-spacer {
+        flex: 1 1 auto;
+    }
+
+    /* Keeps the modal body height stable while the item form loads. */
+    .pages-menu-modal-loading {
+        min-height: 220px;
+    }
+
+    .pages-menu-delete-btn:hover {
+        color: var(--oc-danger-color, #cc3300);
+    }
+}
+
+/* Menu editor: item list + item form panel. */
+.pages-menu-editor {
+    .menu-item-row {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .03));
+        }
+
+        &.selected {
+            background: var(--oc-primary-color, #6a70f2);
+            color: #fff;
+
+            .menu-item-subtitle {
+                color: rgba(255, 255, 255, .8);
+            }
+
+            .menu-item-actions {
+                opacity: 1;
+            }
+
+            /* Keep actions legible on the dark selected background. */
+            .menu-item-action {
+                color: rgba(255, 255, 255, .8);
+
+                &:hover {
+                    background: rgba(255, 255, 255, .18);
+                    color: #fff;
+                }
+            }
+        }
+
+        &:hover .menu-item-actions {
+            opacity: 1;
+        }
+
+        /* Drop cues (mirror the sidebar page tree). before/after = a drop line to
+           reorder; inside = a border around the row you'd nest into. */
+        &.drop-before::before,
+        &.drop-after::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--oc-primary-color, #6a70f2);
+        }
+
+        &.drop-before::before {
+            top: -1px;
+        }
+
+        &.drop-after::after {
+            bottom: -1px;
+        }
+
+        &.drop-inside {
+            border-color: var(--oc-primary-color, #6a70f2);
+            background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
+        }
+    }
+
+    .menu-item-icon {
+        flex: 0 0 auto;
+        width: 18px;
+        text-align: center;
+        opacity: .7;
+    }
+
+    .menu-item-drag {
+        flex: 0 0 auto;
+        cursor: grab;
+        opacity: .35;
+    }
+
+    .menu-item-label {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .menu-item-title {
+        display: block;
+        font-size: 14px;
+        line-height: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .menu-item-subtitle {
+        display: block;
+        font-size: 12px;
+        line-height: 15px;
+        color: var(--oc-text-muted-color, #97a1ab);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Flat, subtle icon actions matching the editor toolbar (transparent, muted icon,
+       light hover), revealed on row hover to keep the list clean at rest. */
+    .menu-item-actions {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity .12s;
+    }
+
+    .menu-item-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        border: none;
+        border-radius: 4px;
+        background: transparent;
+        color: var(--oc-text-muted, #72809d);
+        font-size: 13px;
+        cursor: pointer;
+        box-shadow: none;
+
+        &:hover {
+            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .06));
+            color: var(--oc-text-color, #33414f);
+        }
+
+        &.menu-item-action-danger:hover {
+            color: var(--oc-danger-color, #cc3300);
+        }
+    }
+}

@@ -17,17 +17,20 @@ class MenuPicker extends FormWidgetBase
     {
         $this->prepareVars();
 
-        return $this->makePartial('~/modules/backend/widgets/form/partials/_field_dropdown.htm');
+        return $this->makePartial('~/modules/backend/widgets/form/partials/_field_dropdown.php');
     }
 
     /**
-     * Prepares the view data
+     * prepareVars for display
      */
     public function prepareVars()
     {
         $this->vars['field'] = $this->makeFormField();
     }
 
+    /**
+     * makeFormField as a dropdown listing the theme menus
+     */
     protected function makeFormField(): FormField
     {
         $field = clone $this->formField;
@@ -37,6 +40,9 @@ class MenuPicker extends FormWidgetBase
         return $field;
     }
 
+    /**
+     * getOptions for the dropdown
+     */
     protected function getOptions(): array
     {
         return Menu::listInTheme(Theme::getEditTheme(), true)

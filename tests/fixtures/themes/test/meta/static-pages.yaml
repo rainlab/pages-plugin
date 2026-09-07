@@ -1,0 +1,6 @@
+static-pages:
+    index: {  }
+    about:
+        about-team: {  }
+    hidden-page: {  }
+    sidebar-page: {  }

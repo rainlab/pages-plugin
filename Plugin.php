@@ -2,26 +2,43 @@
 
 use Event;
 use Backend;
-use RainLab\Pages\Classes\Controller;
 use RainLab\Pages\Classes\Page as StaticPage;
 use RainLab\Pages\Classes\Router;
 use Cms\Classes\Theme;
-use Cms\Classes\Controller as CmsController;
 use System\Classes\PluginBase;
 
+/**
+ * Plugin Information File
+ */
 class Plugin extends PluginBase
 {
+    /**
+     * register the Editor extension for the backend Pages editor.
+     */
+    public function register()
+    {
+        Event::listen('editor.extension.register', function () {
+            return \RainLab\Pages\Classes\EditorExtension::class;
+        });
+    }
+
+    /**
+     * pluginDetails returns information about this plugin.
+     */
     public function pluginDetails()
     {
         return [
-            'name' => 'rainlab.pages::lang.plugin.name',
-            'description' => 'rainlab.pages::lang.plugin.description',
+            'name' => 'Pages',
+            'description' => 'Pages & menus features.',
             'author' => 'Alexey Bobkov, Samuel Georges',
             'icon' => 'icon-files-o',
             'homepage' => 'https://github.com/rainlab/pages-plugin'
         ];
     }
 
+    /**
+     * registerComponents used by the frontend.
+     */
     public function registerComponents()
     {
         return [
@@ -32,169 +49,61 @@ class Plugin extends PluginBase
         ];
     }
 
+    /**
+     * registerFormWidgets available for backend forms.
+     */
+    public function registerFormWidgets()
+    {
+        return [
+            \RainLab\Pages\FormWidgets\PagePicker::class => 'staticpagepicker',
+            \RainLab\Pages\FormWidgets\MenuPicker::class => 'staticmenupicker',
+        ];
+    }
+
+    /**
+     * registerPermissions available for backend users.
+     */
     public function registerPermissions()
     {
         return [
             'rainlab.pages.manage_pages' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
+                'tab'   => 'Pages',
                 'order' => 200,
-                'label' => 'rainlab.pages::lang.page.manage_pages'
+                'label' => 'Manage static pages'
             ],
             'rainlab.pages.manage_menus' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
+                'tab'   => 'Pages',
                 'order' => 200,
-                'label' => 'rainlab.pages::lang.page.manage_menus'
-                ],
+                'label' => 'Manage static menus'
+            ],
             'rainlab.pages.manage_content' => [
-                'tab'   => 'rainlab.pages::lang.page.tab',
+                'tab'   => 'Pages',
                 'order' => 200,
-                'label' => 'rainlab.pages::lang.page.manage_content'
+                'label' => 'Manage static content'
             ]
         ];
     }
 
+    /**
+     * registerNavigation for the backend, a single item hosting the Vue Editor shell.
+     */
     public function registerNavigation()
     {
         return [
             'pages' => [
-                'label'       => 'rainlab.pages::lang.plugin.name',
-                'url'         => Backend::url('rainlab/pages'),
+                'label'       => 'Pages',
+                'url'         => Backend::url('rainlab/pages/index'),
                 'icon'        => 'icon-files-o',
                 'iconSvg'     => 'plugins/rainlab/pages/assets/images/pages-icon.svg',
                 'permissions' => ['rainlab.pages.*'],
                 'order'       => 200,
-                'useDropdown' => false,
-
-                'sideMenu' => [
-                    'pages' => [
-                        'label'       => 'rainlab.pages::lang.page.menu_label',
-                        'icon'        => 'icon-files-o',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'pages'],
-                        'permissions' => ['rainlab.pages.manage_pages']
-                    ],
-                    'menus' => [
-                        'label'       => 'rainlab.pages::lang.menu.menu_label',
-                        'icon'        => 'icon-sitemap',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'menus'],
-                        'permissions' => ['rainlab.pages.manage_menus']
-                    ],
-                    'content' => [
-                        'label'       => 'rainlab.pages::lang.content.menu_label',
-                        'icon'        => 'icon-file-text-o',
-                        'url'         => 'javascript:;',
-                        'attributes'  => ['data-menu-item'=>'content'],
-                        'permissions' => ['rainlab.pages.manage_content']
-                    ]
-                ]
+                'useDropdown' => false
             ]
         ];
     }
 
-    public function registerFormWidgets()
-    {
-        return [
-            FormWidgets\PagePicker::class => 'staticpagepicker',
-            FormWidgets\MenuPicker::class => 'staticmenupicker',
-        ];
-    }
-
-    public function boot()
-    {
-        Event::listen('cms.router.beforeRoute', function($url) {
-            return Controller::instance()->initCmsPage($url);
-        });
-
-        Event::listen('cms.page.beforeRenderPage', function($controller, $page) {
-            // Before twig renders
-            $twig = $controller->getTwig();
-            $loader = $controller->getLoader();
-            Controller::instance()->injectPageTwig($page, $loader, $twig);
-
-            // Get rendered content
-            $contents = Controller::instance()->getPageContents($page);
-            if ($contents && strlen($contents)) {
-                return $contents;
-            }
-        });
-
-        Event::listen('cms.block.render', function($blockName, $blockContents) {
-            $page = CmsController::getController()->getPage();
-
-            if (!isset($page->apiBag['staticPage'])) {
-                return;
-            }
-
-            $contents = Controller::instance()->getPlaceholderContents($page, $blockName, $blockContents);
-            if ($contents && strlen($contents)) {
-                return $contents;
-            }
-        });
-
-        Event::listen('cms.pageLookup.listTypes', function() {
-            return [
-                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
-                'all-static-pages' => ['rainlab.pages::lang.menuitem.all_static_pages', true]
-            ];
-        });
-
-        Event::listen('pages.menuitem.listTypes', function() {
-            return [
-                'static-page'      => 'rainlab.pages::lang.menuitem.static_page',
-                'all-static-pages' => 'rainlab.pages::lang.menuitem.all_static_pages'
-            ];
-        });
-
-        Event::listen(['cms.pageLookup.getTypeInfo', 'pages.menuitem.getTypeInfo'], function($type) {
-            if ($type == 'url') {
-                return [];
-            }
-
-            if ($type == 'static-page'|| $type == 'all-static-pages') {
-                return StaticPage::getMenuTypeInfo($type);
-            }
-        });
-
-        Event::listen(['cms.pageLookup.resolveItem', 'pages.menuitem.resolveItem'], function($type, $item, $url, $theme) {
-            if ($type == 'static-page' || $type == 'all-static-pages') {
-                return StaticPage::resolveMenuItem($item, $url, $theme);
-            }
-        });
-
-        Event::listen('cms.template.save', function($controller, $template, $type) {
-            Plugin::clearCache();
-        });
-
-        Event::listen('cms.template.processTwigContent', function($template, $dataHolder) {
-            if ($template instanceof \Cms\Classes\Layout) {
-                $dataHolder->content = Controller::instance()->parseSyntaxFields($dataHolder->content);
-            }
-        });
-
-        Event::listen('backend.richeditor.listTypes', function () {
-            return [
-                'static-page' => 'rainlab.pages::lang.menuitem.static_page',
-            ];
-        });
-
-        Event::listen('backend.richeditor.getTypeInfo', function ($type) {
-            if ($type === 'static-page') {
-                return StaticPage::getRichEditorTypeInfo($type);
-            }
-        });
-
-        Event::listen('system.console.theme.sync.getAvailableModelClasses', function () {
-            return [
-                Classes\Menu::class,
-                Classes\Page::class,
-            ];
-        });
-    }
-
     /**
-     * Register new Twig variables
-     * @return array
+     * registerMarkupTags adds the staticPage filter.
      */
     public function registerMarkupTags()
     {
@@ -205,6 +114,17 @@ class Plugin extends PluginBase
         ];
     }
 
+    /**
+     * boot the plugin events.
+     */
+    public function boot()
+    {
+        Event::subscribe(\RainLab\Pages\Classes\ExtendCmsModule::class);
+    }
+
+    /**
+     * clearCache flushes the router and menu caches for the edit theme.
+     */
     public static function clearCache()
     {
         $theme = Theme::getEditTheme();
@@ -213,6 +133,5 @@ class Plugin extends PluginBase
         $router->clearCache();
 
         StaticPage::clearMenuCache($theme);
-        // SnippetManager::clearCache($theme);
     }
 }

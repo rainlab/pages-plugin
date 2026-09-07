@@ -1,17 +1,18 @@
 <?php namespace RainLab\Pages\FormWidgets;
 
-use Backend\Classes\FormWidgetBase;
 use Cms\Classes\Theme;
+use Backend\Classes\FormField;
+use Backend\Classes\FormWidgetBase;
 use RainLab\Pages\Classes\Page;
 
 /**
- * Static page picker widget
- *
- * @package october\backend
- * @author Alexey Bobkov, Samuel Georges
+ * PagePicker allows the user to pick from available static pages
  */
 class PagePicker extends FormWidgetBase
 {
+    /**
+     * @var string indent for nested pages
+     */
     protected $indent = '&nbsp;&nbsp;&nbsp;';
 
     /**
@@ -20,11 +21,12 @@ class PagePicker extends FormWidgetBase
     public function render()
     {
         $this->prepareVars();
-        return $this->makePartial('~/modules/backend/widgets/form/partials/_field_dropdown.htm');
+
+        return $this->makePartial('~/modules/backend/widgets/form/partials/_field_dropdown.php');
     }
 
     /**
-     * Prepares the view data
+     * prepareVars for display
      */
     public function prepareVars()
     {
@@ -32,9 +34,9 @@ class PagePicker extends FormWidgetBase
     }
 
     /**
-     * @return \Backend\Classes\FormField
+     * makeFormField as a dropdown listing the page hierarchy
      */
-    protected function makeFormField()
+    protected function makeFormField(): FormField
     {
         $field = clone $this->formField;
         $field->type = 'dropdown';
@@ -42,15 +44,13 @@ class PagePicker extends FormWidgetBase
         $tree = Page::buildMenuTree(Theme::getEditTheme());
         $indent = $field->getConfig('indent', $this->indent);
 
-        // Flatten page tree for dropdown options
         $options = [];
         $iterator = function($items, $depth = 0) use (&$iterator, &$tree, &$options, $indent) {
-
             foreach ($items as $code) {
                 $itemData = $tree[$code];
                 $options[$code] = str_repeat($indent, $depth) . $itemData['title'];
                 if (!empty($itemData['items'])) {
-                    $iterator($itemData['items'], $depth+1);
+                    $iterator($itemData['items'], $depth + 1);
                 }
             }
 

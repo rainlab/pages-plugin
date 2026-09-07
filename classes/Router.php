@@ -1,6 +1,6 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Lang;
+use Site;
 use Cache;
 use Event;
 use Config;
@@ -10,30 +10,27 @@ use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
 
 /**
- * A router for static pages.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * Router for static pages.
  */
 class Router
 {
     /**
-     * @var \Cms\Classes\Theme A reference to the CMS theme containing the object.
+     * @var \Cms\Classes\Theme theme reference containing the object
      */
     protected $theme;
 
     /**
-     * @var array Contains the URL map - the list of page file names and corresponding URL patterns.
+     * @var array urlMap of page file names and corresponding URL patterns
      */
     private static $urlMap = [];
 
     /**
-     * @var array Request-level cache
+     * @var array cache is a request-level cache
      */
     private static $cache = [];
 
     /**
-     * Creates the router instance.
+     * __construct creates the router instance
      * @param \Cms\Classes\Theme $theme Specifies the theme being processed.
      */
     public function __construct(Theme $theme)
@@ -42,19 +39,23 @@ class Router
     }
 
     /**
-     * Finds a static page by its URL.
+     * findByUrl finds a static page by its URL
      * @param string $url The requested URL string.
-     * @return \RainLab\Pages\Classes\Page Returns \RainLab\Pages\Classes\Page object or null if the page cannot be found.
+     * @return \RainLab\Pages\Classes\Page Returns the page object or null if the page cannot be found.
      */
     public function findByUrl($url)
     {
         $url = Str::lower(RouterHelper::normalizeUrl($url));
 
-        if (array_key_exists($url, self::$cache)) {
-            return self::$cache[$url];
+        // Request-level caches are keyed per theme and locale, matching the
+        // persistent cache, so iterating sites in one request stays correct.
+        $cacheKey = $this->getCacheKey('static-page-url-map');
+
+        if (isset(self::$cache[$cacheKey]) && array_key_exists($url, self::$cache[$cacheKey])) {
+            return self::$cache[$cacheKey][$url];
         }
 
-        $urlMap = $this->getUrlMap();
+        $urlMap = $this->getUrlMap($cacheKey);
         $urlMap = array_key_exists('urls', $urlMap) ? $urlMap['urls'] : [];
 
         if (!array_key_exists($url, $urlMap)) {
@@ -70,38 +71,33 @@ class Router
              */
             $this->clearCache();
 
-            return self::$cache[$url] = Page::loadCached($this->theme, $fileName);
+            return self::$cache[$cacheKey][$url] = Page::loadCached($this->theme, $fileName);
         }
 
-        return self::$cache[$url] = $page;
+        return self::$cache[$cacheKey][$url] = $page;
     }
 
     /**
-     * Autoloads the URL map only allowing a single execution.
+     * getUrlMap autoloads the URL map only allowing a single execution
      * @return array Returns the URL map.
      */
-    protected function getUrlMap()
+    protected function getUrlMap($cacheKey)
     {
-        if (!count(self::$urlMap)) {
-            $this->loadUrlMap();
+        if (empty(self::$urlMap[$cacheKey])) {
+            $this->loadUrlMap($cacheKey);
         }
 
-        return self::$urlMap;
+        return self::$urlMap[$cacheKey];
     }
 
     /**
-     * Loads the URL map - a list of page file names and corresponding URL patterns.
-     * The URL map can is cached. The clearUrlMap() method resets the cache. By default
-     * the map is updated every time when a page is saved in the back-end, or
-     * when the interval defined with the cms.urlCacheTtl expires.
+     * loadUrlMap loads the URL map - a list of page file names and corresponding URL patterns
      * @return boolean Returns true if the URL map was loaded from the cache. Otherwise returns false.
      */
-    protected function loadUrlMap()
+    protected function loadUrlMap($cacheKey)
     {
-        $key = $this->getCacheKey('static-page-url-map');
-
         $cacheable = Config::get('cms.enable_route_cache', false);
-        $cached = $cacheable ? Cache::get($key, false) : false;
+        $cached = $cacheable ? Cache::get($cacheKey, false) : false;
 
         if (!$cached || ($unserialized = @unserialize($cached)) === false) {
             /*
@@ -120,7 +116,8 @@ class Router
                     continue;
                 }
 
-                $url = $page->getViewBag()->property('url');
+                // Prefer the translated URL for the active site, if any
+                $url = $page->getTranslatableUrl() ?: $page->getViewBag()->property('url');
                 if (!$url) {
                     continue;
                 }
@@ -133,30 +130,40 @@ class Router
                 $map['titles'][$file] = $page->getViewBag()->property('title');
             }
 
-            self::$urlMap = $map;
+            self::$urlMap[$cacheKey] = $map;
 
             if ($cacheable) {
                 $comboConfig = Config::get('cms.url_cache_ttl', 10);
                 $expiresAt = now()->addMinutes($comboConfig);
-                Cache::put($key, serialize($map), $expiresAt);
+                Cache::put($cacheKey, serialize($map), $expiresAt);
             }
 
             return false;
         }
 
-        self::$urlMap = $unserialized;
+        self::$urlMap[$cacheKey] = $unserialized;
 
         return true;
     }
 
     /**
-     * Returns the caching URL key depending on the theme.
+     * getCacheKey returns the caching URL key depending on the theme
      * @param string $keyName Specifies the base key name.
      * @return string Returns the theme-specific key name.
      */
-    protected function getCacheKey($keyName)
+    protected function getCacheKey($keyName, $locale = null)
     {
         $key = crc32($this->theme->getPath()).$keyName;
+
+        // URL maps hold translated URLs, cache them per locale
+        if ($locale === null && Site::hasMultiSite()) {
+            $locale = Site::getActiveSite()?->hard_locale;
+        }
+
+        if ($locale) {
+            $key .= '-'.$locale;
+        }
+
         /**
          * @event pages.router.getCacheKey
          * Enables modifying the key used to reference cached RainLab.Pages routes
@@ -173,12 +180,21 @@ class Router
     }
 
     /**
-     * Clears the router cache.
+     * clearCache clears the router cache
      */
     public function clearCache()
     {
         self::$cache = [];
         self::$urlMap = [];
         Cache::forget($this->getCacheKey('static-page-url-map'));
+
+        // Clear every locale's map
+        if (Site::hasMultiSite()) {
+            foreach (Site::listSites() as $site) {
+                if ($site->hard_locale) {
+                    Cache::forget($this->getCacheKey('static-page-url-map', $site->hard_locale));
+                }
+            }
+        }
     }
 }

@@ -2,39 +2,40 @@
 
 use Cms\Classes\ComponentBase;
 
+/**
+ * ChildPages component displays a list of child pages for the current page.
+ */
 class ChildPages extends ComponentBase
 {
     /**
-     * @var \RainLab\Pages\Components\StaticPage A reference to the static page component
+     * @var \RainLab\Pages\Components\StaticPage staticPageComponent reference
      */
     protected $staticPageComponent;
 
     /**
-     * @var array Array of \RainLab\Pages\Classes\Page references to the child static page objects for the current page
+     * @var array childPages references to the child static page objects for the current page
      */
     protected $childPages;
 
     /**
-     * @var array Child pages data
-     * [
-     *      'url' => '',
-     *      'title' => '',
-     *      'page' => \RainLab\Pages\Classes\Page,
-     *      'viewBag' => array,
-     *      'is_hidden' => bool,
-     *      'navigation_hidden' => bool,
-     * ]
+     * @var array pages data for each child page
      */
     public $pages = [];
 
+    /**
+     * componentDetails
+     */
     public function componentDetails()
     {
         return [
-            'name'        => 'rainlab.pages::lang.component.child_pages_name',
-            'description' => 'rainlab.pages::lang.component.child_pages_description'
+            'name'        => 'Child pages',
+            'description' => 'Displays a list of child pages for the current page'
         ];
     }
 
+    /**
+     * onRun
+     */
     public function onRun()
     {
         // Check if the staticPage component is attached to the rendering template

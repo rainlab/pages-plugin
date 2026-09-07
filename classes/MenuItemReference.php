@@ -1,53 +1,49 @@
 <?php namespace RainLab\Pages\Classes;
 
 /**
- * MenuItemReference represents a front-end menu item.
- * This class is used on the front-end.
+ * MenuItemReference represents a front-end menu item, used on the front-end.
  * In the back-end items are represented with the
  * \RainLab\Pages\Classes\MenuItem objects.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
  */
 class MenuItemReference
 {
     /**
-     * @var string Specifies the menu item type.
+     * @var string type specifies the menu item type.
      */
     public $type;
 
     /**
-     * @var string Specifies the item title
+     * @var string title specifies the item title.
      */
     public $title;
 
     /**
-     * @var string Specifies the item URL
+     * @var string url specifies the item URL.
      */
     public $url;
 
     /**
-     * @var string Specifies the menu item code.
+     * @var string code specifies the menu item code.
      */
     public $code;
 
     /**
-     * @var string Indicates whether the item corresponds the currently viewed page.
+     * @var bool isActive indicates whether the item corresponds to the currently viewed page.
      */
     public $isActive = false;
 
     /**
-     * @var string Indicates whether an item subitem corresponds the currently viewed page.
+     * @var bool isChildActive indicates whether a subitem corresponds to the currently viewed page.
      */
     public $isChildActive = false;
 
     /**
-     * @var array Specifies the item subitems
+     * @var array items specifies the item subitems.
      */
     public $items = [];
 
     /**
-     * @var array Specifies the item custom view bag properties.
+     * @var array viewBag specifies the item custom view bag properties.
      */
     public $viewBag = [];
 

@@ -6,67 +6,73 @@ use RainLab\Pages\Classes\Router;
 use Cms\Models\MaintenanceSetting;
 
 /**
- * The static page component.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * StaticPage component outputs a static page in a CMS layout.
  */
 class StaticPage extends ComponentBase
 {
     /**
-     * @var \RainLab\Pages\Classes\Page A reference to the static page object
+     * @var \RainLab\Pages\Classes\Page pageObject reference to the static page object
      */
     public $pageObject;
 
     /**
-     * @var string The static page title
+     * @var string title of the static page
      */
     public $title;
 
     /**
-     * @var array Extra data added by syntax fields.
+     * @var array extraData added by syntax fields
      */
     public $extraData = [];
 
     /**
-     * @var string Content cache.
+     * @var string contentCached
      */
     protected $contentCached = false;
 
+    /**
+     * componentDetails
+     */
     public function componentDetails()
     {
         return [
-            'name'        => 'rainlab.pages::lang.component.static_page_name',
-            'description' => 'rainlab.pages::lang.component.static_page_description'
+            'name'        => 'Static page',
+            'description' => 'Outputs a static page in a CMS layout.'
         ];
     }
 
+    /**
+     * defineProperties
+     */
     public function defineProperties()
     {
         return [
             'useContent' => [
-                'title'             => 'rainlab.pages::lang.component.static_page_use_content_name',
-                'description'       => 'rainlab.pages::lang.component.static_page_use_content_description',
+                'title'             => 'Use page content field',
+                'description'       => 'If unchecked, the content section will not appear when editing the static page. Page content will be determined solely through placeholders and variables.',
                 'default'           => 1,
                 'type'              => 'checkbox',
                 'showExternalParam' => false
             ],
             'default' => [
-                'title'             => 'rainlab.pages::lang.component.static_page_default_name',
-                'description'       => 'rainlab.pages::lang.component.static_page_default_description',
+                'title'             => 'Default layout',
+                'description'       => 'Defines this layout as the default for new pages',
                 'default'           => 0,
                 'type'              => 'checkbox',
                 'showExternalParam' => false
             ],
             'childLayout' => [
-                'title'             => 'rainlab.pages::lang.component.static_page_child_layout_name',
-                'description'       => 'rainlab.pages::lang.component.static_page_child_layout_description',
+                'title'             => 'Subpage layout',
+                'description'       => 'The layout to use as the default for any new subpages',
                 'type'              => 'string',
                 'showExternalParam' => false
             ]
         ];
     }
 
+    /**
+     * onRun
+     */
     public function onRun()
     {
         $url = $this->getRouter()->getUrl();
@@ -88,21 +94,33 @@ class StaticPage extends ComponentBase
         }
     }
 
+    /**
+     * page returns the static page object
+     */
     public function page()
     {
         return $this->pageObject;
     }
 
+    /**
+     * parent returns the parent static page
+     */
     public function parent()
     {
         return $this->pageObject ? $this->pageObject->getParent() : null;
     }
 
+    /**
+     * children returns the child static pages
+     */
     public function children()
     {
         return $this->pageObject ? $this->pageObject->getChildren() : null;
     }
 
+    /**
+     * content returns the processed page markup
+     */
     public function content()
     {
         // Evaluate the content property only when it's requested in the
@@ -122,8 +140,7 @@ class StaticPage extends ComponentBase
     }
 
     /**
-     * Find foreign view bag values and add them to
-     * the component and page vars.
+     * defineExtraData finds foreign view bag values and adds them to the component and page vars.
      */
     protected function defineExtraData()
     {
@@ -167,9 +184,8 @@ class StaticPage extends ComponentBase
     }
 
     /**
-     * Implements the getter functionality.
+     * __get implements the getter functionality for extra data.
      * @param  string  $name
-     * @return void
      */
     public function __get($name)
     {
@@ -181,9 +197,8 @@ class StaticPage extends ComponentBase
     }
 
     /**
-     * Determine if an attribute exists on the object.
+     * __isset determines if an extra data attribute exists.
      * @param  string  $key
-     * @return void
      */
     public function __isset($key)
     {

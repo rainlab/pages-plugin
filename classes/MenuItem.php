@@ -1,36 +1,32 @@
 <?php namespace RainLab\Pages\Classes;
 
-use Event;
+use Cms\Models\PageLookupItem;
 
 /**
- * MenuItem represents a menu item.
- * This class is used in the back-end for managing the menu items.
+ * MenuItem represents a menu item, used in the back-end for managing the menu items.
  * On the front-end items are represented with the
  * \RainLab\Pages\Classes\MenuItemReference objects.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
  */
 class MenuItem
 {
     /**
-     * @var string Specifies the menu title
+     * @var string title specifies the menu title.
      */
     public $title;
 
     /**
-     * @var array Specifies the item subitems
+     * @var array items specifies the item subitems.
      */
     public $items = [];
 
     /**
-     * @var string Specifies the parent menu item.
-     * An object of the RainLab\Pages\Classes\MenuItem class or null.
+     * @var mixed parent specifies the parent menu item.
+     * An object of the \RainLab\Pages\Classes\MenuItem class or null.
      */
     public $parent;
 
     /**
-     * @var boolean Determines whether the auto-generated menu items could have subitems.
+     * @var bool nesting determines whether the auto-generated menu items could have subitems.
      */
     public $nesting;
 
@@ -40,41 +36,44 @@ class MenuItem
     public $sites = false;
 
     /**
-     * @var string Specifies the menu item type - URL, static page, etc.
+     * @var string type specifies the menu item type - URL, static page, etc.
      */
     public $type = 'url';
 
     /**
-     * @var string Specifies the URL for URL-type items.
+     * @var string url specifies the URL for URL-type items.
      */
     public $url;
 
     /**
-     * @var string Specifies the menu item code.
+     * @var string code specifies the menu item code.
      */
     public $code;
 
     /**
-     * @var string Specifies the object identifier the item refers to.
+     * @var string reference specifies the object identifier the item refers to.
      * The identifier could be the database identifier or an object code.
      */
     public $reference;
 
     /**
-     * @var boolean Indicates that generated items should replace this item.
+     * @var bool replace indicates that generated items should replace this item.
      */
     public $replace;
 
     /**
-     * @var string Specifies the CMS page path to resolve dynamic menu items to.
+     * @var string cmsPage specifies the CMS page path to resolve dynamic menu items to.
      */
     public $cmsPage;
 
     /**
-     * @var boolean Used by the system internally.
+     * @var bool exists is used by the system internally.
      */
     public $exists = false;
 
+    /**
+     * @var array fillable attributes for this menu item.
+     */
     public $fillable = [
         'title',
         'nesting',
@@ -88,8 +87,7 @@ class MenuItem
     ];
 
     /**
-     * @var array Contains the view bag properties.
-     * This property is used by the menu editor internally.
+     * @var array viewBag contains the view bag properties, used by the menu editor internally.
      */
     public $viewBag = [];
 
@@ -99,9 +97,9 @@ class MenuItem
     public $attributes = [];
 
     /**
-     * Initializes a menu item from a data array.
+     * initFromArray initializes a menu item from a data array
      * @param array $items Specifies the menu item data.
-     * @return Returns an array of the MenuItem objects.
+     * @return array Returns an array of the MenuItem objects.
      */
     public static function initFromArray($items)
     {
@@ -128,7 +126,9 @@ class MenuItem
     }
 
     /**
-     * Returns a list of registered menu item types
+     * getTypeOptions returns a list of registered menu item types, sourced from
+     * the shared page lookup system (cms.pageLookup.listTypes), which normalizes
+     * nesting flags and filters out types with no available CMS pages.
      * @return array Returns an array of registered item types
      */
     public function getTypeOptions($keyValue = null)
@@ -141,71 +141,38 @@ class MenuItem
             'header' => 'Header',
         ];
 
-        $apiResult = Event::fire('pages.menuitem.listTypes');
-
-        if (is_array($apiResult)) {
-            foreach ($apiResult as $typeList) {
-                if (!is_array($typeList)) {
-                    continue;
-                }
-
-                foreach ($typeList as $typeCode => $typeName) {
-                    $result[$typeCode] = $typeName;
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    public function getCmsPageOptions($keyValue = null)
-    {
-        return []; // CMS Pages are loaded client-side
-    }
-
-    public function getReferenceOptions($keyValue = null)
-    {
-        return []; // References are loaded client-side
-    }
-
-    public static function getTypeInfo($type)
-    {
-        $result = [];
-        $apiResult = Event::fire('pages.menuitem.getTypeInfo', [$type]);
-
-        if (is_array($apiResult)) {
-            foreach ($apiResult as $typeInfo) {
-                if (!is_array($typeInfo)) {
-                    continue;
-                }
-
-                foreach ($typeInfo as $name => $value) {
-                    if ($name == 'cmsPages') {
-                        $cmsPages = [];
-
-                        foreach ($value as $page) {
-                            $baseName = $page->getBaseFileName();
-                            $pos = strrpos($baseName, '/');
-
-                            $dir = $pos !== false ? substr($baseName, 0, $pos).' / ' : null;
-                            $cmsPages[$baseName] = strlen($page->title)
-                                ? $dir.$page->title
-                                : $baseName;
-                        }
-
-                        $value = $cmsPages;
-                    }
-
-                    $result[$name] = $value;
-                }
-            }
-        }
+        $result += (new PageLookupItem)->getTypeOptions();
 
         return $result;
     }
 
     /**
-     * Converts the menu item data to an array
+     * getCmsPageOptions returns options for the CMS page dropdown
+     */
+    public function getCmsPageOptions($keyValue = null)
+    {
+        return []; // CMS Pages are loaded client-side
+    }
+
+    /**
+     * getReferenceOptions returns options for the reference dropdown
+     */
+    public function getReferenceOptions($keyValue = null)
+    {
+        return []; // References are loaded client-side
+    }
+
+    /**
+     * getTypeInfo returns type information resolved from page lookup providers
+     * via the shared page lookup system (cms.pageLookup.getTypeInfo).
+     */
+    public static function getTypeInfo($type)
+    {
+        return (new PageLookupItem)->getTypeInfo((string) $type);
+    }
+
+    /**
+     * toArray converts the menu item data to an array
      * @return array Returns the menu item data as array
      */
     public function toArray()

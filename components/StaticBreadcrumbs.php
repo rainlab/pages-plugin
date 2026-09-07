@@ -5,30 +5,31 @@ use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\MenuItemReference;
 use RainLab\Pages\Classes\Page as StaticPageClass;
 use Cms\Classes\Theme;
-use Request;
-use Url;
 
 /**
- * The static breadcrumbs component.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
+ * StaticBreadcrumbs component outputs breadcrumbs for a static page.
  */
 class StaticBreadcrumbs extends ComponentBase
 {
     /**
-     * @var array An array of the RainLab\Pages\Classes\MenuItemReference class.
+     * @var array breadcrumbs of RainLab\Pages\Classes\MenuItemReference objects
      */
     public $breadcrumbs = [];
 
+    /**
+     * componentDetails
+     */
     public function componentDetails()
     {
         return [
-            'name'        => 'rainlab.pages::lang.component.static_breadcrumbs_name',
-            'description' => 'rainlab.pages::lang.component.static_breadcrumbs_description'
+            'name'        => 'Static breadcrumbs',
+            'description' => 'Outputs breadcrumbs for a static page.'
         ];
     }
 
+    /**
+     * onRun
+     */
     public function onRun()
     {
         $url = $this->getRouter()->getUrl();

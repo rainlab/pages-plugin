@@ -1,18 +1,16 @@
 <?php namespace RainLab\Pages\Classes;
 
 use Cms;
+use Site;
 use File;
-use Lang;
 use Cache;
 use Event;
 use Config;
 use Validator;
 use RainLab\Pages\Classes\PageList;
 use Cms\Classes\Theme;
-use Cms\Classes\Snippet;
 use Cms\Classes\Layout;
 use Cms\Classes\Content as ContentBase;
-use Cms\Classes\ComponentManager;
 use System\Helpers\View as ViewHelper;
 use October\Rain\Support\Str;
 use October\Rain\Router\Helper as RouterHelper;
@@ -22,32 +20,23 @@ use Twig\Node\Node as TwigNode;
 
 /**
  * Page represents a static page.
- *
- * @package rainlab\pages
- * @author Alexey Bobkov, Samuel Georges
  */
 class Page extends ContentBase
 {
-    /**
-     * @var array implement
-     */
-    public $implement = [
-        '@'.\RainLab\Translate\Behaviors\TranslatablePageUrl::class,
-        '@'.\RainLab\Translate\Behaviors\TranslatableCmsObject::class
-    ];
+    use \Cms\Classes\Page\HasTranslatableBag;
 
     /**
-     * @var string The container name associated with the model, eg: pages.
+     * @var string dirName associated with the model, eg: pages
      */
     protected $dirName = 'content/static-pages';
 
     /**
-     * @var bool Wrap code section in PHP tags.
+     * @var bool wrapCode section in PHP tags
      */
     protected $wrapCode = false;
 
     /**
-     * @var array Properties that can be set with fill()
+     * @var array fillable properties that can be set with fill()
      */
     protected $fillable = [
         'markup',
@@ -56,12 +45,12 @@ class Page extends ContentBase
     ];
 
     /**
-     * @var array List of attribute names which are not considered "settings".
+     * @var array purgeable list of attribute names which are not considered "settings"
      */
     protected $purgeable = ['parsedMarkup', 'placeholders'];
 
     /**
-     * @var array The rules to be applied to the data.
+     * @var array rules to be applied to the data
      */
     public $rules = [
         'title' => 'required',
@@ -69,7 +58,7 @@ class Page extends ContentBase
     ];
 
     /**
-     * @var array The array of custom attribute names.
+     * @var array attributeNames of custom attribute names
      */
     public $attributeNames = [
         'title' => 'title',
@@ -77,24 +66,7 @@ class Page extends ContentBase
     ];
 
     /**
-     * @var array Attributes that support translation, if available.
-     */
-    public $translatable = [
-        'code',
-        'markup',
-        'viewBag[title]',
-        'viewBag[meta_title]',
-        'viewBag[meta_description]',
-    ];
-
-    /**
-     * @var string Translation model used for translation, if available.
-     */
-    public $translatableModel = 'RainLab\Translate\Classes\MLStaticPage';
-
-    /**
-     * @var string Contains the page parent file name.
-     * This property is used by the page editor internally.
+     * @var string parentFileName used by the page editor internally
      */
     public $parentFileName;
 
@@ -132,8 +104,8 @@ class Page extends ContentBase
         parent::__construct($attributes);
 
         $this->customMessages = [
-            'url.regex' => 'rainlab.pages::lang.page.invalid_url',
-            'url.unique_url' => 'rainlab.pages::lang.page.url_not_unique',
+            'url.regex' => __("Invalid URL format. The URL should start with the forward slash symbol and can contain digits, Latin letters and the following symbols: _-/."),
+            'url.unique_url' => __("This URL is already used by another page."),
         ];
     }
 
@@ -142,7 +114,7 @@ class Page extends ContentBase
     //
 
     /**
-     * Sets the object attributes.
+     * fill sets the object attributes
      * @param array $attributes A list of attributes to set.
      */
     public function fill(array $attributes)
@@ -160,7 +132,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns the attributes used for validation.
+     * getValidationAttributes returns the attributes used for validation
      * @return array
      */
     protected function getValidationAttributes()
@@ -169,8 +141,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Validates the object properties.
-     * Throws a ValidationException in case of an error.
+     * beforeValidate validates the object properties
      */
     public function beforeValidate()
     {
@@ -193,7 +164,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Triggered before a new object is saved.
+     * beforeCreate is triggered before a new object is saved
      */
     public function beforeCreate()
     {
@@ -201,7 +172,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Triggered after a new object is saved.
+     * afterCreate is triggered after a new object is saved
      */
     public function afterCreate()
     {
@@ -209,7 +180,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Adds this page to the meta index.
+     * appendToMeta adds this page to the meta index
      */
     protected function appendToMeta()
     {
@@ -245,9 +216,8 @@ class Page extends ContentBase
     }
 
     /**
-     * delete the object from the disk.
-     * Recursively deletes subpages. Returns a list of file names of deleted pages.
-     * @return array
+     * delete the object from the disk, recursively deleting subpages
+     * @return array Returns a list of file names of deleted pages.
      */
     public function delete()
     {
@@ -261,9 +231,11 @@ class Page extends ContentBase
         }
 
         /*
-         * Delete the object
+         * Delete the object, along with any translated mirror files
          */
         $result = array_merge($result, [$this->getBaseFileName()]);
+
+        $this->deleteLocaleMirrors();
 
         parent::delete();
 
@@ -276,7 +248,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Removes this page to the meta index.
+     * removeFromMeta removes this page from the meta index
      */
     protected function removeFromMeta()
     {
@@ -289,7 +261,7 @@ class Page extends ContentBase
     //
 
     /**
-     * Helper that makes a URL for a static page in the active theme.
+     * url makes a URL for a static page in the active theme
      *
      * Guide for the page reference:
      * - chairs -> content/static-pages/chairs.htm
@@ -303,13 +275,13 @@ class Page extends ContentBase
             return null;
         }
 
-        $url = array_get($page->attributes, 'viewBag.url');
+        $url = $page->getTranslatableUrl() ?: array_get($page->attributes, 'viewBag.url');
 
         return Cms::url($url);
     }
 
     /**
-     * Determine the default layout for a new page
+     * setDefaultLayout determines the default layout for a new page
      * @param \RainLab\Pages\Classes\Page $parentPage
      */
     public function setDefaultLayout($parentPage)
@@ -342,7 +314,7 @@ class Page extends ContentBase
     //
 
     /**
-     * Returns the parent page that belongs to this one, or null.
+     * getParent returns the parent page that belongs to this one, or null
      * @return mixed
      */
     public function getParent()
@@ -362,7 +334,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns all the child pages that belong to this one.
+     * getChildren returns all the child pages that belong to this one
      * @return array
      */
     public function getChildren()
@@ -387,8 +359,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns a list of layouts available in the theme.
-     * This method is used by the form widget.
+     * getLayoutOptions returns a list of layouts available in the theme
      * @return array Returns an array of strings.
      */
     public function getLayoutOptions()
@@ -406,14 +377,14 @@ class Page extends ContentBase
         }
 
         if (!$result) {
-            $result[null] = Lang::get('rainlab.pages::lang.page.layouts_not_found');
+            $result[null] = __("Layouts not found");
         }
 
         return $result;
     }
 
     /**
-     * Looks up the Layout Cms object for this page.
+     * getLayoutObject looks up the Layout Cms object for this page
      * @return Cms\Classes\Layout
      */
     public function getLayoutObject()
@@ -470,8 +441,7 @@ class Page extends ContentBase
     //
 
     /**
-     * listLayoutPlaceholders gets information about placeholders defined in the page layout.
-     * Returns an associative array of the placeholder name and codes.
+     * listLayoutPlaceholders gets information about placeholders defined in the page layout
      * @return array
      */
     public function listLayoutPlaceholders()
@@ -485,7 +455,7 @@ class Page extends ContentBase
         $nodes = array_merge([$bodyNode], $this->flattenTwigNode($bodyNode));
 
         foreach ($nodes as $node) {
-            if (!$node instanceof \Cms\Twig\PlaceholderNode) {
+            if (!$node instanceof \Cms\Twig\Node\PlaceholderNode) {
                 continue;
             }
 
@@ -515,7 +485,7 @@ class Page extends ContentBase
     /**
      * flattenTwigNode recursively flattens a twig node and children
      * @param $node
-     * @return array A flat array of twig nodes
+     * @return array Returns a flat array of twig nodes.
      */
     protected function flattenTwigNode($node)
     {
@@ -533,8 +503,7 @@ class Page extends ContentBase
     }
 
     /**
-     * getPlaceholdersAttribute parses the page placeholder {% put %} tags and extracts the
-     * placeholder values. Returns an associative array of the placeholder names and values.
+     * getPlaceholdersAttribute parses the page placeholder {% put %} tags and extracts the placeholder values
      * @return array
      */
     public function getPlaceholdersAttribute()
@@ -548,13 +517,13 @@ class Page extends ContentBase
         }
 
         $bodyNode = $this->getTwigNodeTree($this->code)->getNode('body')->getNode(0);
-        if ($bodyNode instanceof \Cms\Twig\PutNode) {
+        if ($bodyNode instanceof \Cms\Twig\Node\PutNode) {
             $bodyNode = [$bodyNode];
         }
 
         $result = [];
         foreach ($bodyNode as $node) {
-            if (!$node instanceof \Cms\Twig\PutNode) {
+            if (!$node instanceof \Cms\Twig\Node\PutNode) {
                 continue;
             }
 
@@ -573,10 +542,8 @@ class Page extends ContentBase
     }
 
     /**
-     * setPlaceholdersAttribute takes an array of placeholder data (key: code, value: content)
-     * and renders it as a single string of Twig markup against the "code" attribute.
-     * @param array  $value
-     * @return void
+     * setPlaceholdersAttribute takes an array of placeholder data and renders it as Twig markup against the "code" attribute
+     * @param array $value
      */
     public function setPlaceholdersAttribute($value)
     {
@@ -603,6 +570,111 @@ class Page extends ContentBase
 
         $this->attributes['code'] = trim($result);
         $this->attributes['placeholders'] = $placeholders;
+    }
+
+    //
+    // Localization
+    //
+
+    /**
+     * @var string|null appliedSiteLocale is set once locale overrides have been applied,
+     * also used to differentiate the Twig cache between locales.
+     */
+    protected $appliedSiteLocale = null;
+
+    /**
+     * applySiteContext overlays translated content for the active site's locale.
+     *
+     * Translated page content lives in a locale-suffixed mirror directory
+     * (content/static-pages-{locale}/) controlled entirely by this plugin - the
+     * core content/{locale}/ convention only applies to the {% content %} tag.
+     * Mirror values (view bag, markup, placeholders) override the base page
+     * where present. Translated URLs come from viewBag.localeUrl in the base
+     * file via the HasTranslatableBag trait.
+     */
+    public function applySiteContext($site = null)
+    {
+        if ($this->appliedSiteLocale !== null || !Site::hasMultiSite()) {
+            return;
+        }
+
+        $site = $site ?: Site::getActiveSite();
+        $primary = Site::getPrimarySite();
+        if (!$site || !$primary) {
+            return;
+        }
+
+        $locale = (string) $site->hard_locale;
+        if (!strlen($locale) || $locale === (string) $primary->hard_locale) {
+            return;
+        }
+
+        foreach (Site::getLocaleKeyChain($locale) as $localeKey) {
+            if ($mirror = PageLocale::findLocale($localeKey, $this)) {
+                $this->applyLocaleMirror($mirror);
+                $this->appliedSiteLocale = $localeKey;
+                return;
+            }
+        }
+
+        $this->appliedSiteLocale = $locale;
+    }
+
+    /**
+     * applyLocaleMirror overlays a translated mirror's values over this page.
+     */
+    protected function applyLocaleMirror(PageLocale $mirror)
+    {
+        // Non-empty view bag values override the base. The URL and layout stay
+        // structural - the URL is resolved via getTranslatableUrl and the layout
+        // always comes from the base page.
+        foreach ((array) $mirror->getViewBag()->getProperties() as $name => $value) {
+            if (in_array($name, ['url', 'layout']) || $value === null || $value === '') {
+                continue;
+            }
+
+            $this->getViewBag()->setProperty($name, $value);
+        }
+
+        $this->fillViewBagArray();
+
+        if (strlen(trim((string) $mirror->markup))) {
+            $this->markup = $mirror->markup;
+            $this->processedMarkupCache = false;
+        }
+
+        // Placeholder content is stored as {% put %} blocks in the code section
+        if (strlen(trim((string) $mirror->code))) {
+            $this->attributes['code'] = $mirror->code;
+            unset($this->attributes['placeholders']);
+        }
+    }
+
+    /**
+     * getTwigCacheKey differentiates compiled templates per applied locale, since
+     * translated markup is rendered under the base page's file path.
+     */
+    public function getTwigCacheKey()
+    {
+        $key = parent::getTwigCacheKey();
+
+        if ($this->appliedSiteLocale !== null) {
+            $key .= '-'.$this->appliedSiteLocale;
+        }
+
+        return $key;
+    }
+
+    /**
+     * deleteLocaleMirrors removes any translated mirror files for this page.
+     */
+    protected function deleteLocaleMirrors()
+    {
+        $pattern = $this->theme->getPath().'/content/static-pages-*/'.$this->fileName;
+
+        foreach (File::glob($pattern) ?: [] as $filePath) {
+            File::delete($filePath);
+        }
     }
 
     /**
@@ -666,11 +738,21 @@ class Page extends ContentBase
     //
 
     /**
-     * Returns a cache key for this record.
+     * getMenuCacheKey returns a cache key for this record
      */
-    protected static function getMenuCacheKey($theme)
+    protected static function getMenuCacheKey($theme, $locale = null)
     {
         $key = crc32($theme->getPath()).'static-page-menu';
+
+        // Menu trees hold translated URLs and titles, cache them per locale
+        if ($locale === null && Site::hasMultiSite()) {
+            $locale = Site::getActiveSite()?->hard_locale;
+        }
+
+        if ($locale) {
+            $key .= '-'.$locale;
+        }
+
         /**
          * @event pages.page.getMenuCacheKey
          * Enables modifying the key used to reference cached RainLab.Pages menu trees
@@ -687,7 +769,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Returns whether the specified URLs are equal.
+     * urlsAreEqual returns whether the specified URLs are equal
      */
     protected static function urlsAreEqual($url, $other)
     {
@@ -695,18 +777,27 @@ class Page extends ContentBase
     }
 
     /**
-     * Clears the menu item cache
+     * clearMenuCache clears the menu item cache
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
      */
     public static function clearMenuCache($theme)
     {
         Cache::forget(self::getMenuCacheKey($theme));
+
+        // Clear every locale's menu tree
+        if (Site::hasMultiSite()) {
+            foreach (Site::listSites() as $site) {
+                if ($site->hard_locale) {
+                    Cache::forget(self::getMenuCacheKey($theme, $site->hard_locale));
+                }
+            }
+        }
     }
 
     /**
-     * Handler for the pages.menuitem.getTypeInfo event.
-     * Returns a menu item type information. The type information is returned as array
-     * with the following elements:
+     * getMenuTypeInfo is the handler for the cms.pageLookup.getTypeInfo event
+     *
+     * The type information is returned as array with the following elements:
      * - references - a list of the item type reference options. The options are returned in the
      *   ["key"] => "title" format for options that don't have sub-options, and in the format
      *   ["key"] => ["title"=>"Option title", "items"=>[...]] for options that have sub-options. Optional,
@@ -738,9 +829,9 @@ class Page extends ContentBase
     }
 
     /**
-     * Handler for the pages.menuitem.resolveItem event.
-     * Returns information about a menu item. The result is an array
-     * with the following keys:
+     * resolveMenuItem is the handler for the cms.pageLookup.resolveItem event
+     *
+     * The result is an array with the following keys:
      * - url - the menu item URL. Not required for menu item types that return all available records.
      *   The URL should be returned relative to the website root and include the subdirectory, if any.
      *   Use the Cms::url() helper to generate the URLs.
@@ -750,8 +841,7 @@ class Page extends ContentBase
      *   The items array should be added only if the $item's $nesting property value is TRUE.
      * @param \RainLab\Pages\Classes\MenuItem $item Specifies the menu item.
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
-     * @param string $url Specifies the current page URL, normalized, in lower case
-     * The URL is specified relative to the website root, it includes the subdirectory name, if any.
+     * @param string $url Specifies the current page URL, normalized, in lower case.
      * @return mixed Returns an array. Returns null if the item cannot be resolved.
      */
     public static function resolveMenuItem($item, $url, $theme)
@@ -809,9 +899,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Handler for the backend.richeditor.getTypeInfo event.
-     * Returns a menu item type information. The type information is returned as array
-     *
+     * getRichEditorTypeInfo is the handler for the backend.richeditor.getTypeInfo event
      * @param string $type Specifies the page link type
      * @return array Array of available link targets keyed by URL ['https://example.com/' => 'Homepage]
      */
@@ -847,24 +935,25 @@ class Page extends ContentBase
     }
 
     /**
-     * Builds and caches a menu item tree.
-     * This method is used internally for menu items and breadcrumbs.
+     * buildMenuTree builds and caches a menu item tree
      * @param \Cms\Classes\Theme $theme Specifies the current theme.
      * @return array Returns an array containing the page information
      */
     public static function buildMenuTree($theme)
     {
-        if (self::$menuTreeCache !== null) {
-            return self::$menuTreeCache;
-        }
-
+        // The request-level cache is keyed per theme and locale, matching the
+        // persistent cache, so iterating sites in one request stays correct.
         $key = self::getMenuCacheKey($theme);
+
+        if (is_array(self::$menuTreeCache) && array_key_exists($key, self::$menuTreeCache)) {
+            return self::$menuTreeCache[$key];
+        }
 
         $cached = Cache::get($key, false);
         $unserialized = $cached ? @unserialize($cached) : false;
 
         if ($unserialized !== false) {
-            return self::$menuTreeCache = $unserialized;
+            return self::$menuTreeCache[$key] = $unserialized;
         }
 
         $menuTree = [
@@ -875,9 +964,13 @@ class Page extends ContentBase
             $result = [];
 
             foreach ($items as $item) {
+                // Overlay the active site's translated title and URL, if any
+                $item->page->applySiteContext();
+
                 $viewBag = $item->page->viewBag;
                 $pageCode = $item->page->getBaseFileName();
-                $pageUrl = Str::lower(RouterHelper::normalizeUrl(array_get($viewBag, 'url')));
+                $pageUrl = $item->page->getTranslatableUrl() ?: array_get($viewBag, 'url');
+                $pageUrl = Str::lower(RouterHelper::normalizeUrl($pageUrl));
 
                 $itemData = [
                     'url'    => $pageUrl,
@@ -902,17 +995,16 @@ class Page extends ContentBase
         $pageList = new PageList($theme);
         $iterator($pageList->getPageTree(), null, 0);
 
-        self::$menuTreeCache = $menuTree;
+        self::$menuTreeCache[$key] = $menuTree;
         $comboConfig = Config::get('cms.template_cache_ttl', 10);
         $expiresAt = now()->addMinutes($comboConfig);
         Cache::put($key, serialize($menuTree), $expiresAt);
 
-        return self::$menuTreeCache;
+        return self::$menuTreeCache[$key];
     }
 
     /**
-     * Returns a list of options for the Reference drop-down menu in the
-     * menu item configuration form, when the Static Page item type is selected.
+     * listStaticPageMenuOptions returns a list of options for the Reference drop-down menu in the menu item configuration form
      * @return array Returns an array
      */
     protected static function listStaticPageMenuOptions()
@@ -947,11 +1039,7 @@ class Page extends ContentBase
     }
 
     /**
-     * Disables safe mode check for static pages.
-     *
-     * This allows developers to use placeholders in layouts even if safe mode is enabled.
-     *
-     * @return void
+     * checkSafeMode disables the safe mode check for static pages, allowing placeholders in layouts even if safe mode is enabled
      */
     protected function checkSafeMode()
     {
