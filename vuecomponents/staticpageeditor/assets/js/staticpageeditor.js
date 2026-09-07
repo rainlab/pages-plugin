@@ -21,6 +21,10 @@ export default {
             // any values refreshed by the save that runs before the apply.
             placeholderInfo: {},
             syntaxFieldGroups: [],
+            // Last auto-generated URL for a new subpage. While the URL still matches
+            // this value, typing the title keeps rebuilding it as parentUrl + slug;
+            // a manual URL edit (or saving) stops the preset. Null when inactive.
+            autoUrlValue: null,
             // Monaco backs only the "code" surfaces (text-type placeholders).
             codeEditorModelDefinitions: [],
             codeModels: {},
@@ -171,6 +175,29 @@ export default {
             if (this.documentData && this.documentData.url !== value) {
                 this.documentData.url = value;
             }
+        },
+
+        // For new subpages, typing the title keeps building the URL as
+        // parentUrl + slug until the URL is edited by hand.
+        'documentData.title': function(value) {
+            if (this.autoUrlValue === null || !this.isNewDocument) {
+                return;
+            }
+
+            // A URL differing from the last generated value means it was edited by hand
+            if (this.documentData.url !== this.autoUrlValue) {
+                this.autoUrlValue = null;
+                return;
+            }
+
+            const prefix = String(this.documentMetadata.parentUrl || '').replace(/\/+$/, '');
+            const slug = oc.InputPresetEngine.formatValue(
+                { inputPresetType: 'url', inputPresetRemoveWords: true },
+                String(value || '')
+            );
+
+            this.autoUrlValue = (slug === '/' || slug === '') ? prefix + '/' : prefix + slug;
+            this.documentData.url = this.autoUrlValue;
         },
 
         // The settings popup deep-clones its snapshot back over documentData on
@@ -476,6 +503,12 @@ export default {
         documentCreatedOrLoaded: function() {
             this.placeholderInfo = (this.documentData && this.documentData.placeholderInfo) || {};
             this.syntaxFieldGroups = (this.documentData && this.documentData.syntaxFieldGroups) || [];
+
+            this.autoUrlValue = (
+                this.documentMetadata &&
+                this.documentMetadata.isNewDocument &&
+                this.documentMetadata.parentUrl
+            ) ? this.documentData.url : null;
 
             this.ensurePlaceholderKeys();
             this.buildCodeModels();

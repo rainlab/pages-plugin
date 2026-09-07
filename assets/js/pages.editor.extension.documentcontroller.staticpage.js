@@ -46,10 +46,13 @@ export class DocumentControllerStaticPage extends DocumentControllerBase {
         }
 
         // New subpages nest under their parent and preset the URL with the parent's.
+        // The editor component keeps appending a slug of the title to the parent URL
+        // (via metadata.parentUrl) until the URL is edited by hand.
         documentData.metadata.parentFileName = userData.parentFileName;
 
         const parentUrl = (userData.parentUrl || '').replace(/\/+$/, '');
         if (parentUrl.length) {
+            documentData.metadata.parentUrl = parentUrl;
             documentData.document.url = parentUrl + '/';
             if (documentData.document.settings) {
                 documentData.document.settings.url = parentUrl + '/';
