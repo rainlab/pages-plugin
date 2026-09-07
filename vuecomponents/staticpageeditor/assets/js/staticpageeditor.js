@@ -16,6 +16,11 @@ export default {
             documentSettingsPopupTitle: this.trans('Static page') || 'Static Page',
             previewUrl: null,
             hasContentField: true,
+            // Layout-driven UI state lives outside documentData: the settings popup
+            // deep-clones documentData back over itself on apply, which would wipe
+            // any values refreshed by the save that runs before the apply.
+            placeholderInfo: {},
+            syntaxFieldGroups: [],
             // Monaco backs only the "code" surfaces (text-type placeholders).
             codeEditorModelDefinitions: [],
             codeModels: {},
@@ -45,7 +50,7 @@ export default {
                 surfaces.push({ key: 'markup', title: this.trans('Content') || 'Content', mode: 'rich', holder: 'root' });
             }
 
-            const info = (this.documentData && this.documentData.placeholderInfo) || {};
+            const info = this.placeholderInfo || {};
             Object.keys(info).forEach((code) => {
                 const meta = info[code] || {};
                 surfaces.push({
@@ -56,7 +61,7 @@ export default {
                 });
             });
 
-            const groups = (this.documentData && this.documentData.syntaxFieldGroups) || [];
+            const groups = this.syntaxFieldGroups || [];
             groups.forEach((group) => {
                 surfaces.push({
                     key: group.key,
@@ -166,6 +171,22 @@ export default {
             if (this.documentData && this.documentData.url !== value) {
                 this.documentData.url = value;
             }
+        },
+
+        // The settings popup deep-clones its snapshot back over documentData on
+        // apply, replacing the placeholders object - rebind the code models so
+        // Monaco keeps writing into the live object.
+        'documentData.placeholders': function(newValue, oldValue) {
+            if (newValue === oldValue || !this.modelsReady) {
+                return;
+            }
+
+            this.modelsReady = false;
+            this.ensurePlaceholderKeys();
+            this.buildCodeModels();
+            this.$nextTick(() => {
+                this.modelsReady = true;
+            });
         }
     },
     methods: {
@@ -292,7 +313,7 @@ export default {
         },
 
         ensurePlaceholderKeys: function() {
-            const info = (this.documentData && this.documentData.placeholderInfo) || {};
+            const info = this.placeholderInfo || {};
             if (!this.documentData.placeholders || typeof this.documentData.placeholders !== 'object') {
                 this.documentData.placeholders = {};
             }
@@ -453,6 +474,9 @@ export default {
         },
 
         documentCreatedOrLoaded: function() {
+            this.placeholderInfo = (this.documentData && this.documentData.placeholderInfo) || {};
+            this.syntaxFieldGroups = (this.documentData && this.documentData.syntaxFieldGroups) || [];
+
             this.ensurePlaceholderKeys();
             this.buildCodeModels();
             this.loadedSyntaxGroups = {};
@@ -492,9 +516,9 @@ export default {
             // content field visibility - rebuild the surfaces when they changed.
             const infoChanged =
                 (data.placeholderInfo !== undefined &&
-                    JSON.stringify(data.placeholderInfo) !== JSON.stringify(this.documentData.placeholderInfo || {})) ||
+                    JSON.stringify(data.placeholderInfo) !== JSON.stringify(this.placeholderInfo || {})) ||
                 (data.syntaxFieldGroups !== undefined &&
-                    JSON.stringify(data.syntaxFieldGroups) !== JSON.stringify(this.documentData.syntaxFieldGroups || [])) ||
+                    JSON.stringify(data.syntaxFieldGroups) !== JSON.stringify(this.syntaxFieldGroups || [])) ||
                 (data.hasContentField !== undefined && (data.hasContentField !== false) !== this.hasContentField);
 
             if (!infoChanged) {
@@ -502,15 +526,22 @@ export default {
             }
 
             if (data.placeholderInfo !== undefined) {
-                this.documentData.placeholderInfo = data.placeholderInfo;
+                this.placeholderInfo = data.placeholderInfo;
             }
             if (data.syntaxFieldGroups !== undefined) {
-                this.documentData.syntaxFieldGroups = data.syntaxFieldGroups;
+                this.syntaxFieldGroups = data.syntaxFieldGroups;
             }
             if (data.hasContentField !== undefined) {
                 this.hasContentField = data.hasContentField !== false;
             }
 
+            this.rebuildContentSurfaces();
+        },
+
+        // Rebuilds the tabs, code models and toolbars after the layout-driven
+        // surface set changed.
+        rebuildContentSurfaces: function() {
+            this.modelsReady = false;
             this.ensurePlaceholderKeys();
             this.buildCodeModels();
             this.loadedSyntaxGroups = {};
@@ -527,13 +558,17 @@ export default {
             this.ensureActiveSurfaceExists();
 
             this.$nextTick(() => {
-                const surface = this.activeSurface;
-                if (surface && surface.mode === 'syntax' && !this.loadedSyntaxGroups[surface.key]) {
-                    this.loadSyntaxGroup(surface);
-                }
-                else if (surface && surface.mode === 'rich') {
-                    this.refreshRichSurface(surface.key);
-                }
+                this.modelsReady = true;
+
+                this.$nextTick(() => {
+                    const surface = this.activeSurface;
+                    if (surface && surface.mode === 'syntax' && !this.loadedSyntaxGroups[surface.key]) {
+                        this.loadSyntaxGroup(surface);
+                    }
+                    else if (surface && surface.mode === 'rich') {
+                        this.refreshRichSurface(surface.key);
+                    }
+                });
             });
         },
 
