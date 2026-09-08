@@ -90,3 +90,4 @@ v2.2.4: Fixes tab rendering in Firefox
 v2.2.5: Fixes performance of tree control UI
 v2.2.6: Compatibility fixes for October v4.3
 v3.0.0: Modernized backend editor rebuilt on the Vue Editor module
+v3.0.1: Performance improvements on very large pages with repeaters
