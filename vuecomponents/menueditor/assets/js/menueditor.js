@@ -181,6 +181,12 @@ export default {
             return item.typeLabel || item.type || '';
         },
 
+        // Hidden state for the row indicator. The server overlays the active
+        // site's locale value into viewBag.isHidden, so this is locale-aware.
+        isItemHidden: function(item) {
+            return !!(item.viewBag && item.viewBag.isHidden && item.viewBag.isHidden !== '0');
+        },
+
         newBlankItem: function() {
             return {
                 _id: this.nextItemId++,

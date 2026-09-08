@@ -14,6 +14,7 @@
             subtitle-label="<?= e(trans('Code')) ?>"
             subtitle-preset-type="file"
             :subtitle-preset-remove-words="true"
+            :is-new-document="isNewDocument"
             ref="documentHeader"
             :data="documentData"
             :disabled="processing"
@@ -37,6 +38,7 @@
                     class="menu-item-row"
                     :class="{
                         selected: entry.item._selected,
+                        'item-hidden': isItemHidden(entry.item),
                         'drop-before': dropTargetId === entry.item._id && dropMode === 'before',
                         'drop-after': dropTargetId === entry.item._id && dropMode === 'after',
                         'drop-inside': dropTargetId === entry.item._id && dropMode === 'inside'
@@ -52,7 +54,11 @@
                     <i class="menu-item-drag icon-bars"></i>
                     <i class="menu-item-icon icon-file-o"></i>
                     <span class="menu-item-label">
-                        <span class="menu-item-title">{{ entry.item.title || '<?= e(trans('Untitled')) ?>' }}</span>
+                        <span class="menu-item-title">{{ entry.item.title || '<?= e(trans('Untitled')) ?>' }}<i
+                            v-if="isItemHidden(entry.item)"
+                            class="menu-item-hidden-icon icon-eye-slash"
+                            title="<?= e(trans('Hidden')) ?>"
+                        ></i></span>
                         <span class="menu-item-subtitle">{{ itemSubtitle(entry.item) }}</span>
                     </span>
                     <span class="menu-item-actions" @click.stop>

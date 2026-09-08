@@ -331,6 +331,15 @@ class Menu extends Meta
             foreach ($menuItems as $item) {
                 $localeFields = array_get($item->viewBag, "locale.{$locale}", []);
                 foreach ($localeFields as $fieldName => $fieldValue) {
+                    // The hidden flag can be toggled per locale; a missing value
+                    // inherits the base value.
+                    if ($fieldName === 'isHidden') {
+                        if ($fieldValue !== null && $fieldValue !== '') {
+                            $item->viewBag['isHidden'] = $fieldValue;
+                        }
+                        continue;
+                    }
+
                     if ($fieldValue) {
                         $item->$fieldName = $fieldValue;
 

@@ -23,7 +23,11 @@ items:
         reference: about
         cmsPage: ''
         replace: '0'
-        viewBag: {  }
+        viewBag:
+            isHidden: '1'
+            locale:
+                fr:
+                    isHidden: '0'
     -
         title: External
         nesting: '0'
@@ -33,4 +37,8 @@ items:
         reference: ''
         cmsPage: ''
         replace: '0'
-        viewBag: {  }
+        viewBag:
+            isHidden: '0'
+            locale:
+                fr:
+                    isHidden: '1'

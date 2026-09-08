@@ -142,6 +142,12 @@ trait HasMenuCrud
                 }
             }
 
+            // The hidden flag can be toggled per locale
+            $hidden = array_get($localeFields, 'isHidden');
+            if ($hidden !== null && $hidden !== '') {
+                array_set($item, 'viewBag.isHidden', $hidden);
+            }
+
             if (!empty($item['items']) && is_array($item['items'])) {
                 $item['items'] = $this->applyItemsEditLocale($item['items'], $locale);
             }
@@ -151,9 +157,11 @@ trait HasMenuCrud
     }
 
     /**
-     * localizeItemData stores the posted title/url values as locale translations
-     * and restores the base values from the menu on disk. The url is only
-     * translated for url-type items.
+     * localizeItemData stores the posted title/url values and the hidden flag as
+     * locale overrides and restores the base values from the menu on disk. The
+     * url is only translated for url-type items. Values matching the base are
+     * not stored, following the Translatable convention: no override means the
+     * item inherits the base value, so base edits keep propagating.
      */
     protected function localizeItemData(array $postedItems, array $originalItems, string $locale): array
     {
@@ -172,7 +180,27 @@ trait HasMenuCrud
                 $originalValue = array_get($original, $fieldName, $value);
                 array_set($item, $fieldName, $originalValue);
 
-                $localeData[$locale][$fieldName] = $value;
+                if ((string) $value !== (string) $originalValue) {
+                    $localeData[$locale][$fieldName] = $value;
+                }
+                else {
+                    unset($localeData[$locale][$fieldName]);
+                }
+            }
+
+            // The hidden flag is only stored when it differs from the base value
+            // so unchanged items keep inheriting the base state.
+            $hidden = array_get($item, 'viewBag.isHidden');
+            if ($hidden !== null) {
+                $originalHidden = array_get($original, 'viewBag.isHidden', '0');
+                array_set($item, 'viewBag.isHidden', $originalHidden);
+
+                if ((bool) $hidden !== (bool) $originalHidden) {
+                    $localeData[$locale]['isHidden'] = $hidden;
+                }
+                else {
+                    unset($localeData[$locale]['isHidden']);
+                }
             }
 
             // Only url-type items carry a translated URL
@@ -183,8 +211,17 @@ trait HasMenuCrud
                 unset($targetData);
             }
 
+            // Dropped overrides can empty a locale group; remove empty groups and
+            // clear the round-tripped locale data when nothing remains.
+            $localeData = array_filter($localeData);
+
             if ($localeData) {
                 array_set($item, 'viewBag.locale', $localeData);
+            }
+            else {
+                $viewBag = (array) array_get($item, 'viewBag', []);
+                unset($viewBag['locale']);
+                array_set($item, 'viewBag', $viewBag);
             }
 
             if (!empty($item['items']) && is_array($item['items'])) {

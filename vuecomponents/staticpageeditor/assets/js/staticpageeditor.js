@@ -493,9 +493,14 @@ export default {
                     });
                 }
 
-                // Ensure the initially-active rich surface's toolbar is populated.
+                // Activate the initial surface: populate a rich surface's toolbar, or
+                // load the syntax island when a layout without a content field makes
+                // a syntax group the first tab.
                 if (this.activeSurface && this.activeSurface.mode === 'rich') {
                     this.refreshRichSurface(this.activeSurfaceKey);
+                }
+                else if (this.activeSurface && this.activeSurface.mode === 'syntax' && !this.loadedSyntaxGroups[this.activeSurface.key]) {
+                    this.loadSyntaxGroup(this.activeSurface);
                 }
             });
         },

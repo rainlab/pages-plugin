@@ -22,6 +22,12 @@ abstract class PagesPluginTestCase extends PluginTestCase
     protected $themeSnapshot = [];
 
     /**
+     * @var bool themeSnapshotComplete guards against restoring from a snapshot
+     * that failed part-way, which would wrongly delete unrecorded fixture files
+     */
+    protected $themeSnapshotComplete = false;
+
+    /**
      * setUp the test case
      */
     public function setUp(): void
@@ -79,10 +85,13 @@ abstract class PagesPluginTestCase extends PluginTestCase
     protected function snapshotThemeFiles()
     {
         $this->themeSnapshot = [];
+        $this->themeSnapshotComplete = false;
 
         foreach (File::allFiles($this->theme->getPath()) as $file) {
-            $this->themeSnapshot[$file->getPathname()] = file_get_contents($file->getPathname());
+            $this->themeSnapshot[$file->getPathname()] = $this->readWithRetry($file->getPathname());
         }
+
+        $this->themeSnapshotComplete = true;
     }
 
     /**
@@ -90,7 +99,7 @@ abstract class PagesPluginTestCase extends PluginTestCase
      */
     protected function restoreThemeFiles()
     {
-        if (!$this->themeSnapshot) {
+        if (!$this->themeSnapshot || !$this->themeSnapshotComplete) {
             return;
         }
 
@@ -105,6 +114,24 @@ abstract class PagesPluginTestCase extends PluginTestCase
                 File::put($path, $contents);
             }
         }
+    }
+
+    /**
+     * readWithRetry reads a file, retrying while external processes hold a lock
+     */
+    protected function readWithRetry(string $path): string
+    {
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $contents = @file_get_contents($path);
+            if ($contents !== false) {
+                return $contents;
+            }
+
+            usleep(100000);
+            clearstatcache(true, $path);
+        }
+
+        throw new RuntimeException('Unable to read theme fixture file: '.$path);
     }
 
     /**

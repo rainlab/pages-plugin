@@ -14,6 +14,7 @@
             subtitle-label="<?= e(trans('URL')) ?>"
             subtitle-preset-type="url"
             :subtitle-preset-remove-words="true"
+            :is-new-document="isNewDocument"
             ref="documentHeader"
             :data="documentData"
             :disabled="processing"

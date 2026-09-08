@@ -643,10 +643,15 @@ class Page extends ContentBase
             $this->processedMarkupCache = false;
         }
 
-        // Placeholder content is stored as {% put %} blocks in the code section
-        if (strlen(trim((string) $mirror->code))) {
-            $this->attributes['code'] = $mirror->code;
-            unset($this->attributes['placeholders']);
+        // Placeholder content is stored as {% put %} blocks in the code section.
+        // Mirror placeholders merge per code so untranslated placeholders keep
+        // inheriting the base content.
+        $mirrorPlaceholders = array_filter((array) $mirror->placeholders, function($content) {
+            return strlen(trim((string) $content));
+        });
+
+        if ($mirrorPlaceholders) {
+            $this->placeholders = array_merge((array) $this->placeholders, $mirrorPlaceholders);
         }
     }
 

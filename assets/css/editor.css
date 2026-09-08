@@ -121,6 +121,25 @@
             border-color: var(--oc-primary-color, #6a70f2);
             background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
         }
+
+        /* Items hidden from the front-end (for the active site) are dimmed
+           and flagged with an eye-slash icon. */
+        &.item-hidden {
+            .menu-item-title,
+            .menu-item-icon {
+                opacity: .5;
+            }
+        }
+
+        &.selected .menu-item-hidden-icon {
+            color: rgba(255, 255, 255, .8);
+        }
+    }
+
+    .menu-item-hidden-icon {
+        margin-left: 6px;
+        font-size: 12px;
+        color: var(--oc-text-muted-color, #97a1ab);
     }
 
     .menu-item-icon {

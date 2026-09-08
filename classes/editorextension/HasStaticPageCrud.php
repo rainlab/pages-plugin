@@ -2,6 +2,7 @@
 
 use Url;
 use Site;
+use File;
 use Event;
 use Config;
 use SystemException;
@@ -284,41 +285,86 @@ trait HasStaticPageCrud
             $page->save();
         }
 
-        // Mirrors never store structural fields; the layout is copied from the
-        // base so placeholder pruning resolves against the correct layout.
+        // Mirrors never store structural fields
         unset($settings['url']);
-        $settings['layout'] = array_get($page->viewBag, 'layout');
 
-        $fillData = [
-            'settings' => ['viewBag' => $settings],
-            'markup' => $this->convertLineEndings((string) array_get($documentData, 'markup')),
-        ];
+        // Following the Translatable convention, values matching the base are not
+        // stored - the mirror holds only translated values, so base edits keep
+        // propagating to locales that never diverged.
+        $baseViewBag = (array) $page->getViewBag()->getProperties();
+        foreach ($settings as $name => $value) {
+            if ($this->localeValueMatchesBase($value, array_get($baseViewBag, $name))) {
+                unset($settings[$name]);
+            }
+        }
+
+        $markup = $this->convertLineEndings((string) array_get($documentData, 'markup'));
+        if ($this->localeValueMatchesBase($markup, $page->markup)) {
+            $markup = '';
+        }
 
         $placeholders = array_get($documentData, 'placeholders');
         if (is_array($placeholders)) {
-            $fillData['placeholders'] = array_map([$this, 'convertLineEndings'], $placeholders);
+            $basePlaceholders = (array) $page->placeholders;
+            foreach ($placeholders as $code => $content) {
+                $content = $this->convertLineEndings($content);
+                if ($this->localeValueMatchesBase($content, array_get($basePlaceholders, $code))) {
+                    unset($placeholders[$code]);
+                }
+                else {
+                    $placeholders[$code] = $content;
+                }
+            }
         }
 
-        $mirror = PageLocale::withLocale($locale, function() use ($theme, $page, $mirror, $fillData) {
-            if (!$mirror) {
-                $mirror = PageLocale::inTheme($theme);
-                $mirror->fileName = $page->fileName;
+        // A mirror left without any translated values is removed entirely,
+        // restoring full inheritance from the base page.
+        if (empty($settings) && !strlen(trim($markup)) && empty($placeholders)) {
+            if ($mirror) {
+                PageLocale::withLocale($locale, function() use ($mirror) {
+                    File::delete($mirror->getFilePath());
+                });
+
+                Event::fire('cms.template.delete', [$controller, $mirror]);
             }
 
-            // Fill the settings first so the layout is resolvable when the
-            // placeholder fill prunes against the layout's placeholder list.
-            $mirror->fill(['settings' => $fillData['settings']]);
-            $mirror->fill(array_diff_key($fillData, ['settings' => true]));
-            $mirror->save();
+            $mirror = null;
+        }
+        else {
+            // The layout is copied from the base so placeholder pruning resolves
+            // against the correct layout.
+            $settings['layout'] = array_get($page->viewBag, 'layout');
 
-            return $mirror;
-        });
+            $fillData = [
+                'settings' => ['viewBag' => $settings],
+                'markup' => $markup,
+            ];
 
-        Event::fire('cms.template.save', [$controller, $mirror, 'static-page']);
+            if (is_array($placeholders)) {
+                $fillData['placeholders'] = $placeholders;
+            }
+
+            $mirror = PageLocale::withLocale($locale, function() use ($theme, $page, $mirror, $fillData) {
+                if (!$mirror) {
+                    $mirror = PageLocale::inTheme($theme);
+                    $mirror->fileName = $page->fileName;
+                }
+
+                // Fill the settings first so the layout is resolvable when the
+                // placeholder fill prunes against the layout's placeholder list.
+                $mirror->fill(['settings' => $fillData['settings']]);
+                $mirror->fill(array_diff_key($fillData, ['settings' => true]));
+                $mirror->save();
+
+                return $mirror;
+            });
+
+            Event::fire('cms.template.save', [$controller, $mirror, 'static-page']);
+        }
 
         $result = $this->pageMetadata($page);
         $result['locale'] = $locale;
-        $result['mtime'] = $mirror->mtime;
+        $result['mtime'] = $mirror ? $mirror->mtime : null;
 
         $previewUrl = array_get($page->viewBag, 'localeUrl.'.$locale)
             ?: array_get($page->viewBag, 'url');
@@ -330,6 +376,25 @@ trait HasStaticPageCrud
             'syntaxFieldGroups' => $this->getSyntaxFieldGroups($page),
             'hasContentField' => $this->pageHasContentField($page)
         ];
+    }
+
+    /**
+     * localeValueMatchesBase determines whether a posted locale value matches the
+     * base value. Whitespace is ignored entirely - the rich editor reserializes
+     * markup with different spacing between tags, and a value differing from the
+     * base only in whitespace is not a translation worth storing.
+     */
+    protected function localeValueMatchesBase($value, $base): bool
+    {
+        if (is_array($value) || is_array($base)) {
+            return $value == $base;
+        }
+
+        $normalize = function($text) {
+            return preg_replace('/\s+/', '', (string) $text);
+        };
+
+        return $normalize($value) === $normalize($base);
     }
 
     /**
