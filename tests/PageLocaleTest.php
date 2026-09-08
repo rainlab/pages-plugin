@@ -93,4 +93,29 @@ class PageLocaleTest extends PagesPluginTestCase
         $this->assertFalse($method->invoke($extension, 'Bonjour', 'Hello'));
         $this->assertFalse($method->invoke($extension, ['a' => '1'], ['a' => '2']));
     }
+
+    public function testCleanSyntaxFieldDataKeepsGroupKeys()
+    {
+        $extension = new \RainLab\Pages\Classes\EditorExtension;
+        $method = new ReflectionMethod($extension, 'cleanSyntaxFieldData');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($extension, [
+            'title' => 'Hello',
+            'blocks' => [
+                ['title' => 'One', '_index' => 0, '_group' => 'banner'],
+                ['title' => 'Two', '_index' => 1, '_group' => 'spacer'],
+            ],
+        ]);
+
+        // The _index key is bookkeeping, but _group defines the item type for
+        // group repeaters and must survive so mirrors stay comparable to base values
+        $this->assertEquals([
+            'title' => 'Hello',
+            'blocks' => [
+                ['title' => 'One', '_group' => 'banner'],
+                ['title' => 'Two', '_group' => 'spacer'],
+            ],
+        ], $result);
+    }
 }

@@ -399,10 +399,12 @@ trait HasStaticPageCrud
 
     /**
      * cleanSyntaxFieldData strips repeater bookkeeping keys from posted viewBag data.
+     * The _group key is kept since it defines the item type for group repeaters and
+     * is stored in the base file, keeping mirrors comparable to their base values.
      */
     protected function cleanSyntaxFieldData(array $data): array
     {
-        $internalKeys = ['_index', '_group'];
+        $internalKeys = ['_index'];
 
         foreach ($data as $key => &$value) {
             if (is_array($value)) {
