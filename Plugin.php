@@ -61,6 +61,18 @@ class Plugin extends PluginBase
     }
 
     /**
+     * registerContentFields available for Tailor blueprints, matching the
+     * form widget aliases so 'type: staticpagepicker' works in a blueprint.
+     */
+    public function registerContentFields()
+    {
+        return [
+            \RainLab\Pages\ContentFields\PagePickerField::class => 'staticpagepicker',
+            \RainLab\Pages\ContentFields\MenuPickerField::class => 'staticmenupicker',
+        ];
+    }
+
+    /**
      * registerPermissions available for backend users.
      */
     public function registerPermissions()
