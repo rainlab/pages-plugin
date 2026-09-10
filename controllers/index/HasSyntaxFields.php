@@ -1,5 +1,6 @@
 <?php namespace RainLab\Pages\Controllers\Index;
 
+use Site;
 use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page as StaticPage;
 
@@ -32,6 +33,9 @@ trait HasSyntaxFields
         if (!$page) {
             return null;
         }
+
+        // Overlay the translated mirror so syntax fields show that locale's values
+        $page->applySiteContext(Site::getSiteFromContext());
 
         $config = $this->makeConfig(['fields' => []]);
         $config->model = $page;
