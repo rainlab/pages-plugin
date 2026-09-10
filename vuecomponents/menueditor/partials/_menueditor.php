@@ -72,7 +72,7 @@
                 </li>
             </ul>
 
-            <p v-if="!flatItems.length" style="color:#97a1ab; padding:10px 0;">
+            <p v-if="!flatItems.length" style="color:var(--bs-secondary-color); padding:10px 0;">
                 <?= e(trans('No menu items yet. Use "Add item" in the toolbar.')) ?>
             </p>
         </div>

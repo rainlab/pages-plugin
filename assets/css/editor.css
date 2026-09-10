@@ -36,7 +36,7 @@
         align-items: center;
         gap: 8px;
         padding-top: 15px;
-        border-top: var(--oc-popup-border);
+        border-top: 1px solid var(--bs-border-color);
     }
 
     .pages-menu-modal-footer-spacer {
@@ -49,7 +49,7 @@
     }
 
     .pages-menu-delete-btn:hover {
-        color: var(--oc-danger-color, #cc3300);
+        color: var(--bs-danger);
     }
 }
 
@@ -67,12 +67,12 @@
         user-select: none;
 
         &:hover {
-            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .03));
+            background: var(--oc-toolbar-hover-bg);
         }
 
         &.selected {
-            background: var(--oc-primary-color, #6a70f2);
-            color: #fff;
+            background: var(--bs-primary);
+            color: white;
 
             .menu-item-subtitle {
                 color: rgba(255, 255, 255, .8);
@@ -106,7 +106,7 @@
             left: 0;
             right: 0;
             height: 2px;
-            background: var(--oc-primary-color, #6a70f2);
+            background: var(--bs-primary);
         }
 
         &.drop-before::before {
@@ -118,8 +118,8 @@
         }
 
         &.drop-inside {
-            border-color: var(--oc-primary-color, #6a70f2);
-            background: var(--oc-primary-color-light, rgba(106, 112, 242, .08));
+            border-color: var(--bs-primary);
+            background: rgba(var(--bs-primary-rgb), 0.08);
         }
 
         /* Items hidden from the front-end (for the active site) are dimmed
@@ -139,7 +139,7 @@
     .menu-item-hidden-icon {
         margin-left: 6px;
         font-size: 12px;
-        color: var(--oc-text-muted-color, #97a1ab);
+        color: var(--bs-secondary-color);
     }
 
     .menu-item-icon {
@@ -173,7 +173,7 @@
         display: block;
         font-size: 12px;
         line-height: 15px;
-        color: var(--oc-text-muted-color, #97a1ab);
+        color: var(--bs-secondary-color);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -199,18 +199,18 @@
         border: none;
         border-radius: 4px;
         background: transparent;
-        color: var(--oc-text-muted, #72809d);
+        color: var(--oc-toolbar-color);
         font-size: 13px;
         cursor: pointer;
         box-shadow: none;
 
         &:hover {
-            background: var(--oc-list-hover-bg, rgba(0, 0, 0, .06));
-            color: var(--oc-text-color, #33414f);
+            background: var(--oc-toolbar-hover-bg);
+            color: var(--oc-toolbar-hover-color);
         }
 
         &.menu-item-action-danger:hover {
-            color: var(--oc-danger-color, #cc3300);
+            color: var(--bs-danger);
         }
     }
 }

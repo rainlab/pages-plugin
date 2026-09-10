@@ -84,7 +84,7 @@
                     <div
                         v-show="surface.key === activeSurfaceKey"
                         class="pages-syntax-fields-panel"
-                        style="position:absolute; inset:0; overflow:auto; padding:20px; background:var(--oc-panel-bg, #fff);"
+                        style="position:absolute; inset:0; overflow:auto; padding:20px; background:var(--oc-document-content-bg);"
                     >
                         <!-- Opaque loading overlay shown until the group's form island has
                              loaded, like the document loader. The form stays rendered
@@ -92,7 +92,7 @@
                         <div
                             v-if="!loadedSyntaxGroups[surface.key]"
                             class="d-flex align-items-center justify-content-center"
-                            style="position:absolute; inset:0; z-index:10; background:var(--oc-panel-bg, #fff);"
+                            style="position:absolute; inset:0; z-index:10; background:var(--oc-document-content-bg);"
                         >
                             <backend-loading-indicator size="small"></backend-loading-indicator>
                         </div>
