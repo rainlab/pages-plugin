@@ -96,4 +96,4 @@ Read the [Getting started with Static Pages](https://octobercms.com/blog/post/ge
 
 ## Documentation
 
-Read the [documentation](./DOCS.md) to learn more about this plugin.
+Read the [documentation](./docs/introduction.md) to learn more about this plugin.

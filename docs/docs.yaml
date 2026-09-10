@@ -1,0 +1,61 @@
+#
+# JSON Documentation
+#
+# Compile in console:
+#
+#     php artisan october:util compile docs --value=rainlab.pages
+#
+navigation:
+    -
+        title: "Introduction"
+        link: "./introduction.md"
+        description: "explains how to get started using the Pages plugin"
+        children:
+        -
+            title: "Events"
+            link: "./events.md"
+            description: "lists all the available events found in this plugin"
+        -
+            title: "Static Pages"
+            link: "./static-pages.md"
+            description: "creating and linking to static pages"
+        -
+            title: "Menus"
+            link: "./menus.md"
+            description: "creating menus and setting the active item"
+        -
+            title: "Syntax Fields"
+            link: "./syntax-fields.md"
+            description: "adding custom fields to the page editor form"
+        -
+            title: "Menu Item Types"
+            link: "./menu-item-types.md"
+            description: "registering new menu item types from a plugin"
+        -
+            title: "Tailor Integration"
+            link: "./tailor.md"
+            description: "guide on integration with Tailor"
+        -
+            title: "Form Widgets"
+            link: "./form-widgets.md"
+            description: "picking pages and menus in your own backend forms"
+    -
+        title: "Components"
+        description: "lists all the available components found in this plugin"
+        children:
+        -
+            title: "Static Page"
+            link: "./component-static-page.md"
+            description: "enables a layout to be used by static pages"
+        -
+            title: "Static Menu"
+            link: "./component-static-menu.md"
+            description: "outputs a single menu on the page"
+        -
+            title: "Static Breadcrumbs"
+            link: "./component-static-breadcrumbs.md"
+            description: "outputs breadcrumb navigation for the current page"
+        -
+            title: "Child Pages"
+            link: "./component-child-pages.md"
+            description: "outputs a list of child pages of the current page"
