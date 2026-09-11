@@ -18,6 +18,7 @@
             ref="documentHeader"
             :data="documentData"
             :disabled="processing"
+            @titleinput="onTitleInput"
         ></backend-document-header>
     </template>
 

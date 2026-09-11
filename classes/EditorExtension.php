@@ -229,10 +229,12 @@ class EditorExtension extends ExtensionBase
         );
 
         $description->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
+
         $description->setInitialDocumentData([
+            'title' => __("New page"),
             'fileName' => '',
             'markup' => '',
-            'settings' => ['title' => '', 'url' => '/']
+            'settings' => ['title' => __("New page"), 'url' => '/']
         ]);
 
         $menuDescription = new NewDocumentDescription(

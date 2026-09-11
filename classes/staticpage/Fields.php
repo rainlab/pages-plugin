@@ -7,11 +7,27 @@ class Fields
 {
     /**
      * defineSettingsFields returns the Inspector field definitions for a static page.
-     * The title and URL are edited in the document header, not here.
      */
     public function defineSettingsFields(): array
     {
         return [
+            'title' => [
+                'title' => "Title",
+                'placeholder' => "New page",
+                'type' => 'string',
+                'validation' => [
+                    'required' => ['message' => "The Title is required."]
+                ]
+            ],
+            'url' => [
+                'title' => "URL",
+                'placeholder' => "/",
+                'type' => 'string',
+                'preset' => ['property' => "title", 'type' => 'url'],
+                'validation' => [
+                    'required' => ['message' => "The URL is required."]
+                ]
+            ],
             'fileName' => [
                 'title' => "File Name",
                 'type' => 'string',

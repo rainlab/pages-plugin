@@ -217,6 +217,17 @@ export default {
         }
     },
     methods: {
+        onTitleInput: function() {
+            if (!this.isNewDocument) {
+                return;
+            }
+
+            this.documentData.fileName = oc.InputPresetEngine.formatValue(
+                { inputPresetType: 'file', inputPresetRemoveWords: true },
+                this.documentData.title
+            );
+        },
+
         getRootProperties: function() {
             return ['fileName', 'markup', 'placeholders'];
         },
