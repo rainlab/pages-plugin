@@ -173,6 +173,14 @@ trait HasStaticPageCrud
             return ['mtimeMismatch' => true];
         }
 
+        // An existing page whose posted file name differs is renamed on disk first
+        if (strlen($path)) {
+            $newFileName = trim((string) array_get($documentData, 'fileName'));
+            if (strlen($newFileName)) {
+                $page->renameFileName($newFileName);
+            }
+        }
+
         $settings = $this->cleanSyntaxFieldData((array) array_get($documentData, 'settings', []));
 
         // New pages nest under a parent when created via "Add subpage".

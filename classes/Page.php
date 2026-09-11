@@ -147,12 +147,16 @@ class Page extends ContentBase
     {
         $pages = Page::listInTheme($this->theme, true);
 
-        Validator::extend('uniqueUrl', function($attribute, $value, $parameters) use ($pages) {
+        // While a rename is pending the file still exists on disk under its old base
+        // name, so both the old and new names identify this same page.
+        $ownNames = array_filter([$this->getBaseFileName(), $this->renamedFromBaseFileName]);
+
+        Validator::extend('uniqueUrl', function($attribute, $value, $parameters) use ($pages, $ownNames) {
             $value = trim(strtolower($value));
 
             foreach ($pages as $existingPage) {
                 if (
-                    $existingPage->getBaseFileName() !== $this->getBaseFileName() &&
+                    !in_array($existingPage->getBaseFileName(), $ownNames, true) &&
                     strtolower($existingPage->getViewBag()->property('url')) == $value
                 ) {
                     return false;
@@ -245,6 +249,92 @@ class Page extends ContentBase
         $this->removeFromMeta();
 
         return $result;
+    }
+
+    /**
+     * @var string|null renamedFromBaseFileName holds the previous base file name while a
+     * rename is pending, so the meta index key can be updated after the file is saved.
+     */
+    protected $renamedFromBaseFileName = null;
+
+    /**
+     * renameFileName marks this page's file to be renamed on the next save, keeping its
+     * children nested under it in the meta index
+     */
+    public function renameFileName($newFileName)
+    {
+        $newFileName = $this->normalizeFileName($newFileName);
+
+        if ($newFileName === $this->fileName) {
+            return;
+        }
+
+        $this->renamedFromBaseFileName = $this->getBaseFileName();
+
+        // Move any locale mirror files while the old file name is still current.
+        $this->renameLocaleMirrors($this->fileName, $newFileName);
+
+        // Setting the dirty fileName makes Halcyon rename the file on disk when saved.
+        $this->fileName = $newFileName;
+    }
+
+    /**
+     * afterSave finalizes a pending rename by updating the meta index key in place.
+     */
+    public function afterSave()
+    {
+        if ($this->renamedFromBaseFileName !== null) {
+            $pageList = new PageList($this->theme);
+            $pageList->renameKey($this->renamedFromBaseFileName, $this->getBaseFileName());
+            $this->renamedFromBaseFileName = null;
+        }
+    }
+
+    /**
+     * normalizeFileName trims a posted file name and ensures the .htm extension.
+     * @param string $fileName
+     * @return string
+     */
+    protected function normalizeFileName($fileName)
+    {
+        $fileName = trim((string) $fileName, '/');
+
+        if (!strlen(pathinfo($fileName, PATHINFO_EXTENSION))) {
+            $fileName .= '.htm';
+        }
+
+        return $fileName;
+    }
+
+    /**
+     * renameLocaleMirrors moves any translated mirror files to follow a base rename.
+     * @param string $oldFileName
+     * @param string $newFileName
+     */
+    protected function renameLocaleMirrors($oldFileName, $newFileName)
+    {
+        $pattern = $this->theme->getPath().'/content/static-pages-*/'.$oldFileName;
+
+        foreach (File::glob($pattern) ?: [] as $filePath) {
+            $newPath = dirname($filePath).'/'.$newFileName;
+            if (File::exists($newPath)) {
+                continue;
+            }
+
+            // Copy then delete rather than rename: a plain rename can fail on Windows
+            // while the source is briefly locked by another process. The delete is
+            // retried for the same reason.
+            File::copy($filePath, $newPath);
+
+            for ($attempt = 0; $attempt < 5; $attempt++) {
+                File::delete($filePath);
+                clearstatcache(true, $filePath);
+                if (!File::exists($filePath)) {
+                    break;
+                }
+                usleep(100000);
+            }
+        }
     }
 
     /**

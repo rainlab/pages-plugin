@@ -116,6 +116,50 @@ class StaticPageTest extends PagesPluginTestCase
         $this->assertContains('new-page', $names);
     }
 
+    public function testRenameFileNameMovesFileAndMetaKey()
+    {
+        $page = Page::load($this->theme, 'about');
+        $page->renameFileName('company');
+        $page->save();
+
+        $this->assertEquals('company.htm', $page->fileName);
+        $this->assertFileExists($this->theme->getPath().'/content/static-pages/company.htm');
+        $this->assertFileDoesNotExist($this->theme->getPath().'/content/static-pages/about.htm');
+
+        // The meta index key is renamed in place and the child stays nested under it.
+        $pageList = new PageList($this->theme);
+        $config = $pageList->getPageTree(true);
+
+        $company = null;
+        foreach ($config as $node) {
+            if ($node->page->getBaseFileName() === 'company') {
+                $company = $node;
+            }
+        }
+
+        $this->assertNotNull($company);
+        $this->assertCount(1, $company->subpages);
+        $this->assertEquals('about-team', $company->subpages[0]->page->getBaseFileName());
+    }
+
+    public function testRenameFileNameMovesLocaleMirror()
+    {
+        $page = Page::load($this->theme, 'about');
+        $page->renameFileName('company.htm');
+        $page->save();
+
+        $this->assertFileExists($this->theme->getPath().'/content/static-pages-fr/company.htm');
+        $this->assertFileDoesNotExist($this->theme->getPath().'/content/static-pages-fr/about.htm');
+    }
+
+    public function testRenameFileNameNoOpWhenUnchanged()
+    {
+        $page = Page::load($this->theme, 'about');
+        $page->renameFileName('about');
+
+        $this->assertFalse($page->isDirty('fileName'));
+    }
+
     public function testDeletePageRemovesChildrenAndMeta()
     {
         $page = Page::load($this->theme, 'about');

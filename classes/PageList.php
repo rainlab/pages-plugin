@@ -169,6 +169,30 @@ class PageList
     }
 
     /**
+     * renameKey renames a page's base filename key in place, preserving its position and its subtree
+     * @param string $oldBaseFileName
+     * @param string $newBaseFileName
+     */
+    public function renameKey($oldBaseFileName, $newBaseFileName)
+    {
+        $pagesConfig = $this->getPagesConfig();
+
+        $iterator = function($configPages) use (&$iterator, $oldBaseFileName, $newBaseFileName) {
+            $result = [];
+
+            foreach ($configPages as $fileName => $subpages) {
+                $key = ($fileName === $oldBaseFileName) ? $newBaseFileName : $fileName;
+                $result[$key] = $iterator($subpages);
+            }
+
+            return $result;
+        };
+
+        $updatedStructure = $iterator($pagesConfig['static-pages']);
+        $this->updateStructure($updatedStructure);
+    }
+
+    /**
      * removeSubtree removes a part of the page hierarchy starting from the specified page
      * @param \Cms\Classes\Page $page Specifies a page object.
      */
