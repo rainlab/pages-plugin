@@ -67,6 +67,7 @@ abstract class PagesPluginTestCase extends PluginTestCase
 
         $this->resetStaticProperty(Page::class, 'menuTreeCache', null);
         $this->resetStaticProperty(PageList::class, 'configCache', false);
+        $this->resetStaticProperty(PageList::class, 'structureCache', false);
     }
 
     /**

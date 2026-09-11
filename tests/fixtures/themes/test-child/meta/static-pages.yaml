@@ -1,0 +1,4 @@
+static-pages:
+    about:
+        about-team: {  }
+    child-only: {  }
