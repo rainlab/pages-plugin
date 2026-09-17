@@ -183,6 +183,10 @@ trait HasStaticPageCrud
 
         $settings = $this->cleanSyntaxFieldData((array) array_get($documentData, 'settings', []));
 
+        // Run the raw island postback through the syntax-fields Form widget so nested widgets
+        // (taglist, repeater) apply their save processing, then overlay the processed values.
+        $settings = $this->applySyntaxFieldSaveData($controller, $documentData, $path, $settings);
+
         // New pages nest under a parent when created via "Add subpage".
         $parentFileName = trim((string) array_get($metadata, 'parentFileName'));
         if (!strlen($path) && strlen($parentFileName)) {
@@ -270,6 +274,9 @@ trait HasStaticPageCrud
         }
 
         $settings = $this->cleanSyntaxFieldData((array) array_get($documentData, 'settings', []));
+
+        // Apply the same nested-widget save processing the base save performs.
+        $settings = $this->applySyntaxFieldSaveData($controller, $documentData, $path, $settings);
 
         // A URL differing from the base URL is stored as localeUrl.{locale} in the
         // base file, matching the translated URL storage read by HasTranslatableBag.
@@ -403,6 +410,30 @@ trait HasStaticPageCrud
         };
 
         return $normalize($value) === $normalize($base);
+    }
+
+    /**
+     * applySyntaxFieldSaveData overlays the processed syntax-field values onto the posted
+     * settings. The raw island postback (documentData.syntaxFormData) is run through the
+     * syntax-fields Form widget so nested widgets apply their save logic (for example a
+     * taglist in string mode joining selections into a separator-delimited string). Only
+     * the syntax-field keys are replaced; structural settings (url, title, layout) are kept.
+     */
+    protected function applySyntaxFieldSaveData($controller, array $documentData, string $path, array $settings): array
+    {
+        $postback = array_get($documentData, 'syntaxFormData');
+        if (!is_array($postback) || !$postback) {
+            return $settings;
+        }
+
+        $alias = array_get($documentData, 'syntaxFormAlias');
+        $processed = $controller->processSyntaxFieldPostback($path, $postback, [], $alias);
+
+        foreach ($processed as $key => $value) {
+            $settings[$key] = $value;
+        }
+
+        return $settings;
     }
 
     /**

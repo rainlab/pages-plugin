@@ -106,6 +106,71 @@ trait HasSyntaxFields
     }
 
     /**
+     * processSyntaxFieldPostback runs the raw island postback through the Form widget so each
+     * nested widget's getSaveValue() applies, matching how a native backend form saves.
+     *
+     * The Vue editor issues its save over the command bus rather than submitting the island
+     * form, so the raw island inputs are forwarded verbatim as $postback (repeater indexes,
+     * group markers and _loaded flags included). They are merged into the request so the
+     * rebuilt Form widget and its nested widgets read them as genuine postback data, then the
+     * processed viewBag is extracted via getSaveData(). Returns the given $fallback when no
+     * postback is available, or the page has no syntax fields.
+     */
+    public function processSyntaxFieldPostback($path, $postback, array $fallback, $alias = null): array
+    {
+        if (!is_array($postback) || !$postback) {
+            return $fallback;
+        }
+
+        // Nested widgets (repeater items) re-read their values from the request during save,
+        // so the raw postback must be present there, keyed by the widget's array name.
+        request()->merge($postback);
+
+        $widget = $this->buildSyntaxFieldsSaveWidget($path, $alias);
+        if (!$widget) {
+            return $fallback;
+        }
+
+        return (array) array_get($widget->getSaveData(), 'viewBag', $fallback);
+    }
+
+    /**
+     * buildSyntaxFieldsSaveWidget builds a Form widget carrying every syntax field for a page,
+     * regardless of tab, for processing posted values on save. The alias matches the rendered
+     * island so nested repeater postback markers (for example {alias}Form0_loaded) resolve. It
+     * bypasses the per-request widget cache so a tab-scoped island bound earlier in the request
+     * is not reused.
+     */
+    protected function buildSyntaxFieldsSaveWidget($path, $alias = null)
+    {
+        $theme = Theme::getEditTheme();
+        $page = StaticPage::load($theme, $path);
+        if (!$page) {
+            return null;
+        }
+
+        $page->applySiteContext(Site::getSiteFromContext());
+
+        $alias = preg_replace('/[^a-zA-Z0-9]/', '', (string) $alias);
+
+        $config = $this->makeConfig(['fields' => []]);
+        $config->model = $page;
+        $config->alias = strlen($alias) ? $alias : $this->getSyntaxFieldsAlias();
+        $config->arrayName = 'syntaxFields';
+        $config->context = $page->exists ? 'update' : 'create';
+
+        $widget = $this->makeWidget(\Backend\Widgets\Form::class, $config);
+
+        $widget->bindEvent('form.extendFieldsBefore', function () use ($widget, $page) {
+            $this->addPageSyntaxFields($widget, $page, null);
+        });
+
+        $widget->bindToController();
+
+        return $widget;
+    }
+
+    /**
      * bindSyntaxFieldsWidget rebuilds the widget on any request carrying a page path.
      *
      * Nested widgets (repeater, mediafinder) fire their own AJAX handlers, which require the

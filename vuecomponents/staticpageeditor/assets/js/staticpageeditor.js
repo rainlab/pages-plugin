@@ -398,6 +398,14 @@ export default {
                 result.settings[key] = syntaxData[key];
             });
 
+            // The raw island inputs (repeater bookkeeping and _loaded markers included) ride
+            // along verbatim so the server can rebuild the Form widget and apply each nested
+            // widget's save processing, exactly as a native backend form submit does. The
+            // render-time form alias travels with it so the rebuilt widget derives the same
+            // nested aliases, letting the repeater recognize its _loaded postback marker.
+            result.syntaxFormData = this.collectSyntaxFormPostback();
+            result.syntaxFormAlias = 'pagesSyntaxForm' + this.syntaxFormUid;
+
             return result;
         },
 
@@ -432,16 +440,62 @@ export default {
             return result;
         },
 
+        // Serializes every loaded island form into a nested structure keyed by input name,
+        // preserving repeater indexes, group markers and multi-value arrays, so the server
+        // reads it as genuine postback data for the syntax-fields Form widget.
+        collectSyntaxFormPostback: function() {
+            const result = {};
+
+            this.syntaxSurfaces.forEach((surface) => {
+                const form = this.$refs['form_' + surface.containerId];
+                const el = Array.isArray(form) ? form[0] : form;
+                if (!this.loadedSyntaxGroups[surface.key] || !el) {
+                    return;
+                }
+
+                const formData = new FormData(el);
+                for (const [name, value] of formData.entries()) {
+                    const bracketRe = /([^\[\]]+)|\[([^\]]*)\]/g;
+                    const path = [];
+                    let m;
+                    while ((m = bracketRe.exec(name)) !== null) {
+                        path.push(m[1] !== undefined ? m[1] : m[2]);
+                    }
+
+                    this.assignNested(result, path, value);
+                }
+            });
+
+            return result;
+        },
+
+        // Assigns a value at the bracket path parsed from an input name. A trailing empty
+        // key (from a `name[]` input, such as a multi-select taglist) appends to an array so
+        // every posted value is kept, rather than repeated values overwriting one another.
         assignNested: function(target, path, value) {
+            // A trailing empty segment means the preceding key holds an array.
+            const isArrayKey = path[path.length - 1] === '';
+            const keys = isArrayKey ? path.slice(0, -1) : path;
+
             let node = target;
-            for (let i = 0; i < path.length - 1; i++) {
-                const key = path[i];
+            for (let i = 0; i < keys.length - 1; i++) {
+                const key = keys[i];
                 if (node[key] === undefined || typeof node[key] !== 'object') {
                     node[key] = {};
                 }
                 node = node[key];
             }
-            node[path[path.length - 1]] = value;
+
+            const lastKey = keys[keys.length - 1];
+            if (isArrayKey) {
+                if (!Array.isArray(node[lastKey])) {
+                    node[lastKey] = [];
+                }
+                node[lastKey].push(value);
+            }
+            else {
+                node[lastKey] = value;
+            }
         },
 
         loadSyntaxGroup: function(surface) {
