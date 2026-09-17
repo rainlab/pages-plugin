@@ -44,6 +44,54 @@ You may also use the `{repeater}` tag for repeating content:
 
 For more details on syntax fields, see the [Parser section](https://octobercms.com/docs/services/parser#dynamic-syntax-parser) of the October documentation.
 
+## Blocks
+
+A repeater can offer the editor a choice of item types by supplying a `groups` attribute. Each item then picks a group, and only that group's fields are shown. This turns the repeater into a block builder, where every group is a reusable block definition. The `groups` attribute points to a YAML file, conventionally stored in the theme's `meta` directory:
+
+```html
+{repeater name="sections" groups="~/themes/website/meta/blocks.yaml" prompt="Add a block"}{/repeater}
+```
+
+The groups file defines each block by a code, with its `name`, an optional `icon`, and its `fields`:
+
+```yaml
+documents:
+    name: Documents
+    icon: icon-file-text-o
+    fields:
+        heading:
+            label: Heading
+            type: text
+        categories:
+            label: Categories
+            type: taglist
+            mode: string
+            optionsMethod: getDocumentCategoryOptions
+quote:
+    name: Pull quote
+    icon: icon-quote-left
+    fields:
+        body:
+            label: Quote
+            type: textarea
+```
+
+The `~` prefix resolves to the application directory, so `~/themes/website/meta/blocks.yaml` refers to the file inside the active theme. The `$` prefix may be used as an alternative absolute path syntax.
+
+Each saved item stores its chosen block code alongside its field values, so you can branch on it in the markup. Loop over the items and render each block by its code:
+
+```twig
+{% for section in sections %}
+    {% if section._group == 'documents' %}
+        <h2>{{ section.heading }}</h2>
+    {% elseif section._group == 'quote' %}
+        <blockquote>{{ section.body }}</blockquote>
+    {% endif %}
+{% endfor %}
+```
+
+Nested widgets inside a block behave exactly as they do on a regular form. A `taglist` in `string` mode, for example, joins its selections into a separator-delimited string, and a `mediafinder` returns its attachment, so no special handling is needed when reading block values in the markup.
+
 ## Placeholders
 
 [Placeholders](https://octobercms.com/docs/cms/layouts#placeholders) defined in the layout are automatically detected by the Pages plugin. The Edit Static Page form displays a tab for each placeholder defined in the layout used by the page. Placeholders are defined in the layout in the usual way:
