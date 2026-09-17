@@ -1,3 +1,8 @@
+<?php
+    $pagesToolbarButtons = class_exists(\Backend\Classes\RichEditorManager::class)
+        ? \Backend\Classes\RichEditorManager::instance()->getToolbarButtons('pages-content')
+        : null;
+?>
 <backend-document
     :header-collapsed="documentHeaderCollapsed"
     :full-screen="documentFullScreen"
@@ -65,6 +70,9 @@
                         <backend-richeditor
                             :model-value="surfaceValue(surface)"
                             @update:model-value="setSurfaceValue(surface, $event)"
+                            <?php if ($pagesToolbarButtons): ?>
+                                :toolbar-buttons="<?= e(json_encode(explode(',', $pagesToolbarButtons))) ?>"
+                            <?php endif ?>
                         >
                         </backend-richeditor>
                     </backend-richeditor-document-connector>

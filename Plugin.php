@@ -73,6 +73,19 @@ class Plugin extends PluginBase
     }
 
     /**
+     * registerRichEditorToolbars
+     */
+    public function registerRichEditorToolbars()
+    {
+        return [
+            'pages-content' => [
+                'label' => "Pages Content",
+                'description' => "Used by static page and content block editors.",
+            ],
+        ];
+    }
+
+    /**
      * registerPermissions available for backend users.
      */
     public function registerPermissions()
