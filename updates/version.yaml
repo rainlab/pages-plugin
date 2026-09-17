@@ -92,3 +92,4 @@ v2.2.6: Compatibility fixes for October v4.3
 v3.0.0: Modernized backend editor rebuilt on the Vue Editor module
 v3.0.1: Performance improvements on very large pages with repeaters
 v3.0.2: Fixes core translation of syntax fields
+v3.0.3: Fixes syntax fields not piping through the form widget save data
