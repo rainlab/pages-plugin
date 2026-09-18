@@ -1,0 +1,14 @@
+documents:
+    name: Documents
+    icon: icon-file-text-o
+    fields:
+        label:
+            label: Label
+            type: text
+quote:
+    name: Pull quote
+    icon: icon-quote-left
+    fields:
+        body:
+            label: Quote
+            type: textarea

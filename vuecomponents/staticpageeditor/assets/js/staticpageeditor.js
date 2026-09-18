@@ -403,10 +403,29 @@ export default {
             // widget's save processing, exactly as a native backend form submit does. The
             // render-time form alias travels with it so the rebuilt widget derives the same
             // nested aliases, letting the repeater recognize its _loaded postback marker.
-            result.syntaxFormData = this.collectSyntaxFormPostback();
+            result.syntaxFormData = this.collectSyntaxFormPostback().data;
             result.syntaxFormAlias = 'pagesSyntaxForm' + this.syntaxFormUid;
 
             return result;
+        },
+
+        // getSaveEnvelope returns the larajax request envelope carrying the repeater-item
+        // ordering manifest, so the server can restore the DOM (drag-reordered) order that the
+        // object serializer loses when it re-sorts integer keys ascending. Each order path is
+        // rooted at documentData.syntaxFormData, matching where the raw postback sits in the
+        // request.
+        getSaveEnvelope: function(documentData) {
+            const orders = this.collectSyntaxFormPostback().orders;
+            if (!orders.length) {
+                return null;
+            }
+
+            return {
+                orders: orders.map((order) => ({
+                    path: ['documentData', 'syntaxFormData'].concat(order.path),
+                    keys: order.keys
+                }))
+            };
         },
 
         collectSyntaxFieldData: function() {
@@ -443,8 +462,14 @@ export default {
         // Serializes every loaded island form into a nested structure keyed by input name,
         // preserving repeater indexes, group markers and multi-value arrays, so the server
         // reads it as genuine postback data for the syntax-fields Form widget.
+        //
+        // Returns { data, orders }. `orders` is the DOM-order manifest for every container
+        // whose keys are integer indexes (repeater items): JavaScript re-sorts those keys
+        // ascending when the object is serialized, so the manifest lets the server restore the
+        // order the items were walked in here (their drag-reordered order).
         collectSyntaxFormPostback: function() {
-            const result = {};
+            const data = {};
+            const domOrder = new Map();
 
             this.syntaxSurfaces.forEach((surface) => {
                 const form = this.$refs['form_' + surface.containerId];
@@ -455,24 +480,34 @@ export default {
 
                 const formData = new FormData(el);
                 for (const [name, value] of formData.entries()) {
-                    const bracketRe = /([^\[\]]+)|\[([^\]]*)\]/g;
-                    const path = [];
-                    let m;
-                    while ((m = bracketRe.exec(name)) !== null) {
-                        path.push(m[1] !== undefined ? m[1] : m[2]);
-                    }
-
-                    this.assignNested(result, path, value);
+                    this.assignNested(data, this.parseInputPath(name), value, domOrder);
                 }
             });
 
-            return result;
+            return { data: data, orders: this.buildOrderManifest(domOrder) };
+        },
+
+        // parseInputPath splits an input name into its bracket-path segments, e.g.
+        // "syntaxFields[viewBag][sections][0][_group]" ->
+        // ['syntaxFields','viewBag','sections','0','_group'].
+        parseInputPath: function(name) {
+            const bracketRe = /([^\[\]]+)|\[([^\]]*)\]/g;
+            const path = [];
+            let m;
+            while ((m = bracketRe.exec(name)) !== null) {
+                path.push(m[1] !== undefined ? m[1] : m[2]);
+            }
+            return path;
         },
 
         // Assigns a value at the bracket path parsed from an input name. A trailing empty
         // key (from a `name[]` input, such as a multi-select taglist) appends to an array so
         // every posted value is kept, rather than repeated values overwriting one another.
-        assignNested: function(target, path, value) {
+        //
+        // When `domOrder` is given, the first-seen order of each container's child keys is
+        // recorded against the container's path, so buildOrderManifest can later emit the
+        // DOM order of integer-keyed containers.
+        assignNested: function(target, path, value, domOrder) {
             // A trailing empty segment means the preceding key holds an array.
             const isArrayKey = path[path.length - 1] === '';
             const keys = isArrayKey ? path.slice(0, -1) : path;
@@ -483,10 +518,13 @@ export default {
                 if (node[key] === undefined || typeof node[key] !== 'object') {
                     node[key] = {};
                 }
+                this.recordKeyOrder(domOrder, keys.slice(0, i), key);
                 node = node[key];
             }
 
             const lastKey = keys[keys.length - 1];
+            this.recordKeyOrder(domOrder, keys.slice(0, keys.length - 1), lastKey);
+
             if (isArrayKey) {
                 if (!Array.isArray(node[lastKey])) {
                     node[lastKey] = [];
@@ -496,6 +534,47 @@ export default {
             else {
                 node[lastKey] = value;
             }
+        },
+
+        // recordKeyOrder appends `key` to the first-seen key list of the container at
+        // `containerPath`, keyed by that path so sibling containers stay distinct.
+        recordKeyOrder: function(domOrder, containerPath, key) {
+            if (!domOrder) {
+                return;
+            }
+            const mapKey = containerPath.join(' ');
+            let entry = domOrder.get(mapKey);
+            if (!entry) {
+                entry = { path: containerPath, keys: [] };
+                domOrder.set(mapKey, entry);
+            }
+            if (entry.keys.indexOf(key) === -1) {
+                entry.keys.push(key);
+            }
+        },
+
+        // buildOrderManifest keeps only the containers whose keys are all integer indexes
+        // (repeater item collections) and whose DOM order differs from ascending numeric
+        // order, since only those need correcting on the server.
+        buildOrderManifest: function(domOrder) {
+            const orders = [];
+
+            domOrder.forEach((entry) => {
+                const keys = entry.keys;
+                const allNumeric = keys.length > 1 && keys.every((key) => /^\d+$/.test(key));
+                if (!allNumeric) {
+                    return;
+                }
+
+                const ascending = keys.slice().sort((a, b) => Number(a) - Number(b));
+                if (keys.join(',') === ascending.join(',')) {
+                    return;
+                }
+
+                orders.push({ path: entry.path, keys: keys });
+            });
+
+            return orders;
         },
 
         loadSyntaxGroup: function(surface) {

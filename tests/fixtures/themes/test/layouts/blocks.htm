@@ -1,0 +1,12 @@
+description = "Blocks layout"
+
+[staticPage]
+==
+<html>
+    <body>
+        {% page %}
+        {repeater name="sections" groups="~/plugins/rainlab/pages/tests/fixtures/themes/test/meta/blocks.yaml" tab="Blocks"}
+            {variable name="_dummy" type="text"}{/variable}
+        {/repeater}
+    </body>
+</html>
