@@ -53,6 +53,80 @@ class StaticPageTest extends PagesPluginTestCase
         $this->assertEquals('Default layout', $options['default']);
     }
 
+    public function testSyntaxFieldGroupsKeepRawTabAndTranslateLabel()
+    {
+        $page = $this->makeStubPageWithSyntaxFields([
+            'plain'      => ['type' => 'text'],
+            'featured'   => ['type' => 'text', 'tab' => 'Pages & menus features.'],
+            'ignored'    => ['type' => 'fileupload', 'tab' => 'Pages & menus features.'],
+        ]);
+
+        // The plugin's JSON lang is only wired to the translator in backend context, so register
+        // it here to exercise the real __() label path under the French locale.
+        app('translator')->addJsonPath(plugins_path('rainlab/pages/lang'));
+        $originalLocale = App::getLocale();
+        App::setLocale('fr');
+
+        try {
+            $groups = $this->invokeGetSyntaxFieldGroups($page);
+        }
+        finally {
+            App::setLocale($originalLocale);
+        }
+
+        $byTitle = [];
+        foreach ($groups as $group) {
+            $byTitle[$group['title']] = $group;
+        }
+
+        // The no-tab field falls back to the raw "Fields" identity, translated for display.
+        $this->assertArrayHasKey('Fields', $byTitle);
+        $this->assertEquals('Fields', $byTitle['Fields']['title']);
+        $this->assertEquals('Champs', $byTitle['Fields']['label']);
+
+        // The tab identity stays raw (used for keying and postback); the label is translated.
+        $this->assertArrayHasKey('Pages & menus features.', $byTitle);
+        $this->assertEquals('Pages & menus features.', $byTitle['Pages & menus features.']['title']);
+        $this->assertEquals('Fonctionnalités de pages et menus statiques.', $byTitle['Pages & menus features.']['label']);
+
+        // The fileupload field is skipped, so its tab produces no extra group.
+        $this->assertCount(2, $groups);
+    }
+
+    /**
+     * makeStubPageWithSyntaxFields returns a page double whose listLayoutSyntaxFields is fixed.
+     */
+    protected function makeStubPageWithSyntaxFields(array $fields)
+    {
+        return new class($fields) extends Page {
+            public function __construct(protected array $syntaxFields)
+            {
+            }
+
+            public function listLayoutSyntaxFields()
+            {
+                return $this->syntaxFields;
+            }
+        };
+    }
+
+    /**
+     * invokeGetSyntaxFieldGroups reaches the protected editor-extension grouping helper.
+     */
+    protected function invokeGetSyntaxFieldGroups(Page $page): array
+    {
+        $host = new class {
+            use \RainLab\Pages\Classes\EditorExtension\HasStaticPageCrud;
+
+            public function call(Page $page): array
+            {
+                return $this->getSyntaxFieldGroups($page);
+            }
+        };
+
+        return $host->call($page);
+    }
+
     public function testListLayoutPlaceholders()
     {
         $page = Page::load($this->theme, 'sidebar-page');

@@ -70,7 +70,7 @@ trait HasSyntaxFields
             }
 
             if ($tab !== null) {
-                $fieldTab = trim((string) ($fieldConfig['tab'] ?? '')) ?: __("Fields");
+                $fieldTab = trim((string) ($fieldConfig['tab'] ?? '')) ?: "Fields";
                 if ($fieldTab !== $tab) {
                     continue;
                 }

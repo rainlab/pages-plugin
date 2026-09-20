@@ -70,6 +70,7 @@ export default {
                 surfaces.push({
                     key: group.key,
                     title: group.title,
+                    label: group.label || group.title,
                     mode: 'syntax',
                     tab: group.title,
                     containerId: 'pagesSyntax' + this.syntaxFormUid + '_' + group.key.replace(/[^a-z0-9]/gi, '')
@@ -86,7 +87,7 @@ export default {
         surfaceTabs: function() {
             return this.contentSurfaces.map((surface) => ({
                 key: surface.key,
-                label: surface.title
+                label: surface.label || surface.title
             }));
         },
 

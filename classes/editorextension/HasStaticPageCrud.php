@@ -572,11 +572,11 @@ trait HasStaticPageCrud
                 continue;
             }
 
-            $tab = trim((string) ($fieldConfig['tab'] ?? '')) ?: __("Fields");
+            $tab = trim((string) ($fieldConfig['tab'] ?? '')) ?: "Fields";
             $key = 'syntax:'.md5($tab);
 
             if (!isset($groups[$key])) {
-                $groups[$key] = ['key' => $key, 'title' => $tab];
+                $groups[$key] = ['key' => $key, 'title' => $tab, 'label' => __($tab)];
             }
         }
 
