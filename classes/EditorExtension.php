@@ -371,8 +371,8 @@ class EditorExtension extends ExtensionBase
 
         $this->addNodeCreateMenu($rootNode, self::DOCUMENT_TYPE_CONTENT, __("New Content Block"));
 
-        // Folder nodes are cached by path so files sharing a directory nest under one folder.
-        $folderNodes = [];
+        $localeKeys = Content::listLocaleKeys();
+        $fileNames = [];
 
         foreach (Content::listInTheme($theme, true) as $content) {
             $fileName = ltrim($content->fileName, '/');
@@ -383,11 +383,50 @@ class EditorExtension extends ExtensionBase
                 continue;
             }
 
+            // Translations are edited by selecting their site, not listed as separate blocks.
+            if (Content::isTranslationFileName($fileName, $localeKeys)) {
+                continue;
+            }
+
+            $fileNames[] = $fileName;
+        }
+
+        usort($fileNames, [$this, 'compareContentFileNames']);
+
+        // Folder nodes are cached by path so files sharing a directory nest under one folder.
+        $folderNodes = [];
+
+        foreach ($fileNames as $fileName) {
             $parentNode = $this->resolveContentFolderNode($rootNode, $fileName, $folderNodes);
 
             $node = $parentNode->addNode(basename($fileName), $fileName);
             $node->setIcon(self::ICON_COLOR_CONTENT, 'backend-icon-background entity-small cms-content');
         }
+    }
+
+    /**
+     * compareContentFileNames sorts content paths alphabetically with folders before files at each level.
+     */
+    protected function compareContentFileNames(string $fileNameA, string $fileNameB): int
+    {
+        $segmentsA = explode('/', $fileNameA);
+        $segmentsB = explode('/', $fileNameB);
+        $depth = min(count($segmentsA), count($segmentsB));
+
+        for ($index = 0; $index < $depth; $index++) {
+            $isFolderA = $index < count($segmentsA) - 1;
+            $isFolderB = $index < count($segmentsB) - 1;
+
+            if ($isFolderA !== $isFolderB) {
+                return $isFolderA ? -1 : 1;
+            }
+
+            if ($result = strnatcasecmp($segmentsA[$index], $segmentsB[$index])) {
+                return $result;
+            }
+        }
+
+        return count($segmentsA) <=> count($segmentsB);
     }
 
     /**

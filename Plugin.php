@@ -20,6 +20,8 @@ class Plugin extends PluginBase
         Event::listen('editor.extension.register', function () {
             return \RainLab\Pages\Classes\EditorExtension::class;
         });
+
+        $this->registerConsoleCommand('pages.migratev2', \RainLab\Pages\Console\MigrateV2Command::class);
     }
 
     /**

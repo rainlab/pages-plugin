@@ -79,5 +79,6 @@
     "Preview": "Voorbeeld",
     "Add subpage": "Subpagina toevoegen",
     "You don't have permissions to manage :type documents.": "U heeft geen rechten om :type documenten te beheren.",
-    "Content files cannot be saved in the static pages directory.": "Inhoudsbestanden kunnen niet worden opgeslagen in de map met statische pagina's."
+    "Content files cannot be saved in the static pages directory.": "Inhoudsbestanden kunnen niet worden opgeslagen in de map met statische pagina's.",
+    "This file name is reserved for translations. Select a site to translate the content block instead.": "Deze bestandsnaam is gereserveerd voor vertalingen. Selecteer een site om het inhoudsblok te vertalen."
 }

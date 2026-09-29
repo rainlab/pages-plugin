@@ -2,7 +2,6 @@
 
 use File;
 use Event;
-use Config;
 use SystemException;
 use ApplicationException;
 use Cms\Classes\Theme;
@@ -27,9 +26,20 @@ trait HasContentCrud
             throw new SystemException(sprintf('The content block %s was not found.', $path));
         }
 
+        $document = $this->contentToDocumentArray($content);
+        $metadata = $this->contentMetadata($content);
+
+        // A non-primary-locale site shows its translation, or the content it inherits until translated.
+        if ($locale = $this->getEditLocale()) {
+            $translation = $content->findTranslation($locale);
+            $document['markup'] = ($translation ?: $content->findInheritedTranslation($locale))->markup;
+            $metadata['locale'] = $locale;
+            $metadata['mtime'] = $translation ? $translation->mtime : null;
+        }
+
         return [
-            'document' => $this->contentToDocumentArray($content),
-            'metadata' => $this->contentMetadata($content)
+            'document' => $document,
+            'metadata' => $metadata
         ];
     }
 
@@ -53,6 +63,11 @@ trait HasContentCrud
             throw new SystemException(sprintf('The content block %s was not found.', $path));
         }
 
+        // Editing an existing block with a non-primary-locale site selected saves its translation.
+        if (strlen($path) && ($locale = $this->getEditLocale())) {
+            return $this->saveLocalizedContentDocument($controller, $content, $locale);
+        }
+
         if (
             strlen($path) &&
             !$forceSave &&
@@ -62,6 +77,8 @@ trait HasContentCrud
             return ['mtimeMismatch' => true];
         }
 
+        $previousFileName = $content->fileName;
+
         $fileName = (string) array_get($documentData, 'fileName');
         if (strlen($fileName)) {
             // Static page storage is managed by the page document type.
@@ -69,16 +86,20 @@ trait HasContentCrud
                 throw new ApplicationException(__("Content files cannot be saved in the static pages directory."));
             }
 
+            // Translations are edited by selecting their site, so their file names are reserved.
+            if (Content::isTranslationFileName($fileName, Content::listLocaleKeys())) {
+                throw new ApplicationException(__("This file name is reserved for translations. Select a site to translate the content block instead."));
+            }
+
             $content->fileName = $fileName;
         }
 
-        $markup = (string) array_get($documentData, 'markup');
-        if (Config::get('system.convert_line_endings', false) === true) {
-            $markup = str_replace(["\r\n", "\r"], "\n", $markup);
-        }
-
-        $content->markup = $markup;
+        $content->markup = $this->convertLineEndings((string) array_get($documentData, 'markup'));
         $content->save();
+
+        if (strlen($path)) {
+            $content->renameTranslationsFrom($previousFileName);
+        }
 
         Event::fire('cms.template.save', [$controller, $content, 'content']);
 
@@ -88,7 +109,67 @@ trait HasContentCrud
     }
 
     /**
-     * deleteContentDocument removes a content block.
+     * saveLocalizedContentDocument writes the posted markup to the locale directory, migrating any legacy suffixed translation.
+     */
+    protected function saveLocalizedContentDocument($controller, Content $content, string $locale)
+    {
+        $documentData = (array) post('documentData');
+        $metadata = (array) post('documentMetadata');
+        $forceSave = (bool) post('documentForceSave');
+
+        $localized = $content->findLocalizedTranslation($locale);
+        $legacy = $content->findLegacyTranslation($locale);
+        $translation = $localized ?: $legacy;
+
+        // Concurrency guard against the translation file
+        if (
+            $translation &&
+            !$forceSave &&
+            $translation->mtime &&
+            array_get($metadata, 'mtime') != $translation->mtime
+        ) {
+            return ['mtimeMismatch' => true];
+        }
+
+        $markup = $this->convertLineEndings((string) array_get($documentData, 'markup'));
+
+        // Markup matching the inherited content is not stored, so the locale keeps following the base.
+        if ($this->localeValueMatchesBase($markup, $content->findInheritedTranslation($locale)->markup)) {
+            $staleFiles = [$localized, $legacy];
+            $translation = null;
+        }
+        else {
+            if (!$localized) {
+                $localized = Content::inTheme($content->theme);
+                $localized->fileName = Content::makeLocaleFileName($content->fileName, $locale);
+            }
+
+            $localized->markup = $markup;
+            $localized->save();
+
+            Event::fire('cms.template.save', [$controller, $localized, 'content']);
+
+            // RainLab.Translate renders suffixed files first, so the legacy file is removed once migrated.
+            $staleFiles = [$legacy];
+            $translation = $localized;
+        }
+
+        foreach (array_filter($staleFiles) as $staleFile) {
+            $staleFile->delete();
+            Event::fire('cms.template.delete', [$controller, $staleFile]);
+        }
+
+        $result = $this->contentMetadata($content);
+        $result['locale'] = $locale;
+        $result['mtime'] = $translation ? $translation->mtime : null;
+
+        return [
+            'metadata' => $result
+        ];
+    }
+
+    /**
+     * deleteContentDocument removes a content block and its translations.
      */
     protected function deleteContentDocument($controller)
     {
@@ -97,6 +178,7 @@ trait HasContentCrud
 
         $content = Content::load($this->getContentTheme(), $path);
         if ($content) {
+            $content->deleteTranslations();
             $content->delete();
             Event::fire('cms.template.delete', [$controller, $content]);
         }
