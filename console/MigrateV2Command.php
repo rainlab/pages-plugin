@@ -49,6 +49,7 @@ class MigrateV2Command extends Command
         }
 
         $moved = 0;
+        $skipped = 0;
 
         foreach (Content::listInTheme($theme, true) as $content) {
             $fileName = ltrim($content->fileName, '/');
@@ -65,6 +66,7 @@ class MigrateV2Command extends Command
 
             if (Content::load($theme, $target)) {
                 $this->warn("Skipped {$fileName}, {$target} already exists");
+                $skipped++;
                 continue;
             }
 
@@ -75,12 +77,17 @@ class MigrateV2Command extends Command
             $moved++;
         }
 
-        if (!$moved) {
+        if (!$moved && !$skipped) {
             $this->info("No legacy content translations found, nothing to migrate.");
             return 0;
         }
 
-        $this->info("Successfully moved {$moved} content translation(s) in theme [{$theme->getDirName()}]");
+        $this->info("Moved {$moved} content translation(s) in theme [{$theme->getDirName()}]");
+
+        if ($skipped) {
+            $this->warn("Skipped {$skipped} file(s) whose locale directory file already exists, review and remove them manually.");
+        }
+
         return 0;
     }
 
