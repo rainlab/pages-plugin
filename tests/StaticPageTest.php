@@ -20,6 +20,22 @@ class StaticPageTest extends PagesPluginTestCase
         $this->assertEquals('<p>About content</p>', trim($page->markup));
     }
 
+    public function testCachedLoadDoesNotParseContent()
+    {
+        $resolved = 0;
+
+        Event::listen('cms.pageLookup.resolveItem', function () use (&$resolved) {
+            $resolved++;
+        });
+
+        // Static pages render through getProcessedMarkup, so caching must not resolve links
+        $page = Page::loadCached($this->theme, 'about.htm');
+
+        $this->assertNotNull($page);
+        $this->assertArrayNotHasKey('parsedMarkup', $page->getAttributes());
+        $this->assertEquals(0, $resolved);
+    }
+
     public function testUrlHelper()
     {
         $this->assertEquals(url('/about'), Page::url('about'));

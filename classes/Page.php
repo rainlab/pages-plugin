@@ -114,6 +114,14 @@ class Page extends ContentBase
     //
 
     /**
+     * initCacheItem skips content parsing, static pages render through getProcessedMarkup instead.
+     * @param array $item
+     */
+    public static function initCacheItem(&$item)
+    {
+    }
+
+    /**
      * fill sets the object attributes
      * @param array $attributes A list of attributes to set.
      */
