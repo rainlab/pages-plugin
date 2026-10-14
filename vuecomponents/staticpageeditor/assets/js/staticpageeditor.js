@@ -394,6 +394,7 @@ export default {
             }
 
             // Merge values from every loaded syntax-field island into settings (viewBag).
+            this.syncSyntaxForms();
             const syntaxData = this.collectSyntaxFieldData();
             Object.keys(syntaxData).forEach((key) => {
                 result.settings[key] = syntaxData[key];
@@ -427,6 +428,20 @@ export default {
                     keys: order.keys
                 }))
             };
+        },
+
+        // syncSyntaxForms raises the form submit event on each loaded island, since the save
+        // request never fires it there, so editor widgets (code, markdown, rich) flush their content.
+        syncSyntaxForms: function() {
+            this.syntaxSurfaces.forEach((surface) => {
+                const form = this.$refs['form_' + surface.containerId];
+                const el = Array.isArray(form) ? form[0] : form;
+                if (!this.loadedSyntaxGroups[surface.key] || !el) {
+                    return;
+                }
+
+                $(el).trigger('oc.beforeRequest');
+            });
         },
 
         collectSyntaxFieldData: function() {
