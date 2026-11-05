@@ -283,9 +283,9 @@ export default {
         },
 
         // Refresh a rich surface's connector once it becomes active. The connector runs
-        // updateSize()/extendToolbar() on mount, but on first load Froala's wrapper may not
-        // be ready yet (so the resizer stays non-responsive until the tab is toggled). Retry
-        // until the Froala wrapper exists, then run both:
+        // updateSize()/extendToolbar() on mount, but on first load the editor may not be
+        // ready yet (so the resizer stays non-responsive until the tab is toggled). Retry
+        // until the editor exists, then run both:
         //  - updateSize():    recomputes the resizable width/centering (responsive resize)
         //  - extendToolbar(): repopulates the toolbar buttons
         refreshRichSurface: function(key, attempt) {
@@ -299,7 +299,8 @@ export default {
             const inst = Array.isArray(connector) ? connector[0] : connector;
 
             // Wait for the connector and its Froala wrapper to exist before measuring.
-            const wrapperReady = inst && inst.$el && inst.$el.querySelector('.fr-wrapper');
+            // Support froala and tiptap
+            const wrapperReady = inst && inst.$el && inst.$el.querySelector('.fr-wrapper, .rich-editor');
             if (!wrapperReady) {
                 setTimeout(() => this.refreshRichSurface(key, attempt + 1), 50);
                 return;
