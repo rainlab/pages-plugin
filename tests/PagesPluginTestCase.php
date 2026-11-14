@@ -4,6 +4,8 @@ use Cms\Classes\Theme;
 use RainLab\Pages\Classes\Page;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\PageList;
+use RainLab\Pages\Classes\EditorExtension;
+use RainLab\Pages\Controllers\Index;
 
 /**
  * PagesPluginTestCase is the base class for the plugin test suite. It activates
@@ -68,6 +70,26 @@ abstract class PagesPluginTestCase extends PluginTestCase
         $this->resetStaticProperty(Page::class, 'menuTreeCache', null);
         $this->resetStaticProperty(PageList::class, 'configCache', false);
         $this->resetStaticProperty(PageList::class, 'structureCache', false);
+    }
+
+    /**
+     * swapPost installs a POST request so post() and the larajax request read the payload
+     */
+    protected function swapPost(array $data): void
+    {
+        $request = \Illuminate\Http\Request::create('/', 'POST', $data);
+        app()->instance('request', $request);
+        \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
+    }
+
+    /**
+     * invokeCommand calls a protected editor extension command handler
+     */
+    protected function invokeCommand(string $name): mixed
+    {
+        $method = new ReflectionMethod(EditorExtension::class, $name);
+
+        return $method->invoke(new EditorExtension, new Index);
     }
 
     /**

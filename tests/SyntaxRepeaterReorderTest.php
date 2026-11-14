@@ -1,8 +1,6 @@
 <?php
 
 use RainLab\Pages\Classes\Page;
-use RainLab\Pages\Classes\EditorExtension;
-use RainLab\Pages\Controllers\Index;
 
 require_once __DIR__.'/PagesPluginTestCase.php';
 
@@ -39,16 +37,6 @@ class SyntaxRepeaterReorderTest extends PagesPluginTestCase
         $page->save();
 
         return $page;
-    }
-
-    /**
-     * swapPost installs a POST request so post() and the larajax request read the payload.
-     */
-    protected function swapPost(array $data): void
-    {
-        $request = \Illuminate\Http\Request::create('/', 'POST', $data);
-        app()->instance('request', $request);
-        \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
     }
 
     /**
@@ -90,10 +78,7 @@ class SyntaxRepeaterReorderTest extends PagesPluginTestCase
         // The larajax dispatch applies the envelope before the handler runs.
         ajax()->request()->applyEnvelope();
 
-        $extension = new EditorExtension;
-        $method = new ReflectionMethod($extension, 'savePageDocument');
-        $method->setAccessible(true);
-        $method->invoke($extension, new Index);
+        $this->invokeCommand('savePageDocument');
 
         $saved = Page::load($this->theme, 'reorderpage');
         $sections = array_get($saved->getViewBag()->getProperties(), 'sections');
@@ -136,10 +121,7 @@ class SyntaxRepeaterReorderTest extends PagesPluginTestCase
 
         ajax()->request()->applyEnvelope();
 
-        $extension = new EditorExtension;
-        $method = new ReflectionMethod($extension, 'savePageDocument');
-        $method->setAccessible(true);
-        $method->invoke($extension, new Index);
+        $this->invokeCommand('savePageDocument');
 
         $saved = Page::load($this->theme, 'reorderpage');
         $sections = array_get($saved->getViewBag()->getProperties(), 'sections');

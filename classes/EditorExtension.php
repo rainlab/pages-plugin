@@ -43,6 +43,11 @@ class EditorExtension extends ExtensionBase
     const CONTEXT = 'pages';
 
     /**
+     * @var array subpageLayoutCache of new subpage layouts, keyed by the parent page layout
+     */
+    protected $subpageLayoutCache = [];
+
+    /**
      * getNamespace returns the unique extension namespace.
      */
     public function getNamespace(): string
@@ -230,12 +235,20 @@ class EditorExtension extends ExtensionBase
 
         $description->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
 
-        $description->setInitialDocumentData([
+        $pageData = [
             'title' => __("New page"),
             'fileName' => '',
             'markup' => '',
             'settings' => ['title' => __("New page"), 'url' => '/']
-        ]);
+        ];
+
+        $layoutName = $this->getNewPageLayout(Theme::getEditTheme());
+        if ($layoutName !== null) {
+            $pageData['layout'] = $layoutName;
+            $pageData['settings']['layout'] = $layoutName;
+        }
+
+        $description->setInitialDocumentData($pageData);
 
         $menuDescription = new NewDocumentDescription(
             __("New menu"),
@@ -288,6 +301,20 @@ class EditorExtension extends ExtensionBase
         return [
             'layouts' => $this->listLayoutOptions()
         ];
+    }
+
+    /**
+     * getNewPageLayout returns the layout preselected for a new page: the parent's child
+     * layout or the default layout, otherwise the first layout in the dropdown.
+     */
+    protected function getNewPageLayout($theme, ?StaticPage $parentPage = null): ?string
+    {
+        $page = StaticPage::inTheme($theme);
+        $page->setDefaultLayout($parentPage);
+
+        $layout = $page->getLayoutObject();
+
+        return $layout ? $layout->getBaseFileName() : null;
     }
 
     /**
@@ -507,12 +534,18 @@ class EditorExtension extends ExtensionBase
             $baseName = $page->getBaseFileName();
             $title = $page->getViewBag()->property('title') ?: $baseName;
 
+            $layoutName = (string) $page->getViewBag()->property('layout');
+            if (!array_key_exists($layoutName, $this->subpageLayoutCache)) {
+                $this->subpageLayoutCache[$layoutName] = $this->getNewPageLayout($page->theme, $page);
+            }
+
             $node = $parentNode->addNode($title, $baseName);
             $node->setIcon(self::ICON_COLOR_PAGE, 'backend-icon-background entity-small cms-page');
-            // path drives the drag-move handler; url presets new subpage URLs.
+            // path drives the drag-move handler; url and subpageLayout preset new subpages.
             $node->setUserData([
                 'path' => $baseName,
-                'url' => (string) $page->getViewBag()->property('url')
+                'url' => (string) $page->getViewBag()->property('url'),
+                'subpageLayout' => $this->subpageLayoutCache[$layoutName]
             ]);
             $node->setHasApiMenuItems(true);
 

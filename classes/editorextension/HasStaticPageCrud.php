@@ -193,19 +193,9 @@ trait HasStaticPageCrud
             $page->parentFileName = $parentFileName;
         }
 
-        // New pages without a chosen layout inherit the parent's child layout, or the
-        // theme layout marked as default. It is resolved before filling so the layout
-        // is stored in the saved view bag, not only on the view bag component.
-        if (!strlen($path) && !strlen((string) array_get($settings, 'layout'))) {
-            $parentPage = strlen($parentFileName)
-                ? StaticPage::load($theme, $parentFileName)
-                : null;
-
-            $page->setDefaultLayout($parentPage);
-
-            if ($layout = $page->getViewBag()->property('layout')) {
-                $settings['layout'] = $layout;
-            }
+        // Set page layout super early because it cascades to other elements
+        if ($layout = array_get($settings, 'layout')) {
+            $page->getViewBag()->setProperty('layout', $layout);
         }
 
         $fillData = [
@@ -306,7 +296,7 @@ trait HasStaticPageCrud
         }
 
         // Mirrors never store structural fields
-        unset($settings['url']);
+        unset($settings['url'], $settings['layout']);
 
         // Following the Translatable convention, values matching the base are not
         // stored - the mirror holds only translated values, so base edits keep
@@ -552,6 +542,11 @@ trait HasStaticPageCrud
     protected function pageToDocumentArray(StaticPage $page): array
     {
         $viewBag = (array) $page->getViewBag()->getProperties();
+
+        // Pages without a stored layout preselect the layout the editor falls back to
+        if (!array_get($viewBag, 'layout') && ($layout = $page->getLayoutObject())) {
+            $viewBag['layout'] = $layout->getBaseFileName();
+        }
 
         return [
             'fileName' => ltrim($page->getBaseFileName(), '/'),

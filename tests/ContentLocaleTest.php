@@ -6,7 +6,6 @@ use System\Models\SiteDefinition;
 use Backend\VueComponents\TreeView\SectionDefinition;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\EditorExtension;
-use RainLab\Pages\Controllers\Index;
 
 require_once __DIR__.'/PagesPluginTestCase.php';
 
@@ -329,27 +328,6 @@ class ContentLocaleTest extends PagesPluginTestCase
         ]);
 
         return $this->invokeCommand('saveContentDocument');
-    }
-
-    /**
-     * invokeCommand calls a protected editor extension command handler
-     */
-    protected function invokeCommand(string $name)
-    {
-        $method = new ReflectionMethod(EditorExtension::class, $name);
-        $method->setAccessible(true);
-
-        return $method->invoke(new EditorExtension, new Index);
-    }
-
-    /**
-     * swapPost installs a POST request so post() reads the payload
-     */
-    protected function swapPost(array $data): void
-    {
-        $request = \Illuminate\Http\Request::create('/', 'POST', $data);
-        app()->instance('request', $request);
-        \Illuminate\Support\Facades\Facade::clearResolvedInstance('request');
     }
 
     /**

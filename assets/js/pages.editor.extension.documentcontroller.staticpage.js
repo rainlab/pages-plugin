@@ -33,7 +33,8 @@ export class DocumentControllerStaticPage extends DocumentControllerBase {
             icon: 'icon-create',
             command: new EditorCommand('pages:create-document@' + this.documentType, {
                 parentFileName: userData.path,
-                parentUrl: userData.url
+                parentUrl: userData.url,
+                subpageLayout: userData.subpageLayout
             }),
             label: this.trans('Add subpage') || 'Add subpage'
         });
@@ -49,6 +50,14 @@ export class DocumentControllerStaticPage extends DocumentControllerBase {
         // The editor component keeps appending a slug of the title to the parent URL
         // (via metadata.parentUrl) until the URL is edited by hand.
         documentData.metadata.parentFileName = userData.parentFileName;
+
+        // New subpages preselect the parent's child layout
+        if (userData.subpageLayout) {
+            documentData.document.layout = userData.subpageLayout;
+            if (documentData.document.settings) {
+                documentData.document.settings.layout = userData.subpageLayout;
+            }
+        }
 
         const parentUrl = (userData.parentUrl || '').replace(/\/+$/, '');
         if (parentUrl.length) {
