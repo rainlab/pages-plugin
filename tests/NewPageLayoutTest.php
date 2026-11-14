@@ -80,29 +80,6 @@ class NewPageLayoutTest extends PagesPluginTestCase
     }
 
     /**
-     * testOpenPageWithoutLayoutPreselectsFallbackLayout expects a page saved without a
-     * layout to open with the layout the editor renders, so saving it stores that layout.
-     */
-    public function testOpenPageWithoutLayoutPreselectsFallbackLayout(): void
-    {
-        File::put(
-            $this->theme->getPath().'/content/static-pages/nolayout.htm',
-            "[viewBag]\ntitle = \"No Layout\"\nurl = \"/nolayout\"\n==\n<p>No layout</p>"
-        );
-
-        $this->swapPost([
-            'documentData' => ['key' => 'nolayout.htm'],
-        ]);
-
-        $result = $this->invokeCommand('openPageDocument');
-
-        $firstLayout = array_key_first(Page::inTheme($this->theme)->getLayoutOptions());
-
-        $this->assertEquals($firstLayout, array_get($result, 'document.settings.layout'));
-        $this->assertEquals($firstLayout, array_get($result, 'document.layout'));
-    }
-
-    /**
      * testSaveKeepsPlaceholdersOfPostedLayout changes the layout of a page and expects the
      * placeholders of the new layout to be kept.
      */

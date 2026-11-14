@@ -296,7 +296,7 @@ trait HasStaticPageCrud
         }
 
         // Mirrors never store structural fields
-        unset($settings['url'], $settings['layout']);
+        unset($settings['url']);
 
         // Following the Translatable convention, values matching the base are not
         // stored - the mirror holds only translated values, so base edits keep
@@ -542,11 +542,6 @@ trait HasStaticPageCrud
     protected function pageToDocumentArray(StaticPage $page): array
     {
         $viewBag = (array) $page->getViewBag()->getProperties();
-
-        // Pages without a stored layout preselect the layout the editor falls back to
-        if (!array_get($viewBag, 'layout') && ($layout = $page->getLayoutObject())) {
-            $viewBag['layout'] = $layout->getBaseFileName();
-        }
 
         return [
             'fileName' => ltrim($page->getBaseFileName(), '/'),
