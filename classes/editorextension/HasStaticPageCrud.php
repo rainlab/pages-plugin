@@ -1,6 +1,6 @@
 <?php namespace RainLab\Pages\Classes\EditorExtension;
 
-use Url;
+use Cms;
 use Site;
 use File;
 use Event;
@@ -51,13 +51,14 @@ trait HasStaticPageCrud
     }
 
     /**
-     * pagePreviewUrl returns the frontend URL for a page URL string.
+     * pagePreviewUrl returns the frontend URL for a page URL string, on the base URL
+     * of the site selected in the backend rather than the host of the current request.
      */
     protected function pagePreviewUrl($url): ?string
     {
         $url = trim((string) $url);
 
-        return strlen($url) ? Url::to($url) : null;
+        return strlen($url) ? Cms::fullUrl($url) : null;
     }
 
     /**
