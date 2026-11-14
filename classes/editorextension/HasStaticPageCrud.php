@@ -193,6 +193,21 @@ trait HasStaticPageCrud
             $page->parentFileName = $parentFileName;
         }
 
+        // New pages without a chosen layout inherit the parent's child layout, or the
+        // theme layout marked as default. It is resolved before filling so the layout
+        // is stored in the saved view bag, not only on the view bag component.
+        if (!strlen($path) && !strlen((string) array_get($settings, 'layout'))) {
+            $parentPage = strlen($parentFileName)
+                ? StaticPage::load($theme, $parentFileName)
+                : null;
+
+            $page->setDefaultLayout($parentPage);
+
+            if ($layout = $page->getViewBag()->property('layout')) {
+                $settings['layout'] = $layout;
+            }
+        }
+
         $fillData = [
             'settings' => ['viewBag' => $settings],
             'markup' => $this->convertLineEndings((string) array_get($documentData, 'markup')),
@@ -205,16 +220,6 @@ trait HasStaticPageCrud
         }
 
         $page->fill($fillData);
-
-        // New pages without a chosen layout inherit the parent's child layout, or the
-        // theme layout marked as default.
-        if (!strlen($path) && !strlen((string) array_get($settings, 'layout'))) {
-            $parentPage = strlen($parentFileName)
-                ? StaticPage::load($theme, $parentFileName)
-                : null;
-
-            $page->setDefaultLayout($parentPage);
-        }
 
         $page->validate();
         $page->save();
