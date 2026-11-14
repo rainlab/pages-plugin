@@ -1,8 +1,5 @@
 <?php
 
-use System\Classes\SiteManager;
-use System\Classes\SiteCollection;
-use System\Models\SiteDefinition;
 use RainLab\Pages\Classes\EditorExtension;
 
 require_once __DIR__.'/PagesPluginTestCase.php';
@@ -13,59 +10,72 @@ require_once __DIR__.'/PagesPluginTestCase.php';
  */
 class PreviewUrlTest extends PagesPluginTestCase
 {
-    public function tearDown(): void
-    {
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', null);
-
-        parent::tearDown();
-    }
-
     /**
      * testPreviewUrlUsesSelectedSiteBaseUrl selects a site with its own domain and
      * expects the preview URL on that domain.
      */
-    public function testPreviewUrlUsesSelectedSiteBaseUrl()
+    public function testPreviewUrlUsesSelectedSiteBaseUrl(): void
     {
         $this->setUpMultisite();
 
-        $previewUrl = Site::withContext(2, function () {
-            $method = new ReflectionMethod(EditorExtension::class, 'pagePreviewUrl');
-            $method->setAccessible(true);
+        $this->assertEquals('https://other.example.com/about', $this->previewUrl('/about'));
+        $this->assertEquals('https://other.example.com', $this->previewUrl('/'));
+    }
 
-            return $method->invoke(new EditorExtension, '/about');
+    /**
+     * testPreviewUrlKeepsSiteRoutePrefix expects a prefixed site to keep its prefix
+     */
+    public function testPreviewUrlKeepsSiteRoutePrefix(): void
+    {
+        $this->setUpMultisite(['is_prefixed' => true, 'route_prefix' => '/fr']);
+
+        $this->assertEquals('https://other.example.com/fr/about', $this->previewUrl('/about'));
+    }
+
+    /**
+     * testPreviewUrlIsNullWithoutUrl expects no preview link for a page without a URL
+     */
+    public function testPreviewUrlIsNullWithoutUrl(): void
+    {
+        $this->setUpMultisite();
+
+        $this->assertNull($this->previewUrl(''));
+    }
+
+    /**
+     * previewUrl returns the editor preview URL with the second site selected
+     */
+    protected function previewUrl(string $url): ?string
+    {
+        return Site::withContext(2, function() use ($url) {
+            return self::callProtectedMethod(new EditorExtension, 'pagePreviewUrl', [$url]);
         });
-
-        $this->assertEquals('https://other.example.com/about', $previewUrl);
     }
 
     /**
      * setUpMultisite installs a two-site fixture where the second site has a custom domain
      */
-    protected function setUpMultisite()
+    protected function setUpMultisite(array $otherSite = []): void
     {
-        $sites = Model::unguarded(function() {
-            return new SiteCollection([
-                new SiteDefinition([
-                    'id' => 1,
-                    'name' => 'Primary',
-                    'code' => 'primary',
-                    'is_primary' => true,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true
-                ]),
-                new SiteDefinition([
-                    'id' => 2,
-                    'name' => 'Other',
-                    'code' => 'other',
-                    'is_primary' => false,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true,
-                    'is_custom_url' => true,
-                    'app_url' => 'https://other.example.com'
-                ])
-            ]);
-        });
-
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', $sites);
+        $this->setUpSites([
+            [
+                'id' => 1,
+                'name' => 'Primary',
+                'code' => 'primary',
+                'is_primary' => true,
+                'is_enabled' => true,
+                'is_enabled_edit' => true
+            ],
+            $otherSite + [
+                'id' => 2,
+                'name' => 'Other',
+                'code' => 'other',
+                'is_primary' => false,
+                'is_enabled' => true,
+                'is_enabled_edit' => true,
+                'is_custom_url' => true,
+                'app_url' => 'https://other.example.com'
+            ]
+        ]);
     }
 }

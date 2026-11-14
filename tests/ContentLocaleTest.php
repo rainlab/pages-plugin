@@ -1,8 +1,5 @@
 <?php
 
-use System\Classes\SiteManager;
-use System\Classes\SiteCollection;
-use System\Models\SiteDefinition;
 use Backend\VueComponents\TreeView\SectionDefinition;
 use RainLab\Pages\Classes\Content;
 use RainLab\Pages\Classes\EditorExtension;
@@ -29,8 +26,6 @@ class ContentLocaleTest extends PagesPluginTestCase
         foreach ($this->createdDirectories as $directory) {
             File::deleteDirectory($this->theme->getPath().'/'.$directory);
         }
-
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', null);
 
         parent::tearDown();
     }
@@ -353,35 +348,31 @@ class ContentLocaleTest extends PagesPluginTestCase
      */
     protected function setUpMultisite(int $activeSiteId, array $locales = ['fr'])
     {
-        $sites = Model::unguarded(function() use ($locales) {
-            $definitions = [
-                new SiteDefinition([
-                    'id' => 1,
-                    'name' => 'Primary',
-                    'code' => 'primary',
-                    'locale' => 'en',
-                    'is_primary' => true,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true
-                ])
+        $definitions = [
+            [
+                'id' => 1,
+                'name' => 'Primary',
+                'code' => 'primary',
+                'locale' => 'en',
+                'is_primary' => true,
+                'is_enabled' => true,
+                'is_enabled_edit' => true
+            ]
+        ];
+
+        foreach (array_values($locales) as $index => $locale) {
+            $definitions[] = [
+                'id' => $index + 2,
+                'name' => strtoupper($locale),
+                'code' => $locale,
+                'locale' => $locale,
+                'is_primary' => false,
+                'is_enabled' => true,
+                'is_enabled_edit' => true
             ];
+        }
 
-            foreach (array_values($locales) as $index => $locale) {
-                $definitions[] = new SiteDefinition([
-                    'id' => $index + 2,
-                    'name' => strtoupper($locale),
-                    'code' => $locale,
-                    'locale' => $locale,
-                    'is_primary' => false,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true
-                ]);
-            }
-
-            return new SiteCollection($definitions);
-        });
-
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', $sites);
+        $this->setUpSites($definitions);
         Config::set('system.active_site', $activeSiteId);
     }
 }

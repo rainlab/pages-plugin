@@ -1,6 +1,9 @@
 ﻿<?php
 
 use Cms\Classes\Theme;
+use System\Classes\SiteManager;
+use System\Classes\SiteCollection;
+use System\Models\SiteDefinition;
 use RainLab\Pages\Classes\Page;
 use RainLab\Pages\Classes\Router;
 use RainLab\Pages\Classes\PageList;
@@ -87,9 +90,21 @@ abstract class PagesPluginTestCase extends PluginTestCase
      */
     protected function invokeCommand(string $name): mixed
     {
-        $method = new ReflectionMethod(EditorExtension::class, $name);
+        return self::callProtectedMethod(new EditorExtension, $name, [new Index]);
+    }
 
-        return $method->invoke(new EditorExtension, new Index);
+    /**
+     * setUpSites installs a site fixture built from the given site attributes
+     */
+    protected function setUpSites(array $definitions): void
+    {
+        $sites = Model::unguarded(function() use ($definitions) {
+            return new SiteCollection(array_map(function($attributes) {
+                return new SiteDefinition($attributes);
+            }, $definitions));
+        });
+
+        $this->setProtectedProperty(SiteManager::instance(), 'sites', $sites);
     }
 
     /**

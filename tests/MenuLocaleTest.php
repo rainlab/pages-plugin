@@ -1,9 +1,6 @@
 <?php
 
 use Cms\Classes\Page as CmsPage;
-use System\Classes\SiteManager;
-use System\Classes\SiteCollection;
-use System\Models\SiteDefinition;
 use RainLab\Pages\Classes\Menu;
 use RainLab\Pages\Classes\EditorExtension;
 
@@ -14,13 +11,6 @@ require_once __DIR__.'/PagesPluginTestCase.php';
  */
 class MenuLocaleTest extends PagesPluginTestCase
 {
-    public function tearDown(): void
-    {
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', null);
-
-        parent::tearDown();
-    }
-
     public function testGenerateReferencesUsesBaseValuesOnPrimarySite()
     {
         $menu = Menu::load($this->theme, 'main-menu.yaml');
@@ -166,30 +156,27 @@ class MenuLocaleTest extends PagesPluginTestCase
      */
     protected function setUpMultisite()
     {
-        $sites = Model::unguarded(function() {
-            return new SiteCollection([
-                new SiteDefinition([
-                    'id' => 1,
-                    'name' => 'Primary',
-                    'code' => 'primary',
-                    'locale' => 'en',
-                    'is_primary' => true,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true
-                ]),
-                new SiteDefinition([
-                    'id' => 2,
-                    'name' => 'French',
-                    'code' => 'french',
-                    'locale' => 'fr',
-                    'is_primary' => false,
-                    'is_enabled' => true,
-                    'is_enabled_edit' => true
-                ])
-            ]);
-        });
+        $this->setUpSites([
+            [
+                'id' => 1,
+                'name' => 'Primary',
+                'code' => 'primary',
+                'locale' => 'en',
+                'is_primary' => true,
+                'is_enabled' => true,
+                'is_enabled_edit' => true
+            ],
+            [
+                'id' => 2,
+                'name' => 'French',
+                'code' => 'french',
+                'locale' => 'fr',
+                'is_primary' => false,
+                'is_enabled' => true,
+                'is_enabled_edit' => true
+            ]
+        ]);
 
-        $this->setProtectedProperty(SiteManager::instance(), 'sites', $sites);
         Config::set('system.active_site', 2);
     }
 
