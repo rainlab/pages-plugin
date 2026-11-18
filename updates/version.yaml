@@ -97,3 +97,4 @@ v3.0.4: Fixes bulk data submission losing sort order on repeater items
 v3.0.5: Fixes tab label translation from syntax fields
 v3.1.0: Adds migration command and translation of content files
 v3.1.1: Fixes saving code editor syntax field values
+v3.1.2: Fixes default layout not preselected on new pages
